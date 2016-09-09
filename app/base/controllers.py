@@ -1,11 +1,9 @@
-from flask import request, jsonify
-from app import app
-from blueprints import base
+from flask import request, jsonify, Blueprint
+from app import app, db
 
-@base.route("/welcome", methods = ["GET"])
+base = Blueprint("base", __name__, url_prefix = "/base")
+
+@app.route("/", methods = ["GET"])
 def welcome():
-    output = {
-        "name": __name__,
-        "version": SERVER_VERSION
-    }
+    output = app.config["PUBLIC_INFOS"]
     return jsonify(output)

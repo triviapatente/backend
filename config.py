@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
+import os, pytz
+from datetime import datetime
 
 # Statement for enabling the development environment
 DEBUG = True
@@ -29,4 +30,11 @@ CSRF_SESSION_KEY = "dssovnjaeknbjkrebnwdvlknfvbkndfbl"
 # Secret key for signing cookies
 SECRET_KEY = "dvkljmdklvmvdkjVSDLjmvlfsnv.kmvsdvsdlvn"
 
-SERVER_VERSION = 0.1
+PUBLIC_INFOS = {
+    "name": "TriviaPatente Webservice",
+    "version": 0.1,
+    "webservice type": "REST",
+    "last_run": datetime.now(pytz.utc)
+}
+
+SQLALCHEMY_TRACK_MODIFICATIONS = True
