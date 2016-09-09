@@ -37,4 +37,6 @@ PUBLIC_INFOS = {
     "last_run": datetime.now(pytz.utc)
 }
 
+DEFAULT_USER_SCORE = 800
+
 SQLALCHEMY_TRACK_MODIFICATIONS = True
