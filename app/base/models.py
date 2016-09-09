@@ -2,7 +2,6 @@
 from sqlalchemy import Column, DateTime, Integer
 from sqlalchemy.ext.declarative import declared_attr
 
-from app.base.models import *
 from app import db
 
 #la classe base è la classe su cui si appoggia ogni oggetto
