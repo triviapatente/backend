@@ -28,3 +28,5 @@ CSRF_SESSION_KEY = "dssovnjaeknbjkrebnwdvlknfvbkndfbl"
 
 # Secret key for signing cookies
 SECRET_KEY = "dvkljmdklvmvdkjVSDLjmvlfsnv.kmvsdvsdlvn"
+
+SERVER_VERSION = 0.1
