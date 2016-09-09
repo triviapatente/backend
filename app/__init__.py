@@ -20,10 +20,10 @@ def not_found(error):
     return render_template('404.html'), 404
 
 # Import a module / component using its blueprint handler variable (mod_auth)
-from app.base.blueprints import api
+from app.base.blueprints import base
 
 # Register blueprint(s)
-app.register_blueprint(api)
+app.register_blueprint(base)
 # app.register_blueprint(xyz_module)
 # ..
 
