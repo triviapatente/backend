@@ -4,6 +4,7 @@ from app import app, db
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
 
+@app.route("/", methods = ["GET"])
 @base.route("/", methods = ["GET"])
 def welcome():
     output = app.config["PUBLIC_INFOS"]
