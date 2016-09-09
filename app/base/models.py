@@ -1,8 +1,12 @@
-from app.db import Column, DateTime, Model, Integer
-import pytz
+# -*- coding: utf-8 -*-
+from sqlalchemy import Column, DateTime, Integer
+from sqlalchemy.ext.declarative import declared_attr
+
+from app.base.models import *
+from app import db
 
 #la classe base è la classe su cui si appoggia ogni oggetto
-class Base(Model):
+class Base(db.Model):
 
     #è una classe astratta quindi lo indichiamo
     __abstract__ = True
@@ -21,7 +25,7 @@ class Base(Model):
     updatedAt = Column(DateTime, default = db.func.current_timestamp())
 
 #la classe commonpk è derivata da ogni classe che ha bisogno di id come chiave primaria
-class CommonPK(Model):
+class CommonPK(db.Model):
 
     #è una classe astratta quindi lo indichiamo
     __abstract__ = True
