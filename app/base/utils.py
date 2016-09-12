@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask.json import JSONEncoder
 #classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
 class TPJSONEncoder(JSONEncoder):
