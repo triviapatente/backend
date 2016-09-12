@@ -20,7 +20,7 @@ def parseQuestionRow(question_row):
     if image:
         # url del tipo: /img_sign2011/550.jpg #
         try:
-            image_url = image.find('a').find('img').get('src')[14:-4]
+            image_url = int(image.find('a').find('img').get('src')[14:-4])
         except:
             None
     question = utils.clean(question_row.find('td', { 'class' : 'quest' }).text)

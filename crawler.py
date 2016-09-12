@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # crawler built based on:
 seed = 'http://m.patentati.it/quiz-patente-b/lista-domande.php'
 
@@ -10,59 +9,40 @@ from crawler.crawl_utils import utils
 # Categories and relative links extraction
 categories_links, cats =  crawl_routines.crawlPage(seed, 'div', 'content')
 
-## TODO usare serialize ##
-
+from app.game.models import Quiz, Image, Category
 categories, quizzes, images = [], [], []
 
-from app.game.models import Quiz, Image, Category
-
-id_cat, id_quest, id_group, max_img = 0, 0, 0, -1
+id_cat, id_group, maxImg = 0, 0, -1
 
 for cat in cats:
-
+    # Create category record
     categories.append(Category(name = cat))
+    groupsLinks = utils.getLinks(utils.getAllAnchors(utils.getContainer('http://m.patentati.it' + categories_links[id_cat], 'div', 'content')))
+    for link in groupsLinks:
+        # Get question rows
+        questionsRows = crawl_routines.getQuestions('http://m.patentati.it' + link, 'quests')
+        #Get out quizzes
+        for row in questionsRows:
+            image, question, answer = crawl_routines.parseQuestionRow(row)
+            if image and image > maxImg:
+                maxImg = image
+            # Create quiz record
+            quizzes.append(Quiz(question = question, answer = answer, image_id = image, category_id = id_cat))
+        id_group = id_group + 1
 
-    #groups_links = utils.getLinks(utils.getAllAnchors(utils.getContainer('http://m.patentati.it' + categories_links[id_cat], 'div', 'content')))
-
-    # i = 0
-    # for group in groups:
-    #     ### Nel frattempo creiamo la tabella gruppi con una notazione JSON ###
-    #     table_groups += '{\n\tid:%s\n' %id_group
-    #     table_groups += '\tname:%s\n' %group
-    #     table_groups += '\tid_cat:%s\n}\n' %id_cat
-    #
-    #     ### Estrazione tabelle delle domande di ogni gruppo ###
-    #     questions_rows = get_questions('http://m.patentati.it' + groups_links[i], 'quests')
-    #
-    #     ### Fase 4 ###
-    #     ### Estrazione delle domande ###
-    #     for row in questions_rows:
-    #         ### Database domande con notazione JSON ###
-    #         image, question, answer = parse_question_row(row)
-    #         table_quests += '{\n\tid:%s\n' %id_quest
-    #         table_quests += '\tquestion:%s\n' %question
-    #         table_quests += '\tanswer:%s\n' %answer
-    #         table_quests += '\tid_group:%s\n' %id_group
-    #         table_quests += '\tid_cat:%s\n' %id_cat
-    #         table_quests += '\tid_img:%s\n}\n' %image
-    #         if image and int(image) > int(max_img):
-    #             max_img = image
-    #         id_quest = id_quest + 1
-    #
-    #     id_group = id_group + 1
-    #     i = i + 1
     id_cat = id_cat + 1
 
-# Get all images
-# for id_img in range(1, int(max_img)):
-#     url = 'http://m.patentati.it/img_sign2011/' + str(id_img) + '.jpg'
-#     path = 'quiz/images/' + str(id_img) + '.jpg'
-#     if crawl_routines.getImage(url, path):
-#         images.append(Image(image = path))
+Get all images
+for id_img in range(1, int(maxImg)):
+    url = 'http://m.patentati.it/img_sign2011/' + str(id_img) + '.jpg'
+    path = 'quiz/images/' + str(id_img) + '.jpg' #da vedere che path mettere
+    continue #togliere questa riga quando scelto il path
+    if crawl_routines.getImage(url, path):
+        # Create image record
+        images.append(Image(image = path))
 
 
-# Printo i risultati
-from flask import jsonify
-print jsonify(Categories = [i.json for i in categories])
-#print jsonify(Quizzes = [i.json for i in quizzes])
-#print jsonify(Images = [i.json for i in images])
+### Saving Data ###
+print str([i.json for i in categories])
+print str([i.json for i in quizzes])
+print str([i.json for i in images])
