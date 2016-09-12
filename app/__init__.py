@@ -4,8 +4,13 @@ from flask import Flask, render_template
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
+from app.base.utils import TPJSONEncoder
+
 # Define the WSGI application object
 app = Flask(__name__)
+
+#aggiungo il json encoder custom
+app.json_encoder = TPJSONEncoder
 
 # Configurations
 # This line imports contents of config.py in app.config
