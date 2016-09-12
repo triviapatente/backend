@@ -35,15 +35,15 @@ class Base(db.Model):
         #per ognuna
         for column in columns:
             #vedo se ho la colonna scelta (potrei non averla, in caso di proprietà non settata)
-            if self.has_key(column):
+            if self.hasProperty(column):
                 #se la ho, me la prendo in output
-                output[column] = self.hasProperty(column)
+                output[column] = self.get(column)
         return output
 
     #metodo che ritorna la proprietà dell'oggetto corrispondente alla chiave passata per parametro
     def get(self, key):
         return self.__dict__[key]
-        
+
     #metodo che indica se l'oggetto contiene la proprietà key
     #esempio:
     # Classe A, 3 proprietà: one, two, three
