@@ -18,10 +18,10 @@ class Base(db.Model):
     __table_args__ = {'mysql_engine': 'InnoDB'}
 
     #createdAt, parametro che indica la data di creazione, comune a tutti
-    createdAt = Column(DateTime, default = db.func.current_timestamp(),
-                                 onupdate = db.func.current_timestamp())
+    createdAt = Column(DateTime, default = db.func.current_timestamp())
     #updatedAt, parametro che indica la data di ultima modifica, comune a tutti
-    updatedAt = Column(DateTime, default = db.func.current_timestamp())
+    updatedAt = Column(DateTime, default = db.func.current_timestamp(),
+                                 onupdate = db.func.current_timestamp())
 
 #la classe commonpk è derivata da ogni classe che ha bisogno di id come chiave primaria
 class CommonPK(db.Model):
