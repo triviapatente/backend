@@ -24,9 +24,14 @@ class Quiz(Base, CommonPK):
 
   question = Column(String(250), nullable = False)
   answer = Column(Boolean, nullable = False)
-  image = Column(String) #path dell'immagine oppure blob, da decidere
+  image_id = Column(Integer, ForeignKey("image.id"))
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)
+  image = relationship("Image")
   category = relationship("Category")
+
+class Image(Base, CommonPK):
+
+    image = Column(String(250)) #path dell'immagine, in alternativa: blob
 
 class Category(Base, CommonPK):
 
