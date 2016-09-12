@@ -31,7 +31,7 @@ class Quiz(Base, CommonPK):
 
 class Image(Base, CommonPK):
 
-    image = Column(String) #path dell'immagine, in alternativa: blob
+    image = Column(String(250)) #path dell'immagine, in alternativa: blob
 
 class Category(Base, CommonPK):
 
