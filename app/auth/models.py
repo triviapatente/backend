@@ -12,6 +12,7 @@ class User(Base, CommonPK):
   email = Column(String(250), nullable = False, unique = True)
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])
   games = relationship("Game", secondary = partecipation, back_populates = "users")
+  games_won = relationship("Game", back_populates = "winner")
 
 class Keychain(Base, CommonPK):
 
