@@ -12,4 +12,5 @@ if len(sys.argv) < 2 or sys.argv[1] != "--f":
 from app import app
 debug = app.config["DEBUG"]
 
+print 'Running the service..'
 app.run(host = '0.0.0.0', port = 8080, debug = debug)

@@ -22,7 +22,7 @@ class Round(Base, CommonPK):
 
 class Quiz(Base, CommonPK):
 
-  question = Column(String(250), nullable = False)
+  question = Column(String, nullable = False)
   answer = Column(Boolean, nullable = False)
   image_id = Column(Integer, ForeignKey("image.id"))
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)

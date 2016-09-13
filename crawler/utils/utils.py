@@ -43,5 +43,6 @@ def getTexts(spans):
             texts.append(clean(text))
     return texts
 
+# get an html parser for the given url
 def getParser(url):
     return BeautifulSoup(getHtml(url), 'html.parser')

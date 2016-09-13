@@ -5,4 +5,4 @@ import sys
 if len(sys.argv) < 2 or sys.argv[1] != "--f":
     # installo le dipendenze
     from subprocess import call
-    call(["sudo", "sh", "dependencies.sh"])
+    call(["sudo", "sh", "crawler/utils/dependencies.sh"])
