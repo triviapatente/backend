@@ -16,8 +16,6 @@ class Base(db.Model):
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
-	#mysql default engine, permette di gestire le relazioni
-    __table_args__ = {'mysql_engine': 'InnoDB'}
 
     #createdAt, parametro che indica la data di creazione, comune a tutti
     createdAt = Column(DateTime, default = db.func.current_timestamp())

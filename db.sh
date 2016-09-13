@@ -1,7 +1,11 @@
 #postgresql
 #creo utente postgres
+adduser ted
+passwd ted
 sudo -u postgres bash -c "createuser -P -s -e ted"
 sudo -u postgres bash -c "psql -c \"CREATE DATABASE triviapatente \""
+sudo -u postgres bash -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE triviapatente TO ted\""
+
 #cd /etc/postgresql/9.3/main/
 
 #LINE='host all all all password'
