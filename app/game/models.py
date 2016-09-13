@@ -31,8 +31,7 @@ class Round(Base):
   #categoria scelta per il round
   cat_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   chosen_category = relationship("Category")
-  #domande chieste all'utente nel round
-  questions = relationship("Question", back_populates = "round")
+
 
 class Quiz(Base, CommonPK):
   #la domanda del quiz, in lettere
@@ -52,9 +51,9 @@ class Question(Base):
   quiz = relationship("Quiz")
   #risposta data dall'utente
   answer = Column(Boolean, nullable = False)
-  #round di riferimento
-  round_id = Column(Integer, ForeignKey("quiz.id"), nullable = False, primary_key = True)
-  round = relationship("Round", back_populates = "questions")
+  #round di riferimento, espresso attraverso le sue due chiavi primarie, game_id, e user_id
+  game_id = Column(Integer, ForeignKey("round.game_id"), nullable = False, primary_key = True)
+  user_id = Column(Integer, ForeignKey("round.user_id"), nullable = False, primary_key = True)
 
 class Image(Base, CommonPK):
   #path dell'immagine, in alternativa: blob
