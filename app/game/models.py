@@ -32,15 +32,10 @@ class Round(Base):
   cat_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   chosen_category = relationship("Category")
 
-
-<<<<<<< HEAD
-  question = Column(String, nullable = False)
-=======
 class Quiz(Base, CommonPK):
   #la domanda del quiz, in lettere
-  question = Column(String(250), nullable = False)
+  question = Column(String, nullable = False)
   #la risposta giusta, Vero/Falso
->>>>>>> 00c4a803aaf49b26cd397fb4884085e38e5bdfda
   answer = Column(Boolean, nullable = False)
   #l'immagine di riferimento, se presente
   image_id = Column(Integer, ForeignKey("image.id"))
