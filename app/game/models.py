@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Table, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Table, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.base.models import Base, CommonPK
@@ -23,10 +23,10 @@ class Round(Base):
   #numero del round, TODO: trovare il modo di farlo diventare autoincrement rispetto a diversi parametri
   number = Column(Integer, nullable = False)
   #match di riferimento
-  game_id = Column(Integer, ForeignKey("game.id"), nullable = False, primary_key = True)
+  game_id = Column(Integer, ForeignKey("game.id"), nullable = False, primary_key = True, unique = True)
   game = relationship("Game")
   #utente che 'possiede' questo round
-  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True)
+  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True, unique = True)
   user = relationship("User")
   #categoria scelta per il round
   cat_id = Column(Integer, ForeignKey("category.id"), nullable = False)
@@ -44,6 +44,7 @@ class Quiz(Base, CommonPK):
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   category = relationship("Category")
 
+
 class Question(Base):
   #quiz estratto
   quiz_id = Column(Integer, ForeignKey("quiz.id"), nullable = False, primary_key = True)
@@ -53,6 +54,7 @@ class Question(Base):
   #round di riferimento, espresso attraverso le sue due chiavi primarie, game_id, e user_id
   game_id = Column(Integer, ForeignKey("round.game_id"), nullable = False, primary_key = True)
   user_id = Column(Integer, ForeignKey("round.user_id"), nullable = False, primary_key = True)
+
 
 class Image(Base, CommonPK):
   #path dell'immagine, in alternativa: blob
