@@ -2,24 +2,26 @@
 
 # crawler built based on:
 seed = 'http://m.patentati.it/quiz-patente-b/lista-domande.php'
-path = 'images/'
+baseUrl = 'http://m.patentati.it/'
+imgPath = 'images/'
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from crawler import crawler
-from app.base.models import Base
+from app import db
 
-engine = create_engine('postgresql://ted:ted@localhost:5432/triviapatente')
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
+# Create directory if it doesn't exist
+import os
+
+if not os.path.exists(imgPath):
+    os.makedirs(imgPath)
 
 ### Extraction ###
 print 'Start crawling ' + seed + '..'
-crawler.getCategories(session, seed, path)
+crawler.getCategories(db.session, seed, imgPath, baseUrl)
 
 ### Saving Data ###
 print 'Saving data..'
-session.commit()
+db.session.commit()
 print 'Done'

@@ -5,27 +5,27 @@ from bs4 import BeautifulSoup
 
 ### Contains all the general crawl utils ###
 
-# Given an url returns the html document
+# Given an ##url returns the html document
 def getHtml(url):
     return urllib2.urlopen(url).read()
 
-# Get container
+# Get container given the tag (##containerTag) and the class (##containerClass)
 def getContainer(url, containerTag, containerClass):
     return getParser(url).find(containerTag, class_ = containerClass)
 
-# Clean sentence
+# Clean sentence (##str)
 def clean(str):
     return re.sub('[\n\t\r]', '', str)
 
-# Get all anchors in a given div
+# Get all anchors in a given ##container
 def getAllAnchors(container):
     return container.findAll('a')
 
-# Get all spans in a given div
+# Get all spans in a given ##container
 def getAllSpans(container):
     return container.findAll('span')
 
-# Extract links from anchors
+# Extract links from ##anchors
 def getLinks(anchors):
     links = []
     for a in anchors:
@@ -34,7 +34,7 @@ def getLinks(anchors):
             links.append(link)
     return links
 
-# Extract texts from spans
+# Extract texts from ##spans
 def getTexts(spans):
     texts = []
     for t in spans:
@@ -43,6 +43,6 @@ def getTexts(spans):
             texts.append(clean(text))
     return texts
 
-# get an html parser for the given url
+# get an html parser for the given ##url
 def getParser(url):
     return BeautifulSoup(getHtml(url), 'html.parser')
