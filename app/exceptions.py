@@ -45,3 +45,11 @@ class LoginFailed(TPException):
     def __init__(self):
         TPException.__init__(self)
         self.message = "Login fallito"
+
+#eccezione chiamata quando il login dell'utente fallisce
+class Forbidden(TPException):
+    status_code = 403 #forbidden
+
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "Autenticazione richiesta, rieffettua il login"
