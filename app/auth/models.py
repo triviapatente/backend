@@ -39,7 +39,7 @@ class Keychain(Base, CommonPK):
       return s.dumps({ 'id': self.id })
   #metodo che salva in password l'hash della password passata
   def hash_password(self, password):
-      password = pwd_context.encrypt(password)
+      self.password = pwd_context.encrypt(password)
   #metodo che controlla se la password candidata è equivalente all'hash salvato
   def check_password(self, candidate):
       return pwd_context.verify(candidate, self.password)
