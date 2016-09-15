@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, g
 from app import app, db
 from app.auth.models import *
 from app.exceptions import *
+from app.decorators import auth_required, needs_post_values
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
 
 @auth.route("/", methods = ["GET"])
@@ -12,17 +13,12 @@ def welcome():
 
 #api che effettua il login dell'utente
 @auth.route("/login", methods = ["POST"])
+#utilizzando il decorator che ho creato, posso fare il controllo dell'input in una riga
+@needs_post_values("email", "password")
 def login():
-    #prendo i parametri di autenticazione
-    email = request.form.get('email')
-    password = request.form.get('password')
-
-    #gestisco i parametri missing
-    if email is None:
-        raise MissingParameter(["email"])
-    if password is None:
-        raise MissingParameter(["password"])
-
+    #ottengo i valori in input
+    email = g.post.get("email")
+    password = g.post.get("password")
     #ottengo l'user a partire dall'email, e mi chiedo se c'è
     user = User.query.filter(User.email == email).first()
     if user is None:
@@ -42,21 +38,22 @@ def login():
         #se no, login fallito
         raise LoginFailed()
 
+#metodo fittizio per testare l'autenticazione
+@auth.route("/test", methods = ["POST"])
+@auth_required
+def randomMethod():
+    return "Doing something"
+
 
 #api che effettua la registrazione dell'utente
 @auth.route("/register", methods = ["POST"])
+#utilizzando il decorator che ho creato, posso fare il controllo dell'input in una riga
+@needs_post_values("email", "username", "password")
 def register():
-    username = request.form.get('username')
-    email = request.form.get('email')
-    password = request.form.get('password')
-
-    #gestisco i parametri missing #TODO: da fare meglio
-    if username is None:
-        raise MissingParameter(["username"])
-    if password is None:
-        raise MissingParameter(["password"])
-    if email is None:
-        raise MissingParameter(["email"])
+    #ottengo i valori in input
+    username = g.post.get("username")
+    email = g.post.get("email")
+    password = g.post.get("password")
     #vedo se ci sono altri utenti che hanno lo stesso username o la stessa password
     u = User.query.filter((User.username == username or User.email == email)).first()
     #se si, ti mando l'errore appropriato
