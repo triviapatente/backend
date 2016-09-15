@@ -3,7 +3,7 @@
 #file che contiene i diversi tipi di eccezione usati all'interno dell'api
 #eccezione generica, che definisce il modo di serializzare in dizionario l'eccezione
 class TPException(Exception):
-    status_code = 404
+    status_code = 400
     message = ""
     parameters = None
     payload = {}
@@ -19,7 +19,7 @@ class TPException(Exception):
 
 #eccezione chiamata quando un parametro richiesto è mancante
 class MissingParameter(TPException):
-    status_code = 404
+    status_code = 400
 
     def __init__(self, parameters):
         TPException.__init__(self)
@@ -28,7 +28,8 @@ class MissingParameter(TPException):
 
 #eccezione chiamata quando l'utente da inserire è già esistente
 class AlreadyRegisteredUser(TPException):
-    status_code = 404
+    status_code = 400
+    
     def __init__(self, previousUser, username, email):
         TPException.__init__(self)
         self.message = "Esiste già un utente con questo "
