@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 # Import flask and template operators
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -32,6 +34,15 @@ app.register_blueprint(base)
 app.register_blueprint(game)
 app.register_blueprint(message)
 app.register_blueprint(push)
+
+from app.exceptions import TPException
+#registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
+@app.errorhandler(TPException)
+def handleTPException(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    print "API Error %d: %s" % (error.status_code, error.message)
+    return response,
 
 
 # Build the database:
