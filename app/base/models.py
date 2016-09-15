@@ -30,12 +30,11 @@ class Base(db.Model):
         output = {}
         #ottengo le colonne generiche
         columns = self.columns()
+        print "columns: %d" % len(columns)
         #per ognuna
         for column in columns:
-            #vedo se ho la colonna scelta (potrei non averla, in caso di proprietà non settata)
-            if self.hasProperty(column):
-                #se la ho, me la prendo in output
-                output[column] = self.get(column)
+            output[column] = getattr(self, column)
+
         return output
 
     #metodo che ritorna la proprietà dell'oggetto corrispondente alla chiave passata per parametro
