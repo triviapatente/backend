@@ -35,7 +35,7 @@ PUBLIC_INFOS = {
     "webservice type": "REST",
     "last_run": datetime.now(pytz.utc)
 }
-INIT_DB = True
+INIT_DB = False
 DEFAULT_USER_SCORE = 800
 
 SQLALCHEMY_TRACK_MODIFICATIONS = True

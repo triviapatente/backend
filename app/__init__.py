@@ -45,6 +45,8 @@ app.register_blueprint(push)
 
 # Build the database:
 # Discard old configurations
-db.drop_all()
+# Attenzione! Questa chiamata è distruttiva, distrugge infatti ogni contenuto del db. Usarla con cautela.
+if app.config["DEBUG"] and app.config["INIT_DB"]:
+    db.drop_all()
 # This will create the database file using SQLAlchemy
 db.create_all()
