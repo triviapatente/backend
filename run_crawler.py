@@ -19,7 +19,7 @@ if not os.path.exists(imgPath):
 
 ### Extraction ###
 print 'Start crawling ' + seed + '..'
-crawler.getCategories(db.session, seed, imgPath, baseUrl)
+crawler.getCategories(db.session, seed, baseUrl, imgPath)
 
 ### Saving Data ###
 print 'Saving data..'

@@ -26,12 +26,3 @@ def parseQuestionRow(question_row):
     question = utils.clean(question_row.find('td', { 'class' : 'quest' }).text)
     answer = bool(utils.clean(question_row.find('td', { 'class' : 'risp' }).text) == 'V')
     return image_url, question, answer
-
-# Given an image ##url a path save the img in the choosen ##imgPath
-def getImage(url, imgPath):
-    request = requests.get(url, stream = True)
-    if request.status_code == 200:
-        with open(path, 'wb') as to_img:
-            shutil.copyfileobj(request.raw, to_img)
-        return True
-    return False

@@ -46,3 +46,13 @@ def getTexts(spans):
 # get an html parser for the given ##url
 def getParser(url):
     return BeautifulSoup(getHtml(url), 'html.parser')
+
+
+# Given an image ##url a path save the img in the choosen ##imgPath
+def getImage(url, imgPath):
+    request = requests.get(url, stream = True)
+    if request.status_code == 200:
+        with open(imgPath, 'wb') as to_img:
+            shutil.copyfileobj(request.raw, to_img)
+        return True
+    return False

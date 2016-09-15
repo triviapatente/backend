@@ -4,15 +4,16 @@ from utils import utils
 
 from app.game.models import Quiz, Image, Category
 
-baseUrl = None
+baseUrl = ''
 
 # get Categories and puts them into ##session, no commit, ##imgPath where to save images
 # ##seed is the url of the seeding page, ##session is the ORM connected to the db
-def getCategories(session, seed, imgPath = '/images', bUrl):
+def getCategories(session, seed, bUrl, imgPath = '/images'):
     # check if imgPath == None
     if not imgPath:
         imgPath = ''
     # assign baseUrl
+    global baseUrl
     baseUrl = bUrl
     # Categories and relative links extraction
     categories =  routines.crawlPage(seed, 'div', 'content')
@@ -59,7 +60,7 @@ def getImage(session, image_url, imgPath):
     path = imgPath + image_url[14:]
     image = session.query(Image).filter(Image.image == path).first()
     if not image:
-        if routines.getImage(url, path):
+        if utils.getImage(url, path):
             # Create image record
             #print 'Successful download, saving image..'
             image = Image(image = path)

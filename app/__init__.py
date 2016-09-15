@@ -42,8 +42,7 @@ def handleTPException(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     print "API Error %d: %s" % (error.status_code, error.message)
-    return response,
-
+    return response
 
 # Build the database:
 # Discard old configurations
