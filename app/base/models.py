@@ -37,21 +37,6 @@ class Base(db.Model):
 
         return output
 
-    #metodo che ritorna la proprietà dell'oggetto corrispondente alla chiave passata per parametro
-    def get(self, key):
-        return self.__dict__[key]
-
-    #metodo che indica se l'oggetto contiene la proprietà key
-    #esempio:
-    # Classe A, 3 proprietà: one, two, three
-    #a  = A(one = 1, three = 3)
-    #a.hasProperty("one") #true
-    #a.hasProperty("two") #false
-    #a.hasProperty("three") #true
-
-    def hasProperty(self, key):
-        return self.__dict__.has_key(key)
-
     @classmethod
     def columns(self):
         output = []
