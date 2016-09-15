@@ -33,10 +33,34 @@ class Keychain(Base, CommonPK):
   facebookToken = Column(String)
 
   #proprietà che contiene un auth token, utile per l'autenticazione
+  #l'expiration time è settato di default a un mese
   @property
   def auth_token(self, expiration = 60 * 60 * 24 * 30):
-      s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
-      return s.dumps({ 'id': self.id })
+      #ottengo il serializer
+      s = self.getSerializer(expiration)
+      #critto l'id dell'utente proprietario del keychain e ne ottengo un token
+      return s.dumps({ 'id': self.user_id })
+
+  #metodo centrale che contiene l'istanza del serializer per generazione e verifica di token
+  #muovendolo in un metodo centrale siamo sicuri che la chiave usata per generare/verificare è sempre la stessa
+  @staticmethod
+  def getSerializer(expiration = None):
+      return Serializer(app.config['SECRET_KEY'], expires_in = expiration)
+
+  #metodo statico che analizza e verifica un token, indicando se la sessione è ancora attiva
+  @classmethod
+  def verify_auth_token(self, token):
+      #ottengo il serializer
+      s = self.getSerializer()
+      try:
+          #vedo se riesco a verificare il token
+          data = s.loads(token)
+      #se non riesco ritorno null
+      except:
+          return None
+      #se no torno l'utente associato
+      return User.query.get(data['id'])
+
   #metodo che salva in password l'hash della password passata
   def hash_password(self, password):
       self.password = pwd_context.encrypt(password)
