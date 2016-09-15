@@ -44,6 +44,7 @@ def handleTPException(error):
     print "API Error %d: %s" % (error.status_code, error.message)
     return response
 
+
 # Build the database:
 # Discard old configurations
 # Attenzione! Questa chiamata è distruttiva, distrugge infatti ogni contenuto del db. Usarla con cautela.
