@@ -20,13 +20,6 @@ app.config.from_object('config')
 # by modules and controllers
 db = SQLAlchemy(app)
 
-# Sample HTTP error handling
-#@app.errorhandler(404)
-#def not_found(error):
-#    return render_template('404.html'), 404
-
-# Import a module / component using its blueprint handler variable (base)
-
 from app.auth.controllers import auth
 from app.base.controllers import base
 from app.game.controllers import game
@@ -40,8 +33,6 @@ app.register_blueprint(game)
 app.register_blueprint(message)
 app.register_blueprint(push)
 
-# app.register_blueprint(xyz_module)
-# ..
 
 # Build the database:
 # Discard old configurations
