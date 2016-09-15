@@ -36,6 +36,7 @@ PUBLIC_INFOS = {
     "last_run": datetime.now(pytz.utc)
 }
 INIT_DB = False
+TRAP_BAD_REQUEST_ERRORS = DEBUG
 DEFAULT_USER_SCORE = 800
 
 SQLALCHEMY_TRACK_MODIFICATIONS = True
