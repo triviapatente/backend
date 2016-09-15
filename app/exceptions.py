@@ -37,3 +37,11 @@ class AlreadyRegisteredUser(TPException):
             self.message = self.message + "username: {0}".format(username)
         elif email == previousUser.email:
             self.message = self.message + "indirizzo email: {0}".format(email)
+
+#eccezione chiamata quando il login dell'utente fallisce
+class LoginFailed(TPException):
+    status_code = 401 #auth required or failed
+
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "Login fallito"
