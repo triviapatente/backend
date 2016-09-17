@@ -7,7 +7,7 @@ from subprocess import call
 #se lo script non è stato chiamato con la flag che forza l'avvio impedendo l'inizializzazione
 if len(sys.argv) < 2 or sys.argv[1] != "--f":
     #esegui lo script di inizializzazione dell'app (che installa anche le dipendenze)
-    call(["sudo", "sh", "dependencies.sh"])
+    call(["sudo", "sh", "scripts/dependencies.sh"])
 
 from app import app
 debug = app.config["DEBUG"]
