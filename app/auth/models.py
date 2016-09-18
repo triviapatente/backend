@@ -18,6 +18,7 @@ class User(Base, CommonPK):
   #dati personali dell'utente
   name = Column(String)
   surname = Column(String)
+  #path dell'immagine
   image = Column(String)
   #punteggio di partenza del giocatore
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])

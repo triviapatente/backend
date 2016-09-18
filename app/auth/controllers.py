@@ -4,6 +4,7 @@ from app import app, db
 from app.auth.models import *
 from app.exceptions import *
 from app.decorators import auth_required, needs_post_values
+from app.preferences.models import *
 from sqlalchemy import or_
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
@@ -66,11 +67,9 @@ def register():
     #i controlli son passati, posso creare l'utente e salvarlo
     user = User(username = username, email = email)
     db.session.add(user)
-    db.session.commit()
     #creo le preferenze dell'utente (default) e le associo all'utente
     preferences = Preferences(user_id = user.id)
     db.session.add(preferences)
-    db.session.commit()
     #posso creare il portachiavi dell'utente e associarlo all'utente stesso
     keychain = Keychain(user_id = user.id, lifes = app.config["INITIAL_LIFES"])
     keychain.hash_password(password)
@@ -79,3 +78,14 @@ def register():
 
     #spedisco all'utente le info del suo utente, e il suo token con il quale autenticarsi
     return jsonify(user = user, token = keychain.auth_token)
+
+
+#api(s) per le modifiche
+
+@settings.route("/account", methods = ["POST"])
+@auth_required
+# ##name, ##surname and profile ##image of ##g.user
+# if some values are null, no modification is performed
+@needs_post_values("name", "surname", "image")
+def changeAccountInfo():
+    return "hello world"
