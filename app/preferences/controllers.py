@@ -6,8 +6,9 @@ from app.preferences.utils import *
 preferences = Blueprint("preferences", __name__, url_prefix = "/preferences")
 
 # ##notification_type rappresenta l'attributo booleano da invertire
-@preferences.route("/notification/<string:notification_type>", methods = ["POST"])
+@preferences.route("/notification/<string:notification_type>/edit", methods = ["POST"])
 @auth_required
+@needs_post_values("new_value")
 def changeNotificationPreferences(notification_type):
     #costruisco l'attributo da modificare
     notification_type = "notification_" + notification_type
@@ -15,15 +16,17 @@ def changeNotificationPreferences(notification_type):
     return changeUISwitchPreferences(g.user, notification_type)
 
 # ##new_value in questo caso potrebbe essere 'all', o 'friends', o 'nobody'
-@preferences.route("/stats/<string:new_value>", methods = ["POST"])
+@preferences.route("/stats/edit", methods = ["POST"])
 @auth_required
+@needs_post_values("new_value")
 def changeStatsPreferences(new_value):
     #cambio l'attributo stats se possibile
     return changeChoicePickerPreferences(g.user, "stats", new_value)
 
 # ##new_value in questo caso potrebbe essere 'all', o 'friends', o 'nobody'
-@preferences.route("/chat/<string:new_value>", methods = ["POST"])
+@preferences.route("/chat/edit", methods = ["POST"])
 @auth_required
+@needs_post_values("new_value")
 def changeChatPreferences(new_value):
     #cambio l'attributo chat se possibile
     return changeChoicePickerPreferences(g.user, "chat", new_value)
