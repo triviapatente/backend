@@ -53,3 +53,10 @@ class Forbidden(TPException):
     def __init__(self):
         TPException.__init__(self)
         self.message = "Autenticazione richiesta, rieffettua il login"
+
+class ChangeFailed(TPException):
+    status_code = 403 #forbidden
+
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "Modifica non effettuata"

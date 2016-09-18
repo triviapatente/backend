@@ -27,6 +27,7 @@ from app.base.controllers import base
 from app.game.controllers import game
 from app.message.controllers import message
 from app.push.controllers import push
+from app.preferences.controllers import preferences
 
 # Register blueprint(s)
 app.register_blueprint(auth)
@@ -34,6 +35,7 @@ app.register_blueprint(base)
 app.register_blueprint(game)
 app.register_blueprint(message)
 app.register_blueprint(push)
+app.register_blueprint(preferences)
 
 from app.exceptions import TPException
 #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
