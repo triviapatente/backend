@@ -3,7 +3,7 @@ from flask import request, jsonify, Blueprint, g
 from app import app, db
 from app.auth.models import *
 from app.exceptions import *
-from app.decorators import auth_required, needs_post_values
+from app.decorators import auth_required, needs_post_values, needs_files_values
 from app.preferences.models import *
 from sqlalchemy import or_
 
@@ -104,11 +104,33 @@ def changeSurname():
     db.session.commit()
     return jsonify(user = g.user)
 
-import shutil
+from werkzeug.utils import secure_filename
+import os
 #api per il cambio dell'immagine (##image)
 @settings.route("/image/edit", methods = ["POST"])
 @auth_required
-@needs_post_values("image")
+@needs_files_values("image")
 def changeImage():
-    # shutil.copyfileobj(g.post.get("image").raw, to_img) ##path
-    return jsonify(user = g.user)
+    image = g.files["image"]
+    #controllo sia valido (quindi che non sia un eseguibile o un file di testo ecc)
+    if allowed_file(image.filename):
+        #prendo l'estensione
+        filename = str(g.user.username) + "." + str(image.filename.rsplit('.')[-1])
+        #cambio il filename con il nome utente per due motivi: 1- univocità, 2- sicurezza, evito che sia pericoloso
+        #con secure_filename mi assicuro ulteriormente della non pericolisità del nome del file
+        image.filename = secure_filename(filename)
+        path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+        try:
+            image.save(path)
+            g.user.image = path
+            db.session.add(g.user)
+            db.session.commit()
+        except:
+            raise ChangeFailed()
+        return jsonify(user = g.user)
+    else:
+        raise ChangeFailed()
+
+#define if the uploaded file is allowed
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.')[-1] in app.config["ALLOWED_EXTENSIONS"]

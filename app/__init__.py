@@ -47,6 +47,11 @@ def handleTPException(error):
     print "API Error %d: %s" % (error.status_code, error.message)
     return response
 
+# Creazione directory per upload users pictures
+import os
+
+if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+    os.makedirs(app.config["UPLOAD_FOLDER"])
 
 # Build the database:
 # Discard old configurations

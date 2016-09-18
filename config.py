@@ -45,4 +45,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 INITIAL_LIFES = 3
 
 #percorso delle immagini utenti
-USER_PICTURES_PATH = "users/images/"
+UPLOAD_FOLDER = "users/images/"
+#estensioni ammesse
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])

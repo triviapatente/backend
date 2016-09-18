@@ -48,3 +48,22 @@ def needs_post_values(*keys):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+# come quello sopra, ma per controllare la presenza di file
+def needs_files_values(*keys):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            missing = []
+            #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente
+            g.files = {}
+            for key in keys:
+                if key not in request.files:
+                    missing.append(key)
+                else:
+                    g.files[key] = request.files[key]
+            if missing:
+                raise MissingParameter(missing)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
