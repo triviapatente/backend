@@ -44,6 +44,8 @@ class Keychain(Base, CommonPK):
   #utente che possiede il keychain
   user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
   user = relationship("User")
+
+  lifes = Column(Integer, nullable = False)
   #TODO: aggiungere controllo, uno dei due tra password o facebookToken deve essere sempre settato
 
   password = Column(String)
