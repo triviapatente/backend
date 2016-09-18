@@ -15,7 +15,7 @@ def changeUISwitchPreferences(user, attribute_to_switch):
         setattr(preferences, attribute_to_switch, not getattr(preferences, attribute_to_switch))
         db.session.add(preferences)
         db.session.commit()
-        return jsonify(preferences)
+        return jsonify(preferences = preferences)
     except:
         #se ad esempio la proprietà non esiste o non si può modificare per qualche altro motivo do errore
         raise ChangeFailed()
