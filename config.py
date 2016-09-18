@@ -43,3 +43,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 #vite iniziali per utente
 INITIAL_LIFES = 3
+
+#percorso delle immagini utenti
+USER_PICTURES_PATH = "users/images/"
