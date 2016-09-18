@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from app import db
-from app.auth.models import *
+from app.preferences.models import *
 from app.exceptions import *
 from flask import jsonify
 
