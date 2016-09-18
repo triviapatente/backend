@@ -10,23 +10,21 @@ preferences = Blueprint("preferences", __name__, url_prefix = "/preferences")
 @auth_required
 @needs_post_values("new_value")
 def changeNotificationPreferences(notification_type):
-    #costruisco l'attributo da modificare
-    notification_type = "notification_" + notification_type
-    #cambio l'attributo costruto, se esiste
-    return changeUISwitchPreferences(g.user, notification_type)
+    #cambio l'attributo richiesto se possibile
+    return changePreference("notification_" + notification_type, g.post.get("new_value"))
 
 # ##new_value in questo caso potrebbe essere 'all', o 'friends', o 'nobody'
 @preferences.route("/stats/edit", methods = ["POST"])
 @auth_required
 @needs_post_values("new_value")
-def changeStatsPreferences(new_value):
+def changeStatsPreferences():
     #cambio l'attributo stats se possibile
-    return changeChoicePickerPreferences(g.user, "stats", new_value)
+    return changePreference("stats", g.post.get("new_value"))
 
 # ##new_value in questo caso potrebbe essere 'all', o 'friends', o 'nobody'
 @preferences.route("/chat/edit", methods = ["POST"])
 @auth_required
 @needs_post_values("new_value")
-def changeChatPreferences(new_value):
+def changeChatPreferences():
     #cambio l'attributo chat se possibile
-    return changeChoicePickerPreferences(g.user, "chat", new_value)
+    return changePreference("chat", g.post.get("new_value"))

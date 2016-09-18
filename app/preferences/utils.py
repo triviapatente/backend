@@ -3,36 +3,21 @@
 from app import db
 from app.preferences.models import *
 from app.exceptions import *
-from flask import jsonify
+from flask import jsonify, g
 
-#metodo per cambiare una preferenza booleana
-# ##user è l'utente, ##attribute_to_switch è l'attributo booleano da invertire
-def changeUISwitchPreferences(user, attribute_to_switch):
-    preferences = getPreferences(user)
+#metodo per cambiare una preferenza
+# ##user è l'utente, ##attribute_to_change è l'attributo da cambiare, ##new_value è il nuovo valore
+def changePreference(attribute_to_change, new_value):
+    preferences = getPreferences(g.user)
     #provo a modificare la preferenza richiesta
+    setattr(preferences, attribute_to_change, new_value)
     try:
-        #nego la precedente proprietà
-        setattr(preferences, attribute_to_switch, not getattr(preferences, attribute_to_switch))
         db.session.add(preferences)
         db.session.commit()
-        return jsonify(preferences = preferences)
-    except:
-        #se ad esempio la proprietà non esiste o non si può modificare per qualche altro motivo do errore
-        raise ChangeFailed()
-
-#metodo per cambiare una preferenza tramite choicepicker
-# ##user è l'utente, ##attribute_to_change è l'attributo da cambiare, ##choice è il nuovo valore
-def changeChoicePickerPreferences(user, attribute_to_change, choice):
-    preferences = getPreferences(user)
-    #provo a modificare la preferenza richiesta
-    try:
-        setattr(preferences, attribute_to_change, choice)
-        db.session.add(preferences)
-        db.session.commit()
-        return jsonify(preferences)
     except:
         #se la proprietà non esiste o non è ammesso il nuovo valore o non si può modificare per qualche motivo do errore
         raise ChangeFailed()
+    return jsonify(preferences = preferences)
 
 #ritorna il record di preferenze dell'utente ##user
 def getPreferences(user):
