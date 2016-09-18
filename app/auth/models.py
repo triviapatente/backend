@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from app import app
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum
 from sqlalchemy.orm import relationship
 from passlib.apps import custom_app_context as pwd_context
 
@@ -19,9 +19,6 @@ class User(Base, CommonPK):
   name = Column(String)
   surname = Column(String)
   image = Column(String)
-  #preferenze
-  preferences_id = Column(Integer, ForeignKey("preferences.id"), nullable = False)
-  preferences = relationship("Preferences")
   #punteggio di partenza del giocatore
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])
   #partite giocate dal giocatore
@@ -38,6 +35,9 @@ class Preferences(Base, CommonPK):
     notification_chat = Column(Boolean, nullable = False, default = True)
     notification_new_game = Column(Boolean, nullable = False, default = True)
     notification_message = Column(Boolean, nullable = False, default = True)
+    #user
+    user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
+    user = relationship("User")
 
 
 class Keychain(Base, CommonPK):

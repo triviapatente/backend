@@ -65,7 +65,7 @@ def register():
     db.session.add(user)
     db.session.commit()
     #posso creare il portachiavi dell'utente e associarlo all'utente stesso
-    keychain = Keychain(user_id = user.id)
+    keychain = Keychain(user_id = user.id, lifes = app.config["INITIAL_LIFES"])
     keychain.hash_password(password)
     db.session.add(keychain)
     db.session.commit()

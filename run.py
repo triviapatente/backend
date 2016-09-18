@@ -13,4 +13,4 @@ from app import app
 debug = app.config["DEBUG"]
 
 print 'Running the service..'
-app.run(host = '0.0.0.0', port = 8080, debug = debug)
+app.run(host = '0.0.0.0', port = 8000, debug = debug)
