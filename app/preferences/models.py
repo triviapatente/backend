@@ -10,7 +10,7 @@ class Preferences(Base, CommonPK):
     #l'utente vuole ricevere messaggi da tutti, solo dagli amici o da nessuno
     chat = Column(Enum("all", "friends", "nobody", name = "chat_preferences"), default = "all")
     #notifiche
-    notification_turno = Column(Boolean, nullable = False, default = True)
+    notification_round = Column(Boolean, nullable = False, default = True)
     notification_new_game = Column(Boolean, nullable = False, default = True)
     notification_message = Column(Boolean, nullable = False, default = True)
     notification_full_hearts = Column(Boolean, nullable = False, default = True)
