@@ -22,7 +22,7 @@ app.config.from_object('config')
 # by modules and controllers
 db = SQLAlchemy(app)
 
-from app.auth.controllers import auth
+from app.auth.controllers import auth, settings
 from app.base.controllers import base
 from app.game.controllers import game
 from app.message.controllers import message
@@ -36,6 +36,7 @@ app.register_blueprint(game)
 app.register_blueprint(message)
 app.register_blueprint(push)
 app.register_blueprint(preferences)
+app.register_blueprint(settings)
 
 from app.exceptions import TPException
 #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione

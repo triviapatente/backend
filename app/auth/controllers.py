@@ -7,6 +7,7 @@ from app.decorators import auth_required, needs_post_values
 from sqlalchemy import or_
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
+settings = Blueprint("settings", __name__, url_prefix = "/settings")
 
 @auth.route("/", methods = ["GET"])
 def welcome():
