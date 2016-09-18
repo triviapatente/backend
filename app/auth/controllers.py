@@ -4,6 +4,8 @@ from app import app, db
 from app.auth.models import *
 from app.exceptions import *
 from app.decorators import auth_required, needs_post_values
+from sqlalchemy import or_
+
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
 
 @auth.route("/", methods = ["GET"])
@@ -14,13 +16,13 @@ def welcome():
 #api che effettua il login dell'utente
 @auth.route("/login", methods = ["POST"])
 #utilizzando il decorator che ho creato, posso fare il controllo dell'input in una riga
-@needs_post_values("email", "password")
+@needs_post_values("user", "password")
 def login():
     #ottengo i valori in input
-    email = g.post.get("email")
+    user_identifier = g.post.get("user")
     password = g.post.get("password")
-    #ottengo l'user a partire dall'email, e mi chiedo se c'è
-    user = User.query.filter(User.email == email).first()
+    #ottengo l'user a partire dall'email o dall'username, e mi chiedo se c'è
+    user = User.query.filter(or_(User.email == user_identifier, User.username == user_identifier)).first()
     if user is None:
         #se no, login fallito!
         raise LoginFailed()
