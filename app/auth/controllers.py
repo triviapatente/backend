@@ -64,6 +64,10 @@ def register():
     user = User(username = username, email = email)
     db.session.add(user)
     db.session.commit()
+    #creo le preferenze dell'utente (default) e le associo all'utente
+    preferences = Preferences(user_id = user.id)
+    db.session.add(preferences)
+    db.session.commit()
     #posso creare il portachiavi dell'utente e associarlo all'utente stesso
     keychain = Keychain(user_id = user.id, lifes = app.config["INITIAL_LIFES"])
     keychain.hash_password(password)
