@@ -1,34 +1,29 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint, g
-from app import app, db
-from app.auth.models import *
+from flask import Blueprint, g
 from app.decorators import auth_required, needs_post_values
-from app.exceptions import *
+from app.preferences.utils import *
 
 preferences = Blueprint("preferences", __name__, url_prefix = "/preferences")
 
-@preferences.route("/", methods = ["GET"])
-def welcome():
-    output = app.config["PUBLIC_INFOS"]
-    return jsonify(output)
-
+# ##notification_type rappresenta l'attributo booleano da invertire
 @preferences.route("/notification/<string:notification_type>", methods = ["POST"])
 @auth_required
 def changeNotificationPreferences(notification_type):
-    #prendo le preferenze dell'utente
-    preferences = Preferences.query.filter(Preferences.user_id == g.user.id).first()
-    #non può essere nulla se ha superato auth_required, in ogni caso controlliamo
-    if not preferences:
-        raise ChangeFailed()
     #costruisco l'attributo da modificare
     notification_type = "notification_" + notification_type
-    #provo a modificare la preferenza richiesta
-    try:
-        #nego la precedente proprietà
-        setattr(preferences, notification_type, not getattr(preferences, notification_type))
-    except:
-        #se ad esempio la proprietà non esiste o non si può modificare per qualche altro motivo da errore
-        raise ChangeFailed()
-    db.session.add(preferences)
-    db.session.commit()
-    return jsonify(preferences)
+    #cambio l'attributo costruto, se esiste
+    return changeUISwitchPreferences(g.user, notification_type)
+
+# ##new_value in questo caso potrebbe essere 'all', o 'friends', o 'nobody'
+@preferences.route("/stats/<string:new_value>", methods = ["POST"])
+@auth_required
+def changeStatsPreferences(new_value):
+    #cambio l'attributo stats se possibile
+    return changeChoicePickerPreferences(g.user, "stats", new_value)
+
+# ##new_value in questo caso potrebbe essere 'all', o 'friends', o 'nobody'
+@preferences.route("/chat/<string:new_value>", methods = ["POST"])
+@auth_required
+def changeChatPreferences(new_value):
+    #cambio l'attributo chat se possibile
+    return changeChoicePickerPreferences(g.user, "chat", new_value)
