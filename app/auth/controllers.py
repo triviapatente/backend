@@ -8,7 +8,7 @@ from app.preferences.models import *
 from sqlalchemy import or_
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
-settings = Blueprint("settings", __name__, url_prefix = "/settings")
+settings = Blueprint("account", __name__, url_prefix = "/account")
 
 @auth.route("/", methods = ["GET"])
 def welcome():
@@ -67,9 +67,11 @@ def register():
     #i controlli son passati, posso creare l'utente e salvarlo
     user = User(username = username, email = email)
     db.session.add(user)
+    db.session.commit()
     #creo le preferenze dell'utente (default) e le associo all'utente
     preferences = Preferences(user_id = user.id)
     db.session.add(preferences)
+    db.session.commit()
     #posso creare il portachiavi dell'utente e associarlo all'utente stesso
     keychain = Keychain(user_id = user.id, lifes = app.config["INITIAL_LIFES"])
     keychain.hash_password(password)
@@ -82,10 +84,31 @@ def register():
 
 #api(s) per le modifiche
 
-@settings.route("/account", methods = ["POST"])
+#api per il cambio del nome (##name)
+@settings.route("/name/edit", methods = ["POST"])
 @auth_required
-# ##name, ##surname and profile ##image of ##g.user
-# if some values are null, no modification is performed
-@needs_post_values("name", "surname", "image")
-def changeAccountInfo():
-    return "hello world"
+@needs_post_values("name")
+def changeName():
+    g.user.name = g.post.get("name")
+    db.session.add(g.user)
+    db.session.commit()
+    return jsonify(user = g.user)
+
+#api per il cambio del cognome (##surname)
+@settings.route("/surname/edit", methods = ["POST"])
+@auth_required
+@needs_post_values("surname")
+def changeSurname():
+    g.user.surname = g.post.get("surname")
+    db.session.add(g.user)
+    db.session.commit()
+    return jsonify(user = g.user)
+
+import shutil
+#api per il cambio dell'immagine (##image)
+@settings.route("/image/edit", methods = ["POST"])
+@auth_required
+@needs_post_values("image")
+def changeImage():
+    # shutil.copyfileobj(g.post.get("image").raw, to_img) ##path
+    return jsonify(user = g.user)
