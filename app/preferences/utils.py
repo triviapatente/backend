@@ -10,7 +10,7 @@ from flask import jsonify, g
 def changePreference(attribute_to_change, new_value):
     preferences = getPreferences(g.user)
     #provo a modificare la preferenza richiesta
-    setattr(preferences, attribute_to_change, new_value)
+    preferences[attribute_to_change] = new_value
     try:
         db.session.add(preferences)
         db.session.commit()

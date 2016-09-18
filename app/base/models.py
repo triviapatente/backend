@@ -12,6 +12,12 @@ class Base(db.Model):
     #è una classe astratta quindi lo indichiamo
     __abstract__ = True
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
   	#ora non servirà più dichiarare __tablename__ in ogni classe
     @declared_attr
     def __tablename__(cls):
@@ -22,7 +28,6 @@ class Base(db.Model):
     #updatedAt, parametro che indica la data di ultima modifica, comune a tutti
     updatedAt = Column(DateTime, default = db.func.current_timestamp(),
                                  onupdate = db.func.current_timestamp())
-
 
     #metodo che serializza l'oggetto in json
     @property
