@@ -48,3 +48,5 @@ INITIAL_LIFES = 3
 UPLOAD_FOLDER = "users/images/"
 #estensioni ammesse
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+#percorso dove vengono salvate le immagini dei quiz
+QUIZ_IMAGE_FOLDER = "images/"
