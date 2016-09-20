@@ -42,12 +42,35 @@ def login():
         #se no, login fallito
         raise LoginFailed()
 
-#metodo fittizio per testare l'autenticazione
+#metodo fittizio per testare le transazioni
+from app.utils import *
 @auth.route("/test", methods = ["POST"])
 @auth_required
+@needs_post_values("name", "surname")
 def randomMethod():
-    return "Doing something"
+    def f(**dict):
+        def f1(**dict):
+            # user = dict["user"]
+            user = g.user #per provare che non serve passare per parametri
+            # session = dict["session"]
+            session = db.session
+            # user.name = dict["name"]
+            user.name = g.post.get("name")
+            session.add(user)
+        def f2(**dict):
+            # user = dict["user"]
+            user = g.user
+            # session = dict["session"]
+            session = db.session
+            # user.surname = dict["surname"]
+            user.surname = g.post.get("surname")
+            session.add(user)
+        doTransaction(f1, **dict)
+        doTransaction(f2, **dict)
 
+    dict = {"name":g.post.get("name"), "surname":g.post.get("surname"), "user":g.user, "session":db.session}
+    doTransaction(f, **dict)
+    return jsonify(user = g.user)
 
 #api che effettua la registrazione dell'utente
 @auth.route("/register", methods = ["POST"])
