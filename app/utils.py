@@ -16,8 +16,7 @@ def doTransaction(transaction, **params):
     db.session.begin(subtransactions=True) #in teoria è di default perchè funziona comunque
     try:
         transaction(**params)
-    except Exception as e:
-        return str(e)
+    except:
         # se avvengono errori torno indietro all'ultimo savepoint (o all'inizio se non ci sono)
         db.session.rollback()
     # per permettere il salvataggio in caso di savepoint il commit è fuori dal blocco try

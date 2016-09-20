@@ -65,8 +65,11 @@ def randomMethod():
             # user.surname = dict["surname"]
             user.surname = g.post.get("surname")
             session.add(user)
+        def f():
+            print "hello"
         doTransaction(f1, **dict)
         doTransaction(f2, **dict)
+        doTransaction(f, None)
 
     dict = {"name":g.post.get("name"), "surname":g.post.get("surname"), "user":g.user, "session":db.session}
     doTransaction(f, **dict)
