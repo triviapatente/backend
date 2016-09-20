@@ -6,6 +6,7 @@ from app.exceptions import *
 from app.decorators import auth_required, needs_post_values, needs_files_values
 from app.preferences.models import *
 from sqlalchemy import or_
+from app.utils import *
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
 settings = Blueprint("account", __name__, url_prefix = "/account")
@@ -25,12 +26,12 @@ def login():
     password = g.post.get("password")
     #ottengo l'user a partire dall'email o dall'username, e mi chiedo se c'è
     user = User.query.filter(or_(User.email == user_identifier, User.username == user_identifier)).first()
-    if user is None:
+    if not user:
         #se no, login fallito!
         raise LoginFailed()
     #ottengo il keychain a partire dall'utente pescato dal db, e mi chiedo se c'è
     keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
-    if keychain is None:
+    if not keychain:
         #se no, login fallito! NB: questa cosa non dovrebbe mai accadere, vorrebbe dire che c'è un problema a livello di registrazione
         raise LoginFailed()
 
@@ -43,7 +44,6 @@ def login():
         raise LoginFailed()
 
 #metodo fittizio per testare le transazioni
-from app.utils import *
 @auth.route("/test", methods = ["POST"])
 @auth_required
 @needs_post_values("name", "surname")
@@ -87,26 +87,28 @@ def register():
     #vedo se ci sono altri utenti che hanno lo stesso username o la stessa password
     u = User.query.filter((User.username == username or User.email == email)).first()
     #se si, ti mando l'errore appropriato
-    if u is not None:
+    if u:
         raise AlreadyRegisteredUser(u, username, email)
 
     #i controlli son passati, posso creare l'utente e salvarlo
-    user = User(username = username, email = email)
-    db.session.add(user)
-    db.session.commit()
-    #creo le preferenze dell'utente (default) e le associo all'utente
-    preferences = Preferences(user_id = user.id)
-    db.session.add(preferences)
-    db.session.commit()
-    #posso creare il portachiavi dell'utente e associarlo all'utente stesso
-    keychain = Keychain(user_id = user.id, lifes = app.config["INITIAL_LIFES"])
-    keychain.hash_password(password)
-    db.session.add(keychain)
-    db.session.commit()
+    def createUser():
+        db.session.autoflush = True
+        user = User(username = username, email = email)
+        db.session.add(user)
+        db.session.flush()
+        #creo le preferenze dell'utente (default) e le associo all'utente
+        preferences = Preferences(user_id = user.id)
+        db.session.add(preferences)
+        #posso creare il portachiavi dell'utente e associarlo all'utente stesso
+        keychain = Keychain(user_id = user.id, lifes = app.config["INITIAL_LIFES"])
+        keychain.hash_password(password)
+        db.session.add(keychain)
+        return jsonify(user = user, token = keychain.auth_token)
 
-    #spedisco all'utente le info del suo utente, e il suo token con il quale autenticarsi
-    return jsonify(user = user, token = keychain.auth_token)
-
+    output = doTransaction(createUser)
+    if output:
+        return output
+    raise TPException() # trovare exception appropriata
 
 #api(s) per le modifiche
 
