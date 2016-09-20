@@ -69,7 +69,7 @@ def randomMethod():
             print "hello"
         doTransaction(f1, **dict)
         doTransaction(f2, **dict)
-        doTransaction(f, None)
+        doTransaction(f)
 
     dict = {"name":g.post.get("name"), "surname":g.post.get("surname"), "user":g.user, "session":db.session}
     doTransaction(f, **dict)
