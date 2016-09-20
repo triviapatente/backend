@@ -9,6 +9,7 @@ from flask import g
 # routine per le transazioni in db, riceve come parametro una funzione ##transaction che contiene le operazioni della transazione
 # in ##params sono contenuti i parametri da passare alla funzione (sono un dizionario)
 def doTransaction(transaction, **params):
+    # controllo che transaction sia una funzione
     if not callable(transaction):
         raise ChangeFailed()
     # inizio la transazione
