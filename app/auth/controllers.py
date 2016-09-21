@@ -9,7 +9,8 @@ from sqlalchemy import or_
 from app.utils import *
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
-settings = Blueprint("account", __name__, url_prefix = "/account")
+account = Blueprint("account", __name__, url_prefix = "/account")
+
 
 @auth.route("/", methods = ["GET"])
 def welcome():
