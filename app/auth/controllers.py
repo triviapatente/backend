@@ -10,7 +10,7 @@ from app.utils import *
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
 account = Blueprint("account", __name__, url_prefix = "/account")
-
+info = Blueprint("")
 
 @auth.route("/", methods = ["GET"])
 def welcome():
@@ -114,7 +114,7 @@ def register():
 #api(s) per le modifiche
 
 #api per il cambio del nome (##name)
-@settings.route("/name/edit", methods = ["POST"])
+@account.route("/name/edit", methods = ["POST"])
 @auth_required
 @needs_post_values("name")
 def changeName():
@@ -124,7 +124,7 @@ def changeName():
     return jsonify(user = g.user)
 
 #api per il cambio del cognome (##surname)
-@settings.route("/surname/edit", methods = ["POST"])
+@account.route("/surname/edit", methods = ["POST"])
 @auth_required
 @needs_post_values("surname")
 def changeSurname():
@@ -136,7 +136,7 @@ def changeSurname():
 from werkzeug.utils import secure_filename
 import os
 #api per il cambio dell'immagine (##image)
-@settings.route("/image/edit", methods = ["POST"])
+@account.route("/image/edit", methods = ["POST"])
 @auth_required
 @needs_files_values("image")
 def changeImage():
