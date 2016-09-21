@@ -10,7 +10,7 @@ from app.utils import *
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
 account = Blueprint("account", __name__, url_prefix = "/account")
-info = Blueprint("")
+info = Blueprint("info", __name__, url_prefix = "/info")
 
 @auth.route("/", methods = ["GET"])
 def welcome():
@@ -43,38 +43,6 @@ def login():
     else:
         #se no, login fallito
         raise LoginFailed()
-
-#metodo fittizio per testare le transazioni
-@auth.route("/test", methods = ["POST"])
-@auth_required
-@needs_post_values("name", "surname")
-def randomMethod():
-    def f(**dict):
-        def f1(**dict):
-            # user = dict["user"]
-            user = g.user #per provare che non serve passare per parametri
-            # session = dict["session"]
-            session = db.session
-            # user.name = dict["name"]
-            user.name = g.post.get("name")
-            session.add(user)
-        def f2(**dict):
-            # user = dict["user"]
-            user = g.user
-            # session = dict["session"]
-            session = db.session
-            # user.surname = dict["surname"]
-            user.surname = g.post.get("surname")
-            session.add(user)
-        def f():
-            print "hello"
-        doTransaction(f1, **dict)
-        doTransaction(f2, **dict)
-        doTransaction(f)
-
-    dict = {"name":g.post.get("name"), "surname":g.post.get("surname"), "user":g.user, "session":db.session}
-    doTransaction(f, **dict)
-    return jsonify(user = g.user)
 
 #api che effettua la registrazione dell'utente
 @auth.route("/register", methods = ["POST"])
@@ -163,3 +131,17 @@ def changeImage():
 #define if the uploaded file is allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.')[-1] in app.config["ALLOWED_EXTENSIONS"]
+
+#api per la richiesta della classifica italiana (globale)
+@info.route("/rank/italy", methods = ["GET"])
+@auth_required
+def getItalianRank():
+    #richiedo le prime n posizioni
+    n = app.config["RESULTS_LIMIT_RANK_ITALY"]
+    rank = User.query.order_by(User.score).limit(n).all()
+    if g.user not in rank:
+        if length(rank) < n:
+            rank.append(g.user)
+        else:
+            rank[n - 1] = g.user
+    return jsonify(rank = rank)

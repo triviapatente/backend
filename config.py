@@ -50,3 +50,5 @@ UPLOAD_FOLDER = "users/images/"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 #percorso dove vengono salvate le immagini dei quiz
 QUIZ_IMAGE_FOLDER = "images/"
+#numero di risultati mostrati nella classifica italiana
+RESULTS_LIMIT_RANK_ITALY = 10
