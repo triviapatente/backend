@@ -130,12 +130,17 @@ def changeImage():
 @info.route("/rank/italy", methods = ["GET"])
 @auth_required
 def getItalianRank():
-    #richiedo le prime n posizioni
+    #vedo quante posizioni devo ritornare
     n = app.config["RESULTS_LIMIT_RANK_ITALY"]
-    rank = User.query.order_by(User.score).limit(n).all()
+    #chiedo la classifica (elenco utenti ordinato in base al punteggio)
+    globalRank = User.query.order_by(User.score).all()
+    #creo un dictionary in cui assegno ad ogni utente la sua posizione
+    globalRankPositions = { user : position for position, user in enumerate(globalRank) }
+    #la classifica che devo ritornare e un sottoinsieme (dall'inizio a n) della classifica globale
+    rank = globalRank[:n]
+    #vedo se l'utente non è nelle prime 10 posizioni
     if g.user not in rank:
-        if length(rank) < n:
-            rank.append(g.user)
-        else:
-            rank[n - 1] = g.user
-    return jsonify(rank = rank)
+        #se non lo è, lo sostituisco all'ultima posizione (la decima)
+        rank[n - 1] = g.user
+    #ritorno la classifica e la posizione dell'utente
+    return jsonify(rank = rank, position = (globalRankPositions[g.user] + 1))
