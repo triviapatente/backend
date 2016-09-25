@@ -10,6 +10,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
 
 from app.base.models import Base, CommonPK
 from app.game.models import partecipation
+from werkzeug.utils import secure_filename
 
 class User(Base, CommonPK):
   #valori identificativi dell'utente, devono essere unici
@@ -26,6 +27,21 @@ class User(Base, CommonPK):
   games = relationship("Game", secondary = partecipation, back_populates = "users")
   #partite vinte dal giocatore
   games_won = relationship("Game", back_populates = "winner")
+
+  #metodo che permette di modificare il nome dell'immagine adattandolo al nome utente in modo sicuro
+  def getFileName(self, filename):
+      #se il file è permesso
+      if User.allowed_file(filename):
+          #lo sostituisco con lo username, mantenendo l'ultima estensione e lo rendo sicuro
+          return secure_filename(str(self.username) + "." + str(filename.rsplit('.')[-1]))
+      else:
+          return False
+
+  #proprietà che definisce quando un file è permesso o no
+  @staticmethod
+  def allowed_file(filename):
+      return '.' in filename and filename.rsplit('.')[-1] in app.config["ALLOWED_EXTENSIONS"]
+
 
 class Keychain(Base, CommonPK):
   #utente che possiede il keychain

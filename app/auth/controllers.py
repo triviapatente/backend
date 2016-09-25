@@ -7,6 +7,7 @@ from app.decorators import auth_required, needs_post_values, needs_files_values
 from app.preferences.models import *
 from sqlalchemy import or_
 from app.utils import *
+import os
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
 account = Blueprint("account", __name__, url_prefix = "/account")
@@ -101,21 +102,18 @@ def changeSurname():
     db.session.commit()
     return jsonify(user = g.user)
 
-from werkzeug.utils import secure_filename
-import os
 #api per il cambio dell'immagine (##image)
 @account.route("/image/edit", methods = ["POST"])
 @auth_required
 @needs_files_values("image")
 def changeImage():
     image = g.files["image"]
-    #controllo sia valido (quindi che non sia un eseguibile o un file di testo ecc)
-    if allowed_file(image.filename):
+    #prendo il nuovo filename
+    filename = g.user.getFileName(image.filename)
+    #controllo che il filename sia valido (se no vuol dire che aveva un'estensione non ammessa)
+    if filename:
         #prendo l'estensione
-        filename = str(g.user.username) + "." + str(image.filename.rsplit('.')[-1])
-        #cambio il filename con il nome utente per due motivi: 1- univocità, 2- sicurezza, evito che sia pericoloso
-        #con secure_filename mi assicuro ulteriormente della non pericolisità del nome del file
-        image.filename = secure_filename(filename)
+        image.filename = filename
         path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
         try:
             image.save(path)
@@ -126,11 +124,7 @@ def changeImage():
             raise ChangeFailed()
         return jsonify(user = g.user)
     else:
-        raise ChangeFailed()
-
-#define if the uploaded file is allowed
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.')[-1] in app.config["ALLOWED_EXTENSIONS"]
+        raise FormatNotAllowed()
 
 #api per la richiesta della classifica italiana (globale)
 @info.route("/rank/italy", methods = ["GET"])
