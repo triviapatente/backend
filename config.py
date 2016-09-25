@@ -52,3 +52,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 QUIZ_IMAGE_FOLDER = "images/"
 #numero di risultati mostrati nella classifica italiana
 RESULTS_LIMIT_RANK_ITALY = 10
+#fattore moltiplicativo massimo e minimo
+MAX_MULTIPLIER_FACTOR = 100
+MIN_MULTIPLIER_FACTOR = 32
