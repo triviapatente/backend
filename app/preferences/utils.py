@@ -4,6 +4,7 @@ from app import db
 from app.preferences.models import *
 from app.exceptions import *
 from flask import jsonify, g
+from app.preferences.queries import *
 
 #metodo per cambiare una preferenza
 # ##user è l'utente, ##attribute_to_change è l'attributo da cambiare, ##new_value è il nuovo valore
@@ -21,7 +22,7 @@ def changePreference(attribute_to_change, new_value):
 
 #ritorna il record di preferenze dell'utente ##user
 def getPreferences(user):
-    preferences = Preferences.query.filter(Preferences.user_id == user.id).first()
+    preferences = getPreferencesFromUserID(user.id)
     #non può essere nulla se ha superato auth_required, controllo nel caso per sbaglio venga usato in un altro contesto
     if not preferences:
         raise ChangeFailed()
