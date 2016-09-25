@@ -8,6 +8,9 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 from app.base.utils import TPJSONEncoder
 
+# Import SocketIO
+from flask_socketio import SocketIO
+
 # Define the WSGI application object
 app = Flask(__name__)
 
@@ -21,6 +24,7 @@ app.config.from_object('config')
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
+socketio = SocketIO(app)
 
 from app.auth.controllers import auth, account, info
 from app.base.controllers import base
@@ -38,6 +42,9 @@ app.register_blueprint(push)
 app.register_blueprint(preferences)
 app.register_blueprint(account)
 app.register_blueprint(info)
+
+# Add websockets
+from app.game.web_sockets import *
 
 from app.exceptions import TPException
 #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione

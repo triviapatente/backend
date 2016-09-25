@@ -9,8 +9,8 @@ if len(sys.argv) < 2 or sys.argv[1] != "--f":
     #esegui lo script di inizializzazione dell'app (che installa anche le dipendenze)
     call(["sudo", "sh", "scripts/dependencies.sh"])
 
-from app import app
+from app import app, socketio
 debug = app.config["DEBUG"]
 
 print 'Running the service..'
-app.run(host = '0.0.0.0', port = 8000, debug = debug)
+socketio.run(app, host = '0.0.0.0', port = 8000, debug = debug)
