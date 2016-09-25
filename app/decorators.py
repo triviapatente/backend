@@ -67,3 +67,23 @@ def needs_files_values(*keys):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+# come quello sopra per controllare le coppie classi id per vedere che l'id sia valido
+def fetch_models(**keys):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            missing = {}
+            g.models = {}
+            for key, model in keys:
+                id = request.form.get(key)
+                obj = db.session.query(model).filter_by(id = id).first()
+                if obj:
+                    g.models[key] = obj
+                else:
+                    missing[key] = id
+            if missing:
+                raise MissingParameter(missing)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
