@@ -15,7 +15,7 @@ from app.preferences.models import *
 def doTransaction(transaction, **params):
     # controllo che transaction sia una funzione
     if not callable(transaction):
-        raise ChangeFailed()
+        return False
     # inizio la transazione
     # permetto più subtransactions nella stessa transazione (quindi è possibile chiamare più volte doTransaction in transaction)
     db.session.begin(subtransactions=True)
