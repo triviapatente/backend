@@ -61,10 +61,10 @@ class Invite(Base):
     game = relationship("Game")
     #chi ha invitato
     sender_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True)
-    sender = relationship("User")
+    sender = relationship("User", foreign_keys = [sender_id])
     #chi ha ricevuto l'invito
     receiver_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True)
-    receiver = relationship("User")
+    receiver = relationship("User", foreign_keys = [receiver_id])
     #l'invito è stato accettato? NB: questo valore ragiona a logica ternaria (True|False|NULL), in quanto un invito potrebbe non essere ne stato accettato ne rifiutato, e quindi il valore diventa NULL
     accepted = Column(Boolean, nullable = True, default = None)
 
