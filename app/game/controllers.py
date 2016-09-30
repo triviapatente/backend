@@ -4,8 +4,8 @@ from app import app, db
 from app.auth.models import User
 from app.game.models import *
 from app.utils import doTransaction
-from app.decorators import auth_required, fetch_models
-from app.exceptions import ChangeFailed
+from app.decorators import auth_required, fetch_models, needs_post_values
+from app.exceptions import ChangeFailed, Forbidden
 
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -55,3 +55,17 @@ def getPendingInvites():
 def getPendingInvitesBadge():
     badge = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).count()
     return jsonify(badge = badge)
+
+#considerare di dare questa info alla creazione del websocket
+@game.route("/invites/<int:game_id>", methods = ["POST"])
+@needs_post_values("accepted")
+@auth_required
+def processInvite(game_id):
+    invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id).first()
+    if not invite:
+        raise ChangeFailed()
+    #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
+    invite.accepted = g.post["accepted"]
+    db.session.add(invite)
+    db.session.commit()
+    return jsonify(success = True)
