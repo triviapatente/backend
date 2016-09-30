@@ -55,6 +55,18 @@ class Question(Base):
   game_id = Column(Integer, ForeignKey("round.game_id"), nullable = False, primary_key = True)
   user_id = Column(Integer, ForeignKey("round.user_id"), nullable = False, primary_key = True)
 
+class Invite(Base):
+    #il game a cui sei stato invitato
+    game_id = Column(Integer, ForeignKey("game.id"), nullable = False, primary_key = True)
+    game = relationship("Game")
+    #chi ha invitato
+    sender_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True)
+    sender = relationship("User")
+    #chi ha ricevuto l'invito
+    receiver_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True)
+    receiver = relationship("User")
+    #l'invito è stato accettato? NB: questo valore ragiona a logica ternaria (True|False|NULL), in quanto un invito potrebbe non essere ne stato accettato ne rifiutato, e quindi il valore diventa NULL
+    accepted = Column(Boolean, nullable = True, default = None)
 
 class Image(Base, CommonPK):
   #path dell'immagine, in alternativa: blob
