@@ -20,27 +20,28 @@ def welcome():
 # @needs_post_values("number_of_players")
 @fetch_models({"opponent": User})
 def newGame():
+    #metodo transazionale
+    def createGame():
+        db.session.autoflush = True
+        new_game = Game()
+        opponent = g.models["opponent"]
+        new_game.users.append(opponent)
+        print opponent.id
+        new_game.users.append(g.user)
+        print g.user.id
+        db.session.add(new_game)
+        db.session.commit()
+        #TODO: gestire la logica per mandare le notifiche push a chi di dovere
+        invite = Invite(sender = g.user, receiver = opponent, game = new_game)
+        db.session.add(invite)
+        return jsonify(game = new_game)
     output = doTransaction(createGame)
     if output:
         return output
     else:
         raise ChangeFailed()
 
-#metodo transazionale
-def createGame():
-    db.session.autoflush = True
-    new_game = Game()
-    opponent = g.models["opponent"]
-    new_game.users.append(opponent)
-    print opponent.id
-    new_game.users.append(g.user)
-    print g.user.id
-    db.session.add(new_game)
-    db.session.commit()
-    #TODO: gestire la logica per mandare le notifiche push a chi di dovere
-    invite = Invite(sender = g.user, receiver = opponent, game = new_game)
-    db.session.add(invite)
-    return jsonify(game = new_game)
+
 
 @game.route("/invites", methods = ["GET"])
 @auth_required
