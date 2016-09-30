@@ -119,6 +119,10 @@ def changeImage():
     else:
         raise FormatNotAllowed()
 
+@account.route("/user", methods = ["GET"])
+@auth_required
+def getCurrentUser():
+    return jsonify(user = g.user)
 
 #api per la richiesta della classifica italiana (globale)
 @info.route("/rank/italy", methods = ["GET"])
