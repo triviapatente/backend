@@ -2,7 +2,7 @@
 from flask import request, jsonify, Blueprint
 from app import app, db
 from app.game.models import *
-from app.decorators import auth_required
+from app.decorators import auth_required, fetch_models
 
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -15,7 +15,7 @@ def welcome():
 @game.route("/new_game")
 @auth_required
 # @needs_post_values("number_of_players")
-@fetch_models({"opponent":"user"})
+@fetch_models(**{"opponent":"user"})
 def createGame():
     new_game = Game()
     new_game.users.append(g.models["opponent"].id)
