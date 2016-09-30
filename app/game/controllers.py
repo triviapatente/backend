@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint, g
 from app import app, db
+from app.auth.models import User
 from app.game.models import *
+from app.utils import doTransaction
 from app.decorators import auth_required, fetch_models
+from app.exceptions import ChangeFailed
 
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -16,10 +19,38 @@ def welcome():
 @auth_required
 # @needs_post_values("number_of_players")
 @fetch_models({"opponent": User})
+def newGame():
+    output = doTransaction(createGame)
+    if output:
+        return output
+    else:
+        raise ChangeFailed()
+
+#metodo transazionale
 def createGame():
+    db.session.autoflush = True
     new_game = Game()
-    new_game.users.append(g.models["opponent"].id)
-    new_game.users.append(g.user.id)
+    opponent = g.models["opponent"]
+    new_game.users.append(opponent)
+    print opponent.id
+    new_game.users.append(g.user)
+    print g.user.id
     db.session.add(new_game)
     db.session.commit()
+    #TODO: gestire la logica per mandare le notifiche push a chi di dovere
+    invite = Invite(sender = g.user, receiver = opponent, game = new_game)
+    db.session.add(invite)
     return jsonify(game = new_game)
+
+@game.route("/invites", methods = ["GET"])
+@auth_required
+def getPendingInvites():
+    invites = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).all()
+    return jsonify(invites = invites)
+
+#considerare di dare questa info alla creazione del websocket
+@game.route("/invites/badge", methods = ["GET"])
+@auth_required
+def getPendingInvitesBadge():
+    badge = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).count()
+    return jsonify(badge = badge)
