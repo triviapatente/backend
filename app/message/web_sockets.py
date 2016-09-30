@@ -3,7 +3,7 @@
 from app import socketio
 from flask_socketio import emit, Namespace
 from app.decorators import auth_required_ws
-from flask_login import current_user
+
 from flask import g
 
 # class-based namespace, the events have the "on_" prefix
@@ -16,4 +16,4 @@ class Chat(Namespace):
         emit('connection response', {'data': 'Connected', 'User': g.user.username })
     def on_disconnect(self):
         print 'Client disconnected'
-socketio.on_namespace(Chat('/chat'))
+#socketio.on_namespace(Chat('/chat'))

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, g
 from app import app, db
 from app.game.models import *
 from app.decorators import auth_required, fetch_models
@@ -12,10 +12,10 @@ def welcome():
     return jsonify(output)
 
 #creazione della partita
-@game.route("/new_game")
+@game.route("/new_game", methods = ["POST"])
 @auth_required
 # @needs_post_values("number_of_players")
-@fetch_models(**{"opponent":"user"})
+@fetch_models({"opponent": User})
 def createGame():
     new_game = Game()
     new_game.users.append(g.models["opponent"].id)

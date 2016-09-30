@@ -2,7 +2,7 @@
 
 from flask import g, request
 from functools import wraps
-
+from app import db
 from app.auth.utils import tokenFromRequest as getToken
 from app.auth.models import Keychain
 from app.exceptions import MissingParameter, Forbidden
@@ -69,13 +69,13 @@ def needs_files_values(*keys):
     return decorator
 
 # come quello sopra per controllare le coppie classi id per vedere che l'id sia valido
-def fetch_models(**keys):
+def fetch_models(keys):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             missing = {}
             g.models = {}
-            for key, model in keys:
+            for key, model in keys.items():
                 id = request.form.get(key)
                 obj = db.session.query(model).filter_by(id = id).first()
                 if obj:
@@ -90,8 +90,9 @@ def fetch_models(**keys):
 
 # per l'autenticazione via websockets
 def auth_required_ws(f):
-    @functools.wraps(f)
+    @wraps(f)
     def check(*args, **kwargs):
+        return False
         if not current_user.is_authenticated:
             disconnect()
         else:

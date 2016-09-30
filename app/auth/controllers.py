@@ -53,7 +53,6 @@ def register():
     #se si, ti mando l'errore appropriato
     if u:
         raise AlreadyRegisteredUser(u, username, email)
-    return jsonify(user = u)
     #i controlli son passati, posso creare l'utente e salvarlo
     def createUser():
         db.session.autoflush = True
