@@ -9,12 +9,13 @@ from app.auth.models import *
 from app.base.models import *
 from app.game.models import *
 from app.preferences.models import *
-
+import traceback
 # routine per le transazioni in db, riceve come parametro una funzione ##transaction che contiene le operazioni della transazione
 # in ##params sono contenuti i parametri da passare alla funzione (sono un dizionario)
 def doTransaction(transaction, **params):
     # controllo che transaction sia una funzione
     if not callable(transaction):
+        print "The transaction you passed is not callable"
         return False
     # inizio la transazione
     # permetto più subtransactions nella stessa transazione (quindi è possibile chiamare più volte doTransaction in transaction)
@@ -22,7 +23,9 @@ def doTransaction(transaction, **params):
     # TODO permettere l'autoflush, quindi si può accedere ad esempio al campo id di un nuovo record (non ho trovato come fare)
     try:
         output = transaction(**params)
-    except:
+    except Exception as e:
+        print "Error while executing transaction: %s", str(e)
+        print traceback.format_exc()
         # se avvengono errori torno indietro all'ultimo savepoint (o all'inizio se non ci sono)
         db.session.rollback()
         return False #se la funzione non ritorna niente non è andata a buon fine
