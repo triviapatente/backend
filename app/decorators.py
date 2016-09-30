@@ -87,3 +87,14 @@ def fetch_models(**keys):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+# per l'autenticazione via websockets
+def auth_required_ws(f):
+    @functools.wraps(f)
+    def check(*args, **kwargs):
+        if not current_user.is_authenticated:
+            disconnect()
+        else:
+            g.user = User.query.filter_by(User.id == current_user.get_id())
+            return f(*args, **kwargs)
+    return check

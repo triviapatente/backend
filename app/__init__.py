@@ -44,7 +44,7 @@ app.register_blueprint(account)
 app.register_blueprint(info)
 
 # Add websockets
-from app.game.web_sockets import *
+from app.message.web_sockets import *
 
 from app.exceptions import TPException
 #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
