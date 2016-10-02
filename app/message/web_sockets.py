@@ -7,7 +7,7 @@ import json
 # class-based namespace, the events have the "on_" prefix
 class Chat(Namespace):
     def on_message(self, message):
-        emit('message', "message1")
+        emit('message', "message2")
         # message = json.loads(message)
         # emit('message', "message2")
     # event triggered on connection
@@ -15,4 +15,5 @@ class Chat(Namespace):
         emit('connection response', "connected")
     def on_disconnect(self):
         print 'Client disconnected'
-#socketio.on_namespace(Chat('/chat'))
+
+socketio.on_namespace(Chat('/chat'))
