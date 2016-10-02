@@ -11,7 +11,11 @@ if len(sys.argv) < 2 or sys.argv[1] != "--f":
 
 
 from app import app, socketio
+
 debug = app.config["DEBUG"]
+port = app.config["PORT"]
 
 print 'Running the service..'
-socketio.run(app, host = '0.0.0.0', port = 8000, debug = debug)
+socketio.run(app, host = '0.0.0.0', port = port, debug = debug)
+
+call(["fuser", "-k", "%d/tcp" % port])

@@ -6,6 +6,9 @@ from datetime import datetime
 # Statement for enabling the development environment
 DEBUG = True
 
+#port used to serve this service
+PORT = 8000
+
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
