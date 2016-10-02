@@ -6,4 +6,3 @@ pip install passlib
 pip install flask-httpauth
 pip install flask-socketio
 pip install eventlet
-pip install gevent

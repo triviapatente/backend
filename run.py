@@ -8,8 +8,7 @@ if len(sys.argv) < 2 or sys.argv[1] != "--f":
     #esegui lo script di inizializzazione dell'app (che installa anche le dipendenze)
     call(["sudo", "sh", "scripts/dependencies.sh"])
 
-from gevent import monkey
-monkey.patch_all()
+
 
 from app import app, socketio
 debug = app.config["DEBUG"]
