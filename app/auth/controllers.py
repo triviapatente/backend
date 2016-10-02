@@ -57,19 +57,19 @@ def register():
     def createUser():
         user = User(username = username, email = email)
         db.session.add(user)
-        db.session.flush()
         #creo le preferenze dell'utente (default) e le associo all'utente
-        preferences = Preferences(user_id = user.id)
+        preferences = Preferences(user = user)
         db.session.add(preferences)
         #posso creare il portachiavi dell'utente e associarlo all'utente stesso
-        keychain = Keychain(user_id = user.id, lifes = app.config["INITIAL_LIFES"])
+        keychain = Keychain(user = user, lifes = app.config["INITIAL_LIFES"])
         keychain.hash_password(password)
         db.session.add(keychain)
-        return jsonify(user = user, token = keychain.auth_token)
+        return (user, keychain.auth_token)
 
     output = doTransaction(createUser)
     if output:
-        return output
+        user, token = output
+        return jsonify(user = user, token = token)
     raise TPException() # trovare exception appropriata
 
 #api(s) per le modifiche

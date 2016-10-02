@@ -20,8 +20,6 @@ def doTransaction(transaction, **params):
     # inizio la transazione
     # permetto più subtransactions nella stessa transazione (quindi è possibile chiamare più volte doTransaction in transaction)
     db.session.begin(subtransactions=True)
-    # TODO permettere l'autoflush, quindi si può accedere ad esempio al campo id di un nuovo record (non ho trovato come fare)
-    db.session.autoflush = True
     try:
         output = transaction(**params)
     except Exception as e:

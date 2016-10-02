@@ -27,14 +27,14 @@ def newGame():
         new_game.users.append(opponent)
         new_game.users.append(g.user)
         db.session.add(new_game)
-        db.session.flush()
         #TODO: gestire la logica per mandare le notifiche push a chi di dovere
         invite = Invite(sender = g.user, receiver = opponent, game = new_game)
         db.session.add(invite)
-        return jsonify(game = new_game)
+        return new_game
+        
     output = doTransaction(createGame)
     if output:
-        return output
+        return jsonify(game = output)
     else:
         raise ChangeFailed()
 
