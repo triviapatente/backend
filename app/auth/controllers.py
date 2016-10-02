@@ -55,7 +55,6 @@ def register():
         raise AlreadyRegisteredUser(u, username, email)
     #i controlli son passati, posso creare l'utente e salvarlo
     def createUser():
-        db.session.autoflush = True
         user = User(username = username, email = email)
         db.session.add(user)
         db.session.flush()

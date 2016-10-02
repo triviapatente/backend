@@ -22,15 +22,12 @@ def welcome():
 def newGame():
     #metodo transazionale
     def createGame():
-        db.session.autoflush = True
         new_game = Game()
         opponent = g.models["opponent"]
         new_game.users.append(opponent)
-        print opponent.id
         new_game.users.append(g.user)
-        print g.user.id
         db.session.add(new_game)
-        db.session.commit()
+        db.session.flush()
         #TODO: gestire la logica per mandare le notifiche push a chi di dovere
         invite = Invite(sender = g.user, receiver = opponent, game = new_game)
         db.session.add(invite)
@@ -57,6 +54,7 @@ def getPendingInvitesBadge():
     return jsonify(badge = badge)
 
 #considerare di dare questa info alla creazione del websocket
+#TODO: controllare che l'invito non sia già stato accettato
 @game.route("/invites/<int:game_id>", methods = ["POST"])
 @needs_post_values("accepted")
 @auth_required
