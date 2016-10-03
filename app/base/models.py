@@ -35,13 +35,15 @@ class Base(db.Model):
         output = {}
         #ottengo le colonne generiche
         columns = self.columns()
-        print "columns: %d" % len(columns)
         #per ognuna
         for column in columns:
             output[column] = getattr(self, column)
 
         return output
 
+    #metodo che ottiene il tipo di una proprietà a partire dalla stessa
+    def column(key):
+        return self.__table__.columns[key]
     @classmethod
     def columns(self):
         output = []
