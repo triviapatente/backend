@@ -6,7 +6,7 @@ from app import app, db
 # save ##message from ##user to room(##game)
 def saveMessage(user, game, message):
     try:
-        new_message = Message(user = user, game = room, content = message)
+        new_message = Message(user = user, game = game, content = message)
         db.session.add(new_message)
         db.session.commit()
     except:
