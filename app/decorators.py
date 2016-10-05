@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from flask import g, request
+from flask import g, request, session
 from functools import wraps
 from app import db
-from app.auth.utils import tokenFromRequest as getToken
+from app.auth.utils import authenticate
 from app.auth.models import Keychain
 from app.exceptions import MissingParameter, Forbidden
 #decorator che serve per markare una api call in modo che avvenga un controllo sul token mandato dall'utente prima della sua esecuzione.
@@ -11,16 +11,15 @@ from app.exceptions import MissingParameter, Forbidden
 def auth_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        #ottengo il token, con la chiamata trovata in app.auth.utils
-        token = getToken()
-        #provo a verificare il token e vedere se riesco a ottenere l'user
-        user = Keychain.verify_auth_token(token)
-        #se non lo ottengo vuol dire che il token non è verificato
-        if user is None:
-            #lancio un errore Forbidden
-            raise Forbidden()
-        #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente
-        g.user = user
+        authenticate()
+        #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
+        return f(*args, **kwargs)
+    return decorated_function
+
+def ws_auth_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        authenticate(socket = True)
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         return f(*args, **kwargs)
     return decorated_function
