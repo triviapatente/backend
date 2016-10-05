@@ -44,6 +44,8 @@ app.register_blueprint(account)
 app.register_blueprint(info)
 
 # Add websockets
+from app.auth.web_sockets import *
+from app.base.web_sockets import *
 from app.message.web_sockets import *
 
 from app.exceptions import TPException
@@ -54,7 +56,16 @@ def handleTPException(error):
     response.status_code = error.status_code
     print "API Error %d: %s" % (error.status_code, error.message)
     return response
-
+@socketio.on_error_default
+def handle_socket_error(error):
+    response = None
+    if issubclass(error.__class__, TPException):
+        response = json.dumps(error.to_dict())
+        print "Socket Error %d: %s" % (error.status_code, error.message)
+    else:
+        response = str(error)
+        print "Socket Error %s" % response
+    emit("error", response)
 # Creazione directory per upload users pictures
 import os
 
