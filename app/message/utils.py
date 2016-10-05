@@ -9,9 +9,9 @@ def saveMessage(user, game, message):
         new_message = Message(user = user, game = game, content = message)
         db.session.add(new_message)
         db.session.commit()
+        return new_message
     except:
         return False
-    return True
 
 # get next n messages from ##offset of a room
 def getMessages(game, offset):
