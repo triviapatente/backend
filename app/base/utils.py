@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask.json import JSONEncoder
+from flask import g
+
 #classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
 class TPJSONEncoder(JSONEncoder):
     def default(self, obj):
@@ -10,3 +12,8 @@ class TPJSONEncoder(JSONEncoder):
             return serialized
         #se no, gestisci con la classe padre (genererà un errore se la classe non è serializable)
         return super(TPJSONEncoder, self).default(obj)
+
+
+#metodo che a partire da un id di room e di un tipo di room, ne costruisce il nome
+def roomName(id, type):
+    return "%s_%s" % (type, id)

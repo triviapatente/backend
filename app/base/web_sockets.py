@@ -1,28 +1,34 @@
 # -*- coding: utf-8 -*-
-from flask import g
+from flask import g, request
 from app import socketio
-from app.decorators import ws_auth_required
-from flask_socketio import emit, join_room, leave_room
+from app.ws_decorators import ws_auth_required, filter_input_room
+from app.base.utils import roomName
+from flask_socketio import emit, join_room, leave_room, rooms
+from flask import g
 
+@socketio.on("join_room")
 @ws_auth_required
-@socketio.on("join")
+@filter_input_room
 #TODO: add decorator that checks for parameters
-#TODO: make auth decorator work
-#TODO: make decorators that checks if a user can join to a room
-def join_room(self, data):
-    id = data["id"]
-    join_room(id)
-    emit("join", {"success": True})
+def join_room_request(data):
+    join_room(g.roomName)
+    print "L'utente %s si e' unito alla stanza %s" % (g.user.username, g.roomName)
+    emit("join_room", {"success": True})
 
+@socketio.on("leave_room")
 @ws_auth_required
-@socketio.on("leave")
 #TODO: add decorator that checks for parameters
-#TODO: make auth decorator work
-#TODO: add logic that verifies if the user is already in the room
-def leave_room(self, data):
-    id = data["id"]
-    leave_room(id)
-    emit("leave", {"success": True})
+def leave_room_request(data):
+    #id della room (id del gioco, per esempio)
+    id = data.get("id")
+    #tipo di room (room di gioco, per esempio)
+    type = data.get("type")
+    #ottengo il nome della stanza
+    name = roomName(id, type)
+    if name in rooms():
+        leave_room(name)
+        print "L'utente %s ha lasciato alla stanza %s" % (g.user.username, name)
+    emit("leave_room", {"success": True})
 
 @socketio.on("connect")
 def connect():

@@ -4,22 +4,16 @@ from flask import g, request, session
 from functools import wraps
 from app import db
 from app.auth.utils import authenticate
-from app.auth.models import Keychain
-from app.exceptions import MissingParameter, Forbidden
+from app.auth.models import Keychain, User
+from app.game.models import Game
+from app.base.utils import roomName
+from app.exceptions import MissingParameter, ChangeFailed
 #decorator che serve per markare una api call in modo che avvenga un controllo sul token mandato dall'utente prima della sua esecuzione.
 #per metterlo in funzione basterà anteporre @auth_required alla stessa
 def auth_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         authenticate()
-        #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
-        return f(*args, **kwargs)
-    return decorated_function
-
-def ws_auth_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        authenticate(socket = True)
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         return f(*args, **kwargs)
     return decorated_function
@@ -67,7 +61,7 @@ def needs_files_values(*keys):
         return decorated_function
     return decorator
 
-# come quello sopra per controllare le coppie classi id per vedere che l'id sia valido
+#per controllare le coppie classi id per vedere che l'id sia valido
 def fetch_models(keys):
     def decorator(f):
         @wraps(f)
