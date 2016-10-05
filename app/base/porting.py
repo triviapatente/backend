@@ -21,7 +21,7 @@ from sqlalchemy import String, Integer, DateTime, Boolean, Enum
 def getDefaultValueForType(candidate):
     #devo usare due array paralleli perchè python non supporta le map con valori non hashabili come chiavi
     types = [String, Integer, DateTime, Boolean, Enum]
-    values = ["stringa", 22, datetime.today().isoformat(), True, "enum_value"]
+    values = ["string", 22, datetime.today().isoformat(), True, "enum_value"]
 
     for i, type in enumerate(types):
         if str(candidate) == str(type()):
