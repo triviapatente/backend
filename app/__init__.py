@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Import flask and template operators
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, json
 
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -24,7 +24,7 @@ app.config.from_object('config')
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
-socketio = SocketIO(app)
+socketio = SocketIO(app, json = json)
 
 from app.auth.controllers import auth, account, info
 from app.base.controllers import base
