@@ -14,7 +14,8 @@ class TPException(Exception):
         rv = dict()
         rv['message'] = self.message
         rv['parameters'] = self.parameters
-        rv = {k: v for k, v in rv.items() if v}
+        rv['success'] = False
+        rv = {k: v for k, v in rv.items() if v != None}
         return rv
 
 #eccezione chiamata quando un parametro richiesto è mancante
