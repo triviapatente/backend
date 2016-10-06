@@ -3,8 +3,9 @@
 from flask import request, g
 from functools import wraps
 from app import db
+from flask_socketio import rooms
 from app.game.models import partecipation
-from app.exceptions import ChangeFailed
+from app.exceptions import ChangeFailed, NotAllowed
 from app.auth.utils import authenticate
 from app.base.utils import roomName
 
@@ -30,6 +31,17 @@ def filter_input_room(f):
             raise ChangeFailed()
     return decorated_function
 
+#funzione che controlla che l'utente sia nella room giusta per effettuare la richiesta
+def check_in_room(type, key, *keys):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            room = roomName(g.params[key], type)
+            if room not in rooms():
+                raise NotAllowed()
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 def ws_auth_required(f):
     @wraps(f)

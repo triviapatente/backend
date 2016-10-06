@@ -69,8 +69,8 @@ class FormatNotAllowed(TPException):
         TPException.__init__(self)
         self.message = "Il file ha un' estensione non permessa dai nostri server"
 class NotAllowed(TPException):
-    status_code = 405 #Method not allowed
+    status_code = 403 #not allowed
 
     def __init__(self):
         TPException.__init__(self)
-        self.message = "Risorsa non disponibile"
+        self.message = "Non hai i permessi di accesso su questa risorsa"
