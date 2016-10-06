@@ -2,9 +2,11 @@
 
 from flask import request, g
 from functools import wraps
-from app.game.models import Game
-from app.auth.models import User
+from app import db
+from app.game.models import partecipation
 from app.exceptions import ChangeFailed
+from app.auth.utils import authenticate
+from app.base.utils import roomName
 
 #per controllare che l'utente possa accedere alla room alla quale vuole accedere
 def filter_input_room(f):
@@ -17,7 +19,8 @@ def filter_input_room(f):
         enabled = True
         #unico caso al momento, ma in caso di riutilizzo del sistema room ci saranno altri casi
         if type == "game":
-            enabled = Game.query.filter(Game.id == id, User.games.any(User.id == g.user.id)).count() > 0
+            query = db.session.query(partecipation).filter_by(user_id = g.user.id, game_id = id)
+            enabled = query.count() > 0
         else:
             enabled = False
         if enabled:
