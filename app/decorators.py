@@ -28,13 +28,11 @@ def needs_values(method, *keys):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            print "needs_values"
             missing = []
             #dove andare a prendere i parametri
             store = storeForMethod(method)
             #dove andare a mettere i parametri pescati
             outputKey = outputKeyForMethod(method)
-            print "Values: ", store, outputKey, isinstance(store, dict)
             #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente
             output = {}
             for key in keys:
@@ -42,15 +40,12 @@ def needs_values(method, *keys):
                 missing_on_array = isinstance(store, list) and key not in store
                 #lo store è una map? controllo se è presente (è il caso di request.form)
                 missing_on_dict = isinstance(store, dict) and store.get(key) == None
-                print "key: ", key, " missing: ", missing_on_dict
                 if missing_on_dict or missing_on_array:
                     missing.append(key)
                 else:
                     output[key] = store[key]
             #necessario perchè g non supporta cose del tipo g[a]
             setattr(g, outputKey, output)
-            print outputKey, output
-            print "Missing!", missing
             if missing:
                 raise MissingParameter(missing)
             return f(*args, **kwargs)
