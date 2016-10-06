@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from app import socketio
-from flask import session
+from flask import session, g
 from flask_socketio import emit
 from models import Keychain
+from app.decorators import needs_values
 
 @socketio.on("auth")
-#TODO: add decorator that checks for parameters
+@needs_values("SOCKET", "token")
 def authenticate(data):
-    token = data["token"]
+    token = g.params["token"]
     user = Keychain.verify_auth_token(token)
     if user:
         #assegno il token alla sessione

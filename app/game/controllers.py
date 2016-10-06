@@ -4,7 +4,7 @@ from app import app, db
 from app.auth.models import User
 from app.game.models import *
 from app.utils import doTransaction
-from app.decorators import auth_required, fetch_models, needs_post_values
+from app.decorators import auth_required, fetch_models, needs_values
 from app.exceptions import ChangeFailed, Forbidden
 
 game = Blueprint("game", __name__, url_prefix = "/game")
@@ -17,7 +17,7 @@ def welcome():
 #creazione della partita
 @game.route("/new_game", methods = ["POST"])
 @auth_required
-# @needs_post_values("number_of_players")
+# @need_values("POST", "number_of_players")
 @fetch_models({"opponent": User})
 def newGame():
     #metodo transazionale
@@ -31,7 +31,7 @@ def newGame():
         invite = Invite(sender = g.user, receiver = opponent, game = new_game)
         db.session.add(invite)
         return new_game
-        
+
     output = doTransaction(createGame)
     if output:
         return jsonify(game = output)
@@ -56,7 +56,7 @@ def getPendingInvitesBadge():
 #considerare di dare questa info alla creazione del websocket
 #TODO: controllare che l'invito non sia già stato accettato
 @game.route("/invites/<int:game_id>", methods = ["POST"])
-@needs_post_values("accepted")
+@needs_values("POST", "accepted")
 @auth_required
 def processInvite(game_id):
     invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id).first()

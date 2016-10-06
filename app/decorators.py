@@ -3,6 +3,7 @@
 from flask import g, request, session
 from functools import wraps
 from app import db
+from app.utils import storeForMethod, outputKeyForMethod
 from app.auth.utils import authenticate
 from app.auth.models import Keychain, User
 from app.game.models import Game
@@ -20,41 +21,36 @@ def auth_required(f):
 
 #decorator che serve per controllare prima di un api call se esistono i parametri passati come argomento
 #*keys è scritto cosi semplicemente perchè è il modo di python di gestire i varargs.
-#ovvero io adesso posso chiamare needs_post_values con un numero infinito di parametri, ed essi saranno inglobati all'interno dell'array keys
-#esempio needs_post_values("1", "2", "3") fa in modo che keys sia uguale a ["1", "2", "3"]
-def needs_post_values(*keys):
-    #serve una funzione intermedia perchè qui abbiamo bisogno di parametri, che vengono passati alla funzione definita nella linea sopra
+#ovvero io adesso posso chiamare needs_values con un numero infinito di parametri, ed essi saranno inglobati all'interno dell'array keys
+#esempio needs_values(request.form, "form", "1", "2", "3") fa in modo che keys sia uguale a ["1", "2", "3"]
+#method rappresenta il tipo di richiesta: può essere GET, FILE, POST, SOCKET
+def needs_values(method, *keys):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            print "needs_values"
             missing = []
+            #dove andare a prendere i parametri
+            store = storeForMethod(method)
+            #dove andare a mettere i parametri pescati
+            outputKey = outputKeyForMethod(method)
+            print "Values: ", store, outputKey, isinstance(store, dict)
             #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente
-            g.post = {}
+            output = {}
             for key in keys:
-                value = request.form.get(key)
-                if value is None:
+                #lo store è un array? controllo se il valore è presente (è il caso di request.files)
+                missing_on_array = isinstance(store, list) and key not in store
+                #lo store è una map? controllo se è presente (è il caso di request.form)
+                missing_on_dict = isinstance(store, dict) and store.get(key) == None
+                print "key: ", key, " missing: ", missing_on_dict
+                if missing_on_dict or missing_on_array:
                     missing.append(key)
                 else:
-                    g.post[key] = value
-            if missing:
-                raise MissingParameter(missing)
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
-# come quello sopra, ma per controllare la presenza di file
-def needs_files_values(*keys):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            missing = []
-            #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente
-            g.files = {}
-            for key in keys:
-                if key not in request.files:
-                    missing.append(key)
-                else:
-                    g.files[key] = request.files[key]
+                    output[key] = store[key]
+            #necessario perchè g non supporta cose del tipo g[a]
+            setattr(g, outputKey, output)
+            print outputKey, output
+            print "Missing!", missing
             if missing:
                 raise MissingParameter(missing)
             return f(*args, **kwargs)

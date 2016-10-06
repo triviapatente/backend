@@ -4,7 +4,7 @@ from app import app, db
 from app.auth.queries import *
 from app.auth.models import *
 from app.exceptions import *
-from app.decorators import auth_required, needs_post_values, needs_files_values
+from app.decorators import auth_required, needs_values, needs_values
 from app.preferences.models import *
 from app.utils import *
 import os
@@ -16,7 +16,7 @@ info = Blueprint("info", __name__, url_prefix = "/info")
 #api che effettua il login dell'utente
 @auth.route("/login", methods = ["POST"])
 #utilizzando il decorator che ho creato, posso fare il controllo dell'input in una riga
-@needs_post_values("user", "password")
+@needs_values("POST", "user", "password")
 def login():
     #ottengo i valori in input
     password = g.post.get("password")
@@ -42,7 +42,7 @@ def login():
 #api che effettua la registrazione dell'utente
 @auth.route("/register", methods = ["POST"])
 #utilizzando il decorator che ho creato, posso fare il controllo dell'input in una riga
-@needs_post_values("email", "username", "password")
+@needs_values("POST", "email", "username", "password")
 def register():
     #ottengo i valori in input
     username = g.post.get("username")
@@ -77,7 +77,7 @@ def register():
 #api per il cambio del nome (##name)
 @account.route("/name/edit", methods = ["POST"])
 @auth_required
-@needs_post_values("name")
+@needs_values("POST", "name")
 def changeName():
     g.user.name = g.post.get("name")
     db.session.add(g.user)
@@ -87,7 +87,7 @@ def changeName():
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
 @auth_required
-@needs_post_values("surname")
+@needs_values("POST", "surname")
 def changeSurname():
     g.user.surname = g.post.get("surname")
     db.session.add(g.user)
@@ -97,7 +97,7 @@ def changeSurname():
 #api per il cambio dell'immagine (##image)
 @account.route("/image/edit", methods = ["POST"])
 @auth_required
-@needs_files_values("image")
+@needs_values("FILE", "image")
 def changeImage():
     image = g.files["image"]
     #prendo il nuovo filename

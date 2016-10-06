@@ -3,13 +3,15 @@ from flask import g, request
 from app import socketio
 from app.ws_decorators import ws_auth_required, filter_input_room
 from app.base.utils import roomName
+from app.decorators import needs_values
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 
 @socketio.on("join_room")
 @ws_auth_required
+@needs_values("SOCKET", "id", "type")
 @filter_input_room
-#TODO: add decorator that checks for parameters
+
 def join_room_request(data):
     join_room(g.roomName)
     print "L'utente %s si e' unito alla stanza %s" % (g.user.username, g.roomName)
@@ -17,7 +19,8 @@ def join_room_request(data):
 
 @socketio.on("leave_room")
 @ws_auth_required
-#TODO: add decorator that checks for parameters
+@needs_values("SOCKET", "id", "type")
+
 def leave_room_request(data):
     #id della room (id del gioco, per esempio)
     id = data.get("id")

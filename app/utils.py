@@ -4,7 +4,7 @@
 
 from app.exceptions import *
 from app import db
-from flask import g
+from flask import g, request
 from app.auth.models import *
 from app.base.models import *
 from app.game.models import *
@@ -38,3 +38,23 @@ def doTransaction(transaction, **params):
 # routine per chiamare un savepoint nella transazione
 def createSavePoint():
     db.session.begin_nested() # in caso di rollback mantiene i dati in stage (db.session.add(.))
+
+#metodo che a partire da un tipo di richiesta ritorna il tipo di store da cui andare a prenderne i parametri
+def storeForMethod(method):
+    if method == "POST":
+        return request.form
+    elif method == "FILE":
+        return request.files
+    elif method == "SOCKET":
+        return request.event["args"][0]
+    return None
+
+#metodo che a partire da un tipo di richiesta ritorna il nome della chiave in cui andare a mettere i parametri una volta presi dal decorator, dentro g
+def outputKeyForMethod(method):
+    if method == "POST":
+        return "post"
+    elif method == "FILE":
+        return "files"
+    elif method == "SOCKET":
+        return "params"
+    return None
