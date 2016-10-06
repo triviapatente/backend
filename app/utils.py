@@ -60,5 +60,5 @@ def outputKeyForMethod(method):
     elif method == "SOCKET":
         return "params"
     elif method == "GET":
-        return "get"
+        return "query"
     return None
