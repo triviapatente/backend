@@ -47,6 +47,8 @@ def storeForMethod(method):
         return request.files
     elif method == "SOCKET":
         return request.event["args"][0]
+    elif method == "GET":
+        return request.args
     return None
 
 #metodo che a partire da un tipo di richiesta ritorna il nome della chiave in cui andare a mettere i parametri una volta presi dal decorator, dentro g
@@ -57,4 +59,6 @@ def outputKeyForMethod(method):
         return "files"
     elif method == "SOCKET":
         return "params"
+    elif method == "GET":
+        return "get"
     return None
