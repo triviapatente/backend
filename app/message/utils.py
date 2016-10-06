@@ -13,6 +13,10 @@ def saveMessage(user, game, message):
     except:
         return False
 
-# get next n messages from ##offset of a room
-def getMessages(game, offset):
-    return jsonify(Message.query.order_by(Message.updatedAt).slice(offset, app.config["MESSAGE_PER_SCROLL"]).all())
+# get next n messages after ##datetime of a room (##game_id)
+def getMessages(game_id, datetime):
+    # filter by updatedAt and ##game_id
+    query = Message.query.filter(Message.game_id == game_id, Message.updatedAt < datetime)
+    # get message ordered by updatedAt field
+    query = query.order_by(Message.updatedAt).limit(app.config["MESSAGE_PER_SCROLL"])
+    return query.all()
