@@ -2,7 +2,7 @@
 
 from app import socketio
 from flask import session, g
-from flask_socketio import emit
+from flask_socketio import emit, disconnect
 from models import Keychain
 from app.decorators import needs_values
 
@@ -21,4 +21,5 @@ def authenticate(data):
 def logout(data = None):
     # rimuovo il token se presente
     session.pop("token", None)
-    emit("disconnect", {"success": session.get("token") == None})
+    emit("logout", {"success": session.get("token") == None})
+    disconnect() # chiude il socket, bisogna refreshare su socketio tester 
