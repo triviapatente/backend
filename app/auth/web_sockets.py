@@ -16,3 +16,9 @@ def authenticate(data):
         session["token"] = token
         print "User %s just connected to socketio server." % user.username
     emit("auth", {"success": user != None})
+
+@socketio.on("logout")
+def logout(data = None):
+    # rimuovo il token se presente
+    session.pop("token", None)
+    emit("disconnect", {"success": session.get("token") == None})

@@ -11,7 +11,6 @@ from flask import g
 @ws_auth_required
 @needs_values("SOCKET", "id", "type")
 @filter_input_room
-
 def join_room_request(data):
     join_room(g.roomName)
     print "L'utente %s si e' unito alla stanza %s" % (g.user.username, g.roomName)
@@ -20,7 +19,6 @@ def join_room_request(data):
 @socketio.on("leave_room")
 @ws_auth_required
 @needs_values("SOCKET", "id", "type")
-
 def leave_room_request(data):
     #id della room (id del gioco, per esempio)
     id = data.get("id")
