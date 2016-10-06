@@ -13,8 +13,8 @@ def welcome():
     return jsonify(output)
 
 
-@message.route("/scroll", methods = ["GET"])
+@message.route("/list/<int:game_id>/", methods = ["GET"])
 @auth_required
-@needs_values("GET", "game_id", "datetime")
-def scroll():
-    return jsonify(messages = getMessages(g.get.get("game_id"), g.get.get("datetime")))
+@needs_values("GET", "datetime")
+def list(game_id):
+    return jsonify(messages = getMessages(game_id, g.query.get("datetime")))
