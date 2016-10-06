@@ -12,7 +12,6 @@ from app.ws_decorators import ws_auth_required, check_in_room
 @ws_auth_required
 @needs_values("SOCKET", "game_id", "content")
 @check_in_room("game", "game_id")
-#TODO: add decorator that checks that the user is the correct room
 def on_message(data):
     game = Game.query.filter_by(id = g.params["game_id"]).first()
     message = saveMessage(user = g.user, game = game, message = data["content"])
