@@ -50,6 +50,8 @@ app.register_blueprint(shop)
 from app.auth.web_sockets import *
 from app.base.web_sockets import *
 from app.message.web_sockets import *
+from app.game.web_sockets import *
+
 
 from app.exceptions import TPException
 #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
@@ -80,5 +82,24 @@ if not os.path.exists(app.config["UPLOAD_FOLDER"]):
 # Attenzione! Questa chiamata è distruttiva, distrugge infatti ogni contenuto del db. Usarla con cautela.
 if app.config["DEBUG"] and app.config["INIT_DB"]:
     db.drop_all()
+
+
+#The following lines represents migration stuff
+#TODO: use flask-migrate
+from sqlalchemy.schema import CreateTable, DropTable
+from app.game.models import Round, Question
+
+from sqlalchemy.ext.compiler import compiles
+#this line make droptable to be in cascade mode for postgresql
+@compiles(DropTable, "postgresql")
+def _compile_drop_table(element, compiler, **kwargs):
+    return compiler.visit_drop_table(element) + " CASCADE"
+
+db.engine.execute(DropTable(Round.__table__))
+db.engine.execute(CreateTable(Round.__table__))
+db.engine.execute(DropTable(Question.__table__))
+db.engine.execute(CreateTable(Question.__table__))
+#end migration
+
 # This will create the database file using SQLAlchemy
 db.create_all()

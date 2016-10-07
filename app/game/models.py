@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Table, Boolean, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 
 from app.base.models import Base, CommonPK
-
+from app import db
 
 partecipation = Table('partecipation', Base.metadata,
     Column('user_id', Integer, ForeignKey('user.id'), primary_key = True),
@@ -17,20 +17,25 @@ class Game(Base, CommonPK):
   #utente vincitore
   winner_id = Column(Integer, ForeignKey("user.id"))
   winner = relationship("User", back_populates = "games_won")
-
-#un round adesso rappresenta il round di un utente, e contiene tutte le info di quel round, come utente che sta giocando, categoria che ha scelto, game di appartenenza, domande proposte
-class Round(Base):
+  ended = Column(Boolean, default = False)
+#rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte
+class Round(Base, CommonPK):
   #numero del round, TODO: trovare il modo di farlo diventare autoincrement rispetto a diversi parametri
   number = Column(Integer, nullable = False)
   #match di riferimento
-  game_id = Column(Integer, ForeignKey("game.id"), nullable = False, primary_key = True, unique = True)
+  game_id = Column(Integer, ForeignKey("game.id"), nullable = False)
   game = relationship("Game")
-  #utente che 'possiede' questo round
-  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True, unique = True)
-  user = relationship("User")
+  #rappresenta il dealer del round, ovvero chi sceglie le categorie!
+  dealer_id = Column(Integer, ForeignKey("user.id"), nullable = False)
+  dealer = relationship("User")
   #categoria scelta per il round
-  cat_id = Column(Integer, ForeignKey("category.id"), nullable = False)
+  cat_id = Column(Integer, ForeignKey("category.id"))
   chosen_category = relationship("Category")
+
+  UniqueConstraint('game_id', 'number')
+  #metodo che genera il dealer del round (colui che può scegliere la categoria)
+  def generate_dealer(self):
+      print db.session.query(db.User).filter(Game.id == self.game_id)
 
 class Quiz(Base, CommonPK):
   #la domanda del quiz, in lettere
@@ -51,9 +56,9 @@ class Question(Base):
   quiz = relationship("Quiz")
   #risposta data dall'utente
   answer = Column(Boolean, nullable = False)
-  #round di riferimento, espresso attraverso le sue due chiavi primarie, game_id, e user_id
-  game_id = Column(Integer, ForeignKey("round.game_id"), nullable = False, primary_key = True)
-  user_id = Column(Integer, ForeignKey("round.user_id"), nullable = False, primary_key = True)
+
+  round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
+  user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
 
 class Invite(Base):
     #il game a cui sei stato invitato
