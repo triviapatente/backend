@@ -87,7 +87,7 @@ if app.config["DEBUG"] and app.config["INIT_DB"]:
 #The following lines represents migration stuff
 #TODO: use flask-migrate
 from sqlalchemy.schema import CreateTable, DropTable
-from app.game.models import Round, Question
+from app.game.models import Round, Question, Game
 
 from sqlalchemy.ext.compiler import compiles
 #this line make droptable to be in cascade mode for postgresql
@@ -97,6 +97,8 @@ def _compile_drop_table(element, compiler, **kwargs):
 
 db.engine.execute(DropTable(Round.__table__))
 db.engine.execute(CreateTable(Round.__table__))
+db.engine.execute(DropTable(Game.__table__))
+db.engine.execute(CreateTable(Game.__table__))
 db.engine.execute(DropTable(Question.__table__))
 db.engine.execute(CreateTable(Question.__table__))
 #end migration

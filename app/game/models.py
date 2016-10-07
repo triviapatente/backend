@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Table, Boolean, UniqueConstraint
-from sqlalchemy.orm import relationship, joinedload
+from sqlalchemy.orm import relationship
 
 from app.base.models import Base, CommonPK
-from app import db
 
 partecipation = Table('partecipation', Base.metadata,
     Column('user_id', Integer, ForeignKey('user.id'), primary_key = True),
@@ -16,7 +15,10 @@ class Game(Base, CommonPK):
   users = relationship("User", secondary = partecipation, back_populates = "games")
   #utente vincitore
   winner_id = Column(Integer, ForeignKey("user.id"))
-  winner = relationship("User", back_populates = "games_won")
+  winner = relationship("User", foreign_keys = [winner_id])
+  #the id of the player that invited other players to this game at the beginning
+  creator_id = Column(Integer, ForeignKey("user.id"))
+  creator = relationship("User", foreign_keys = [creator_id])
   ended = Column(Boolean, default = False)
 #rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte
 class Round(Base, CommonPK):
@@ -33,9 +35,6 @@ class Round(Base, CommonPK):
   chosen_category = relationship("Category")
 
   UniqueConstraint('game_id', 'number')
-  #metodo che genera il dealer del round (colui che può scegliere la categoria)
-  def generate_dealer(self):
-      print db.session.query(db.User).filter(Game.id == self.game_id)
 
 class Quiz(Base, CommonPK):
   #la domanda del quiz, in lettere

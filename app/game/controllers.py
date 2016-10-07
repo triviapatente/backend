@@ -22,7 +22,7 @@ def welcome():
 def newGame():
     #metodo transazionale
     def createGame():
-        new_game = Game()
+        new_game = Game(creator = g.user)
         opponent = g.models["opponent"]
         new_game.users.append(opponent)
         new_game.users.append(g.user)

@@ -25,8 +25,7 @@ class User(Base, CommonPK):
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])
   #partite giocate dal giocatore
   games = relationship("Game", secondary = partecipation, back_populates = "users")
-  #partite vinte dal giocatore
-  games_won = relationship("Game", back_populates = "winner")
+  
 
   #metodo che permette di modificare il nome dell'immagine adattandolo al nome utente in modo sicuro
   def getFileName(self, filename):
