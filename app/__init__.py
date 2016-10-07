@@ -32,6 +32,7 @@ from app.game.controllers import game
 from app.message.controllers import message
 from app.push.controllers import push
 from app.preferences.controllers import preferences
+from app.purchases.controllers import shop
 
 # Register blueprint(s)
 app.register_blueprint(auth)
@@ -42,6 +43,8 @@ app.register_blueprint(push)
 app.register_blueprint(preferences)
 app.register_blueprint(account)
 app.register_blueprint(info)
+app.register_blueprint(shop)
+
 
 # Add websockets
 from app.auth.web_sockets import *
