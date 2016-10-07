@@ -32,7 +32,7 @@ def filter_input_room(f):
     return decorated_function
 
 #funzione che controlla che l'utente sia nella room giusta per effettuare la richiesta
-def check_in_room(type, key, *keys):
+def check_in_room(type, key):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
