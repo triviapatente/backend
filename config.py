@@ -51,6 +51,10 @@ INITIAL_LIFES = 3
 UPLOAD_FOLDER = "users/images/"
 #estensioni ammesse
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+#numero di categorie proposte per il gioco
+NUMBER_OF_CATEGORIES_PROPOSED = 5
+#numero di domande per gioco
+NUMBER_OF_QUESTIONS_PER_ROUND = 4
 #percorso dove vengono salvate le immagini dei quiz
 QUIZ_IMAGE_FOLDER = "images/"
 #numero di risultati mostrati nella classifica italiana
