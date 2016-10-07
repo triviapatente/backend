@@ -58,5 +58,9 @@ RESULTS_LIMIT_RANK_ITALY = 10
 #fattore moltiplicativo massimo e minimo
 MAX_MULTIPLIER_FACTOR = 100
 MIN_MULTIPLIER_FACTOR = 32
+#incremento di range ogni tentativo
+RANGE_INCREMENT = 200
+#range iniziale
+INITIAL_RANGE = 400
 #numero di messaggi nuovi mostrati ad ogni scroll
 MESSAGE_PER_SCROLL = 50

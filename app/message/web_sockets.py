@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from app import socketio
-from flask import request, json, g
-from flask_socketio import emit, Namespace, join_room, leave_room
+from flask import request, g
+from flask_socketio import emit
 from app.message.utils import *
 from app.game.models import Game
 from app.decorators import needs_values
