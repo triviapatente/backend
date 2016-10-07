@@ -39,6 +39,7 @@ def check_in_room(type, key, *keys):
             room = roomName(g.params[key], type)
             if room not in rooms():
                 raise NotAllowed()
+            g.roomName = room
             return f(*args, **kwargs)
         return decorated_function
     return decorator
