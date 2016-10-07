@@ -62,3 +62,11 @@ def outputKeyForMethod(method):
     elif method == "GET":
         return "query"
     return None
+
+def getAllRequestParams():
+    stores = []
+    if hasattr(request, "event") and request.event.get("args"): stores.append(request.event.args[0])
+    if hasattr(request, "form"): stores.append(request.form)
+    if hasattr(request, "query"): stores.append(request.query)
+    return {k: v for d in stores for k, v in d.items()}
+    

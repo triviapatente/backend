@@ -3,7 +3,7 @@
 from flask import g, request, session
 from functools import wraps
 from app import db
-from app.utils import storeForMethod, outputKeyForMethod
+from app.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from app.auth.utils import authenticate
 from app.auth.models import Keychain, User
 from app.game.models import Game
@@ -59,9 +59,11 @@ def fetch_models(keys):
         def decorated_function(*args, **kwargs):
             missing = {}
             g.models = {}
+            input = getAllRequestParams()
             for key, model in keys.items():
-                id = request.form.get(key)
-                obj = db.session.query(model).filter_by(id = id).first()
+                id = input.get(key)
+                obj = None
+                if id: obj = db.session.query(model).filter_by(id = id).first()
                 if obj:
                     g.models[key] = obj
                 else:
