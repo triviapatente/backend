@@ -3,6 +3,8 @@
 from app import app, db
 from app.game.models import Game, Round
 from app.auth.models import User
+from sqlalchemy import or_, and_
+from random import randint
 
 # utils per il calcolo del punteggio
 
@@ -33,7 +35,6 @@ def expectedScore(rating_A, rating_B, range):
   expected_B = 1 / ( 1 + 10**((rating_a - rating_b) / range))
   return expected_A, expected_B
 
-
 #metodo che genera il dealer del round (colui che può scegliere la categoria)
 ##game_id: id del gioco di appartenenza, ##number: numero del round
 def get_dealer(game, number):
@@ -54,3 +55,41 @@ def get_dealer(game, number):
         previous_dealer_position = [k for (k, v) in enumerate(users) if v.id == round.dealer_id][0]
         #ritorno l'utente immediatamente successivo
         return users[(previous_dealer_position + 1) % n_users]
+
+# funzione che cerca un accoppiamento all'interno del ##range per l'utente ##userA
+# ##prevRange serve a evitare di considerare i range già considerati
+def searchInRange(prevRange, scoreRange, userA):
+    # ottengo gli utenti compresi nel range ([userA.score-range;userA.score-prevRange] U [userA.score+prevRange;userA.score+range])
+    users = User.query.filter(or_(and_(User.score < (userA.score + scoreRange), User.score > (userA.score + prevRange)), and_(User.score > userA.score - scoreRange, User.score < userA.score - prevRange)))
+    allUsersInRange = users.all()
+    candidates = None
+    # vedo se ci sono users nel range
+    if allUsersInRange:
+        # ci sono, favorisco i giocatori con un numero di partite superiore alla media
+        scoreSum = 0
+        users_games = {}
+        for user in allUsersInRange:
+            nGames = getNumberOfGames(user)
+            users_games[user] = nGames
+            scoreSum = scoreSum + nGames
+        scoreAverage = scoreSum / len(allUsersInRange)
+        userOverAverage = []
+        for user in allUsersInRange:
+            if users_games[user] > scoreAverage:
+                userOverAverage.append(user)
+        if userOverAverage:
+            candidates = userOverAverage
+    if candidates:
+        index = randint(0,len(candidates)-1)
+        return candidates[index]
+    else:
+        return None
+
+# funzione che ritorna il numero di partite di un giocatore (##user)
+def getNumberOfGames(user):
+    # prendo le partite dell'utente
+    games = Game.query.filter(Game.users.any(User.id == user.id))
+    # le filtro per quelle attive (non hanno un winner)
+    activeGames = games.filter(Game.ended == False)
+    # ritorno il numero delle partite
+    return activeGames.count()

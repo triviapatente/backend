@@ -6,6 +6,7 @@ from app.game.models import *
 from app.utils import doTransaction
 from app.decorators import auth_required, fetch_models, needs_values
 from app.exceptions import ChangeFailed, Forbidden
+from app.game.utils import searchInRange, getNumberOfGames
 
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -67,3 +68,18 @@ def processInvite(game_id):
     db.session.add(invite)
     db.session.commit()
     return jsonify(success = True)
+
+# ricerca aleatoria di un avversario
+@game.route("/new_game/random", methods = ["POST"])
+@auth_required
+def randomSearch():
+    # definisco il numero di cicli massimo di ricerca
+    maxRangeToCover = (User.query.order_by(User.score.desc()).first().score - g.user.score)
+    rangeIncrement = app.config["RANGE_INCREMENT"]
+    prevRange = 0
+    for scoreRange in range(app.config["INITIAL_RANGE"], maxRangeToCover + rangeIncrement, rangeIncrement):
+        user = searchInRange(prevRange, scoreRange, g.user)
+        if user:
+            return jsonify(user = user)
+        prevRange = scoreRange
+    return None

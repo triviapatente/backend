@@ -50,7 +50,6 @@ app.register_blueprint(shop)
 from app.auth.web_sockets import *
 from app.base.web_sockets import *
 from app.message.web_sockets import *
-from app.game.web_sockets import *
 
 
 from app.exceptions import TPException
