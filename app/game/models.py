@@ -54,7 +54,7 @@ class Question(Base):
   quiz_id = Column(Integer, ForeignKey("quiz.id"), nullable = False, primary_key = True)
   quiz = relationship("Quiz")
   #risposta data dall'utente
-  answer = Column(Boolean, nullable = False)
+  answer = Column(Boolean)
 
   round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
   user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
