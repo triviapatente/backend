@@ -19,7 +19,9 @@ class Game(Base, CommonPK):
   #the id of the player that invited other players to this game at the beginning
   creator_id = Column(Integer, ForeignKey("user.id"))
   creator = relationship("User", foreign_keys = [creator_id])
+  #il gioco è finito?
   ended = Column(Boolean, default = False)
+
 #rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte
 class Round(Base, CommonPK):
   #numero del round, TODO: trovare il modo di farlo diventare autoincrement rispetto a diversi parametri
