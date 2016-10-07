@@ -89,14 +89,14 @@ def get_random_categories():
     if round.dealer_id != g.user.id:
         raise NotAllowed()
     #ottengo le categorie proposte precedentemente per lo stesso turno, se ci sono
-    proposed = Category.query.with_entities(Category).join(ProposedCategory).filter(ProposedCategory.game_id == game.id).filter(ProposedCategory.round_id == round.id).all()
+    proposed = Category.query.with_entities(Category).join(ProposedCategory).filter(ProposedCategory.round_id == round.id).all()
     #se non ci sono
     if len(proposed) == 0:
         #le genero random
         proposed = Category.query.order_by(func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"])
         #e le aggiungo come proposed in db
         for candidate in proposed:
-            c = ProposedCategory(game_id = game.id, round_id = round.id, category_id = candidate.id)
+            c = ProposedCategory(round_id = round.id, category_id = candidate.id)
             db.session.add(c)
         db.session.commit()
     #dopodichè, rispondo

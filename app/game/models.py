@@ -83,6 +83,7 @@ class Category(Base, CommonPK):
   name = Column(String(250), nullable = False)
 #categoria proposta al giocatore, che deve sceglierla
 class ProposedCategory(Base):
+  #categoria proposta
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False, primary_key = True)
-  game_id = Column(Integer, ForeignKey("game.id"), nullable = False, primary_key = True)
+  #turno in cui è stata proposta
   round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
