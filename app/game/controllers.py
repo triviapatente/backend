@@ -6,9 +6,15 @@ from app.game.models import *
 from app.utils import doTransaction
 from app.decorators import auth_required, fetch_models, needs_values
 from app.exceptions import ChangeFailed, Forbidden
-from app.game.utils import searchInRange, getNumberOfGames
+from app.game.utils import updateScore
 
 game = Blueprint("game", __name__, url_prefix = "/game")
+
+@game.route("/test", methods = ["POST"])
+@needs_values("POST", "game_id", "scoreRange")
+def test():
+    game = Game.query.filter_by(id = g.post.get("game_id")).first()
+    return jsonify(updatedScores = updateScore(game, int(g.post.get("scoreRange"))))
 
 @game.route("/", methods = ["GET"])
 def welcome():
