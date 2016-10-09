@@ -62,7 +62,7 @@ def searchInRange(prevRange, scoreRange, userA):
     # ottengo gli utenti compresi nel range ([userA.score-range;userA.score-prevRange] U [userA.score+prevRange;userA.score+range])
     users = User.query.filter(or_(and_(User.score < (userA.score + scoreRange), User.score > (userA.score + prevRange)), and_(User.score > userA.score - scoreRange, User.score < userA.score - prevRange)))
     allUsersInRange = users.all()
-    candidates = None
+    candidates = allUsersInRange
     # vedo se ci sono users nel range
     if allUsersInRange:
         # ci sono, favorisco i giocatori con un numero di partite superiore alla media
