@@ -112,6 +112,10 @@ def getUsersFromGame(game):
     # return User.query.with_entities(User).join(Game).filter(Game.id == game.id).all()
     return User.query.filter(User.games.any(id = game.id)).all()
 
+# funzione che ritorna l'utente vincitore di una partita (##game)
+def getWinner(game):
+    return User.query.filter_by(id = game.winner_id).first()
+
 # funzione che ritorna un array associativo user in ##users --> expectedScore, partita avvenuta in ##scoreRange
 def getExpectedScoresForUsers(users, scoreRange):
     # calcolo i punteggi aspettati per ogni giocatore
