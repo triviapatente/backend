@@ -66,23 +66,31 @@ def searchInRange(prevRange, scoreRange, userA):
     # vedo se ci sono users nel range
     if allUsersInRange:
         # ci sono, favorisco i giocatori con un numero di partite superiore alla media
+        # calcolo il numero di partite per giocatore e la somma totale
         scoreSum = 0
         users_games = {}
         for user in allUsersInRange:
             nGames = getNumberOfGames(user)
             users_games[user] = nGames
             scoreSum = scoreSum + nGames
+        # calcolo la media
         scoreAverage = scoreSum / len(allUsersInRange)
+        # trovo gli utenti sopra la media
         userOverAverage = []
         for user in allUsersInRange:
             if users_games[user] > scoreAverage:
                 userOverAverage.append(user)
+        # se ci sono
         if userOverAverage:
+            # allora considero loro
             candidates = userOverAverage
+    # vedo se ci sono candidati (o in range o se possibile sopra la media di partite nel range)
     if candidates:
+        # se ci sono ne scelgo uno a caso
         index = randint(0,len(candidates)-1)
         return candidates[index]
     else:
+        # comunico che non è stato trovato un abbinamento nel range
         return None
 
 # funzione che ritorna il numero di partite di un giocatore (##user)
