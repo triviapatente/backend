@@ -111,23 +111,25 @@ def getNumberOfGames(user_A, user_B):
 def updateScore(game, scoreRange):
     # prendo gli utenti di una partita
     users = getUsersFromGame(game)
-    # prendo i risultati previsti
-    expectedScores = getExpectedScoresForUsers(users, scoreRange)
-    # prendo i k_factors
-    k_factors = getMultiplierFactorsForUsers(users)
     # prendo il vincitore
     winner = getWinner(game)
-    # prendo i risultati effettivi
-    effectiveResults = getEffectiveResults(users, winner)
+    # creo un dictionary che contenga i parametri per l'update del punteggio
+    updateParams = {}
+    for user in users:
+        params = {}
+        params["effectiveResult"] = getEffectiveResult(user, winner)
+        params["expectedScore"] = getExpectedScoreForUser(user, users, scoreRange)
+        params["k_factor"] = getMultiplierFactorForUser(user, users)
+        updateParams[user] = params
     # calcolo i nuovi punteggi
-    # params = {"users": users, "effectiveResults": effectiveResults, "expectedScores": expectedScores, "k_factors": k_factors}
+    # params = {"users": users, "updateParams": {"effectiveResult": effectiveResult, "expectedScore": expectedScore, "k_factor": k_factor}}
     def newScores(**params):
         for user in params["users"]:
             # assegno ad ogni utente il suo nuovo punteggio
-            user.score = new_score(params["effectiveResults"][user], params["expectedScores"][user], params["k_factors"][user], user.score)
+            user.score = new_score(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"], user.score)
             db.session.add(user)
         return users
-    return doTransaction(newScores, **{"users": users, "effectiveResults": effectiveResults, "expectedScores": expectedScores, "k_factors": k_factors})
+    return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
 
 # funzione che ritorna gli utenti di una partita (##game)
 def getUsersFromGame(game):
@@ -138,39 +140,29 @@ def getUsersFromGame(game):
 def getWinner(game):
     return User.query.filter_by(id = game.winner_id).first()
 
-# funzione che ritorna un array associativo user in ##users --> expectedScore, partita avvenuta in ##scoreRange
-def getExpectedScoresForUsers(users, scoreRange):
-    # calcolo i punteggi aspettati per ogni giocatore
-    expectedScores = {}
-    for user_A in users:
-        # il punteggio aspettato di ogni giocatore è calcolato come la media dei punteggi aspettati di tutte le subpartite
-        expectedScores[user_A] = sum(expectedScore(user_A.score, user_B.score, float(scoreRange)) for user_B in users if not user_B == user_A)/(len(users)-1)
-    return expectedScores
+# funzione che ritorna il risultato previsto per ##user_A dati gli ##users di una partita avvenuta in ##scoreRange
+def getExpectedScoreForUser(user_A, users, scoreRange):
+    # il punteggio aspettato di ogni giocatore è calcolato come la media dei punteggi aspettati di tutte le subpartite
+    return sum(expectedScore(user_A.score, user_B.score, float(scoreRange)) for user_B in users if not user_B == user_A)/(len(users)-1)
 
-# funzione che ritorna i coefficienti moltiplicativi per gli utenti (##users)
-def getMultiplierFactorsForUsers(users):
+# funzione che ritorna il coefficiente moltiplicativo per l'utente (##user_A) dati gli utenti (##users)
+def getMultiplierFactorForUser(user_A, users):
     friendly_game = False
     # friendly_game = game.friendly_game # decommentare questa riga una volta introdotte le amichevoli
-    k_factors = {}
-    for user_A in users:
-        # media dei fattori moltiplicativi di tutte le sub partite
-        k_factors[user_A] = sum(k_factor(getNumberOfGames(user_A, user_B), friendly_game) for user_B in users if not user_B == user_A)/(len(users)-1)
-    return k_factors
+    # media dei fattori moltiplicativi di tutte le sub partite
+    return sum(k_factor(getNumberOfGames(user_A, user_B), friendly_game) for user_B in users if not user_B == user_A)/(len(users)-1)
 
-# funzione che ritorna i risultati effettivi per gli utenti (##users) dato il vincitore (##winner)
-def getEffectiveResults(users, winner):
-    effectiveResults = {}
-    for user in users:
-        # se non esiste un vincitore
-        if not winner:
-            # pareggio
-            effectiveResults[user] = Score.draw.value
-        # se l'utente è il vincitore
-        elif user == winner:
-            # vittoria
-            effectiveResults[user] = Score.win.value
-        # se l'utente ha perso
-        else:
-            # sconfitta
-            effectiveResults[user] = Score.loss.value
-    return effectiveResults
+# funzione che ritorna il risultato effettivo per l'utente (##user) dato il vincitore (##winner)
+def getEffectiveResult(user, winner):
+    # se non esiste un vincitore
+    if not winner:
+        # pareggio
+        return Score.draw.value
+    # se l'utente è il vincitore
+    elif user == winner:
+        # vittoria
+        return Score.win.value
+    # se l'utente ha perso
+    else:
+        # sconfitta
+        return Score.loss.value
