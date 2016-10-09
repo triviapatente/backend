@@ -5,6 +5,7 @@ from app.game.models import Game, Round
 from app.auth.models import User
 from sqlalchemy import or_, and_
 from random import randint
+from app.utils import doTransaction
 
 # utils per il calcolo del punteggio
 
@@ -106,6 +107,27 @@ def getNumberOfGames(user_A, user_B):
     # prendo le partite dell'utente e le conto
     return Game.query.filter(Game.users.any(User.id == user_A.id)).filter(Game.users.any(User.id == user_B.id)).count()
 
+# funzione che aggiorna il punteggio di una partita (##game) trovata con un abbinamento in ##scoreRange
+def updateScore(game, scoreRange):
+    # prendo gli utenti di una partita
+    users = getUsersFromGame(game)
+    # prendo i risultati previsti
+    expectedScores = getExpectedScoresForUsers(users, scoreRange)
+    # prendo i k_factors
+    k_factors = getMultiplierFactorsForUsers(users)
+    # prendo il vincitore
+    winner = getWinner(game)
+    # prendo i risultati effettivi
+    effectiveResults = getEffectiveResults(users, winner)
+    # calcolo i nuovi punteggi
+    # params = {"users": users, "effectiveResults": effectiveResults, "expectedScores": expectedScores, "k_factors": k_factors}
+    def newScores(**params):
+        for user in params["users"]:
+            # assegno ad ogni utente il suo nuovo punteggio
+            user.score = new_score(params["effectiveResults"][user], params["expectedScores"][user], params["k_factors"][user], user.score)
+            db.session.add(user)
+        return users
+    return doTransaction(newScores, **{"users": users, "effectiveResults": effectiveResults, "expectedScores": expectedScores, "k_factors": k_factors})
 
 # funzione che ritorna gli utenti di una partita (##game)
 def getUsersFromGame(game):
