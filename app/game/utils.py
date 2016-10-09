@@ -28,12 +28,11 @@ def k_factor(n_games, friendly_game):
         n_games = max_k - min_k
     return (max_k - n_games) / (1 + friendly_game)
 
-# funzione per calcolare la probabilità di vittoria dati:
-# ##rating_A (punteggio del giocatore A), ##rating_B (punteggio del giocatore B) ed il ##range di ricerca
-def expectedScore(rating_A, rating_B, range):
-  expected_A = 1 / ( 1 + 10**((rating_b - rating_a) / range))
-  expected_B = 1 / ( 1 + 10**((rating_a - rating_b) / range))
-  return expected_A, expected_B
+# funzione per calcolare la probabilità di vittoria di A dati:
+# ##score_A (punteggio del giocatore A), ##score_B (punteggio del giocatore B) ed il ##scoreRange di ricerca
+def expectedScore(score_A, score_B, scoreRange):
+    expected = 1 / ( 1 + 10**((score_B - score_A) / scoreRange))
+    return expected
 
 #metodo che genera il dealer del round (colui che può scegliere la categoria)
 ##game_id: id del gioco di appartenenza, ##number: numero del round
@@ -101,3 +100,12 @@ def getNumberOfGames(user):
     activeGames = games.filter(Game.ended == False)
     # ritorno il numero delle partite
     return activeGames.count()
+
+# funzione che ritorna un array associativo user in ##users --> expectedScore, partita avvenuta in ##scoreRange
+def getExpectedScoresForUsers(users, scoreRange):
+    # calcolo i punteggi aspettati per ogni giocatore
+    expectedScores = {}
+    for user_A in users:
+        # il punteggio aspettato di ogni giocatore è calcolato come la media dei punteggi aspettati di tutte le subpartite
+        expectedScores[user_A] = sum(expectedScore(user_A.score, user_B.score, float(scoreRange)) for user_B in users if not user_B == user_A)/(len(users)-1)
+    return expectedScores
