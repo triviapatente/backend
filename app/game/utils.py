@@ -120,6 +120,16 @@ def getExpectedScoresForUsers(users, scoreRange):
         # il punteggio aspettato di ogni giocatore è calcolato come la media dei punteggi aspettati di tutte le subpartite
         expectedScores[user_A] = sum(expectedScore(user_A.score, user_B.score, float(scoreRange)) for user_B in users if not user_B == user_A)/(len(users)-1)
     return expectedScores
+
+# funzione che ritorna i coefficienti moltiplicativi per gli utenti (##users)
+def getMultiplierFactorsForUsers(users):
+    friendly_game = False
+    # friendly_game = game.friendly_game # decommentare questa riga una volta introdotte le amichevoli
+    k_factors = {}
+    for user_A in users:
+        k_factors[user_A] = sum(k_factor(getNumberOfGames(user_A, user_B), friendly_game) for user_B in users if not user_B == user_A)/(len(users)-1)
+    return k_factors
+
 # funzione che ritorna i risultati effettivi per gli utenti (##users) dato il vincitore (##winner)
 def getEffectiveResults(users, winner):
     effectiveResults = {}
