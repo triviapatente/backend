@@ -101,6 +101,11 @@ def getNumberOfActiveGames(user):
     # ritorno il numero delle partite
     return activeGames.count()
 
+# funzione che ritorna il numero di partite tra due giocatori (##user_A, ##user_B)
+def getNumberOfGames(user_A, user_B):
+    # prendo le partite dell'utente e le conto
+    return Game.query.filter(Game.users.any(User.id == user_A.id)).filter(Game.users.any(User.id == user_B.id)).count()
+
 # funzione che ritorna un array associativo user in ##users --> expectedScore, partita avvenuta in ##scoreRange
 def getExpectedScoresForUsers(users, scoreRange):
     # calcolo i punteggi aspettati per ogni giocatore
