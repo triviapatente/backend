@@ -92,7 +92,7 @@ def searchInRange(prevRange, scoreRange, userA):
         # comunico che non è stato trovato un abbinamento nel range
         return None
 
-# funzione che ritorna il numero di partite di un giocatore (##user)
+# funzione che ritorna il numero di partite attive di un giocatore (##user)
 def getNumberOfActiveGames(user):
     # prendo le partite dell'utente
     games = Game.query.filter(Game.users.any(User.id == user.id))
