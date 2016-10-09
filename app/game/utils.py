@@ -120,3 +120,14 @@ def getExpectedScoresForUsers(users, scoreRange):
         # il punteggio aspettato di ogni giocatore è calcolato come la media dei punteggi aspettati di tutte le subpartite
         expectedScores[user_A] = sum(expectedScore(user_A.score, user_B.score, float(scoreRange)) for user_B in users if not user_B == user_A)/(len(users)-1)
     return expectedScores
+# funzione che ritorna i risultati effettivi per gli utenti (##users) dato il vincitore (##winner)
+def getEffectiveResults(users, winner):
+    effectiveResults = {}
+    for user in users:
+        if not winner:
+            effectiveResults[user] = Score.draw.value
+        elif user == winner:
+            effectiveResults[user] = Score.win.value
+        else:
+            effectiveResults[user] = Score.loss.value
+    return effectiveResults
