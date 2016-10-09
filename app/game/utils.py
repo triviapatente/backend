@@ -69,7 +69,7 @@ def searchInRange(prevRange, scoreRange, userA):
         scoreSum = 0
         users_games = {}
         for user in allUsersInRange:
-            nGames = getNumberOfGames(user)
+            nGames = getNumberOfActiveGames(user)
             users_games[user] = nGames
             scoreSum = scoreSum + nGames
         # calcolo la media
@@ -93,7 +93,7 @@ def searchInRange(prevRange, scoreRange, userA):
         return None
 
 # funzione che ritorna il numero di partite di un giocatore (##user)
-def getNumberOfGames(user):
+def getNumberOfActiveGames(user):
     # prendo le partite dell'utente
     games = Game.query.filter(Game.users.any(User.id == user.id))
     # le filtro per quelle attive (non hanno un winner)
