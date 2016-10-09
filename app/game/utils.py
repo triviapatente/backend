@@ -153,6 +153,7 @@ def getMultiplierFactorsForUsers(users):
     # friendly_game = game.friendly_game # decommentare questa riga una volta introdotte le amichevoli
     k_factors = {}
     for user_A in users:
+        # media dei fattori moltiplicativi di tutte le sub partite
         k_factors[user_A] = sum(k_factor(getNumberOfGames(user_A, user_B), friendly_game) for user_B in users if not user_B == user_A)/(len(users)-1)
     return k_factors
 
@@ -160,10 +161,16 @@ def getMultiplierFactorsForUsers(users):
 def getEffectiveResults(users, winner):
     effectiveResults = {}
     for user in users:
+        # se non esiste un vincitore
         if not winner:
+            # pareggio
             effectiveResults[user] = Score.draw.value
+        # se l'utente è il vincitore
         elif user == winner:
+            # vittoria
             effectiveResults[user] = Score.win.value
+        # se l'utente ha perso
         else:
+            # sconfitta
             effectiveResults[user] = Score.loss.value
     return effectiveResults
