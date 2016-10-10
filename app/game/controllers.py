@@ -27,25 +27,46 @@ def welcome():
 # @need_values("POST", "number_of_players")
 @fetch_models({"opponent": User})
 def newGame():
-    #metodo transazionale
-    def createGame():
-        new_game = Game(creator = g.user)
-        opponent = g.models["opponent"]
-        new_game.users.append(opponent)
-        new_game.users.append(g.user)
-        db.session.add(new_game)
-        #TODO: gestire la logica per mandare le notifiche push a chi di dovere
-        invite = Invite(sender = g.user, receiver = opponent, game = new_game)
-        db.session.add(invite)
-        return new_game
-
-    output = doTransaction(createGame)
+    output = doTransaction(createGame, **({"opponent":g.models["opponent"]}))
     if output:
         return jsonify(game = output)
     else:
         raise ChangeFailed()
 
+# ricerca aleatoria di un avversario
+@game.route("/new_game/random", methods = ["POST"])
+@auth_required
+def randomSearch():
+    # definisco il numero di cicli massimo di ricerca
+    users_scores = User.query.order_by(User.score.desc()).all()
+    maxRangeToCover = max(users_scores[0].score - g.user.score, g.user.score - users_scores[-1].score)
+    rangeIncrement = app.config["RANGE_INCREMENT"]
+    prevRange = 0
+    opponent = None
+    for scoreRange in range(app.config["INITIAL_RANGE"], maxRangeToCover + rangeIncrement, rangeIncrement):
+        user = searchInRange(prevRange, scoreRange, g.user)
+        if user:
+            opponent = user
+            break
+        prevRange = scoreRange
 
+    output = doTransaction(createGame, **({"opponent":opponent}))
+    if output:
+        return jsonify(game = output)
+    else:
+        raise ChangeFailed()
+
+#metodo transazionale per la creazione di una partita
+def createGame(**params):
+    new_game = Game(creator = g.user)
+    opponent = params["opponent"]
+    new_game.users.append(opponent)
+    new_game.users.append(g.user)
+    db.session.add(new_game)
+    #TODO: gestire la logica per mandare le notifiche push a chi di dovere
+    invite = Invite(sender = g.user, receiver = opponent, game = new_game)
+    db.session.add(invite)
+    return new_game
 
 @game.route("/invites", methods = ["GET"])
 @auth_required
@@ -74,37 +95,3 @@ def processInvite(game_id):
     db.session.add(invite)
     db.session.commit()
     return jsonify(success = True)
-
-# ricerca aleatoria di un avversario
-@game.route("/new_game/random", methods = ["POST"])
-@auth_required
-def randomSearch():
-    # definisco il numero di cicli massimo di ricerca
-    users_scores = User.query.order_by(User.score.desc()).all()
-    maxRangeToCover = max(users_scores[0].score - g.user.score, g.user.score - users_scores[-1].score)
-    rangeIncrement = app.config["RANGE_INCREMENT"]
-    prevRange = 0
-    opponent = None
-    for scoreRange in range(app.config["INITIAL_RANGE"], maxRangeToCover + rangeIncrement, rangeIncrement):
-        user = searchInRange(prevRange, scoreRange, g.user)
-        if user:
-            opponent = user
-            break
-        prevRange = scoreRange
-
-    def createGame(**params):
-        new_game = Game(creator = g.user)
-        opponent = params["opponent"]
-        new_game.users.append(opponent)
-        new_game.users.append(g.user)
-        db.session.add(new_game)
-        #TODO: gestire la logica per mandare le notifiche push a chi di dovere
-        invite = Invite(sender = g.user, receiver = opponent, game = new_game)
-        db.session.add(invite)
-        return new_game
-
-    output = doTransaction(createGame, **({"opponent":opponent}))
-    if output:
-        return jsonify(game = output)
-    else:
-        raise ChangeFailed()
