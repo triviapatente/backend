@@ -19,17 +19,18 @@ class AuthHTTPTestCase(TPTestCase):
 
     def test_register(self):
         print "#1: Registrazione corretta"
-        response = self.register("2113145723", "2713345123@gmail.com", "dfsdvsv")
+        response = self.register("user", "user@gmail.com", "dfsdvsv")
         assert response.status_code == 200
         assert response.json.get("user") and response.json.get("token")
 
         print "#2: Utente già esistente"
-        response = self.register("123", "12@gmail.com", "dfsdvsv")
+        print "#2.1: per username"
+        response = self.register("user", "12@gmail.com", "dfsdvsv")
         assert response.status_code == 401
-        error = response.json.get("message")
-        print error
-        assert error
-        assert "Esiste già un utente con questo" in error
+
+        print "#2.2: per email"
+        response = self.register("123", "user@gmail.com", "dfsdvsv")
+        assert response.status_code == 401
 
         print "#3: Parametri mancanti"
 
@@ -47,17 +48,20 @@ class AuthHTTPTestCase(TPTestCase):
 
     #per creare un metodo di test basta mettere test_ prima del metodo
     def test_login(self):
+        #chiamata propedeutica
+        self.register("user", "user@gmail.com", "user")
+
         print "#1: Login corretto"
-        response = self.login("2", "2")
+        response = self.login("user", "user")
         assert response.status_code == 200
         assert response.json.get("user") and response.json.get("token")
 
         print "#2: Username/email errata"
-        response = self.login("a", "2")
+        response = self.login("a", "user")
         assert response.status_code == 401
 
         print "#3: Password errata"
-        response = self.login("2", "a")
+        response = self.login("user", "a")
         assert response.status_code == 401
 
         print "#4: Coppia errata"
@@ -66,9 +70,9 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#4: Parametri mancanti"
         print "#4.1: username"
-        response = self.login(None, "a")
+        response = self.login(None, "user")
         assert response.status_code == 400
 
         print "#4.1: password"
-        response = self.login("a", None)
+        response = self.login("user", None)
         assert response.status_code == 400
