@@ -84,9 +84,27 @@ def randomSearch():
     maxRangeToCover = max(users_scores[0].score - g.user.score, g.user.score - users_scores[-1].score)
     rangeIncrement = app.config["RANGE_INCREMENT"]
     prevRange = 0
+    opponent = None
     for scoreRange in range(app.config["INITIAL_RANGE"], maxRangeToCover + rangeIncrement, rangeIncrement):
         user = searchInRange(prevRange, scoreRange, g.user)
         if user:
-            return jsonify(user = user)
+            opponent = user
+            break
         prevRange = scoreRange
-    return None
+
+    def createGame(**params):
+        new_game = Game(creator = g.user)
+        opponent = params["opponent"]
+        new_game.users.append(opponent)
+        new_game.users.append(g.user)
+        db.session.add(new_game)
+        #TODO: gestire la logica per mandare le notifiche push a chi di dovere
+        invite = Invite(sender = g.user, receiver = opponent, game = new_game)
+        db.session.add(invite)
+        return new_game
+
+    output = doTransaction(createGame, **({"opponent":opponent}))
+    if output:
+        return jsonify(game = output)
+    else:
+        raise ChangeFailed()
