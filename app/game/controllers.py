@@ -80,7 +80,8 @@ def processInvite(game_id):
 @auth_required
 def randomSearch():
     # definisco il numero di cicli massimo di ricerca
-    maxRangeToCover = (User.query.order_by(User.score.desc()).first().score - g.user.score)
+    users_scores = User.query.order_by(User.score.desc()).all()
+    maxRangeToCover = max(users_scores[0].score - g.user.score, g.user.score - users_scores[-1].score)
     rangeIncrement = app.config["RANGE_INCREMENT"]
     prevRange = 0
     for scoreRange in range(app.config["INITIAL_RANGE"], maxRangeToCover + rangeIncrement, rangeIncrement):
