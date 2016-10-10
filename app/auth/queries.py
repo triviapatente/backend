@@ -15,7 +15,7 @@ def getKeychain(id):
 
 # ritorna l'utente a partire dallo ##username o dalla ##email
 def getUserFromUsernameOrEmail(username, email):
-    return User.query.filter((User.username == username or User.email == email)).first()
+    return User.query.filter(or_(User.username == username, User.email == email)).first()
 
 # ritorna la classifica
 def getRank():
