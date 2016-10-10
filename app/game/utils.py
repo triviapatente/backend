@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from app import app, db
-from app.game.models import Game, Round
+from app.game.models import Game, Round, partecipation
 from app.auth.models import User
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func
 from random import randint
 from app.utils import doTransaction
 
@@ -60,25 +60,19 @@ def get_dealer(game, number):
 # ##prevRange serve a evitare di considerare i range già considerati
 def searchInRange(prevRange, scoreRange, userA):
     # ottengo gli utenti compresi nel range ([userA.score-range;userA.score-prevRange] U [userA.score+prevRange;userA.score+range])
-    users = User.query.filter(or_(and_(User.score < (userA.score + scoreRange), User.score > (userA.score + prevRange)), and_(User.score > userA.score - scoreRange, User.score < userA.score - prevRange)))
-    allUsersInRange = users.all()
+    allUsersInRange = User.query.filter(or_(and_(User.score < (userA.score + scoreRange), User.score > (userA.score + prevRange)), and_(User.score > userA.score - scoreRange, User.score < userA.score - prevRange))).all()
     candidates = allUsersInRange
     # vedo se ci sono users nel range
     if allUsersInRange:
         # ci sono, favorisco i giocatori con un numero di partite superiore alla media
-        # calcolo il numero di partite per giocatore e la somma totale
-        scoreSum = 0
-        users_games = {}
-        for user in allUsersInRange:
-            nGames = getNumberOfActiveGames(user)
-            users_games[user] = nGames
-            scoreSum = scoreSum + nGames
-        # calcolo la media
-        scoreAverage = scoreSum / len(allUsersInRange)
+        # calcolo il numero di partite per giocatore
+        users_games_count = getNumberOfActiveGames(allUsersInRange)
+        # calcolo la media di partite
+        gamesAverage = sum(n for n in users_games_count.values()) / len(users_games_count)
         # trovo gli utenti sopra la media
         userOverAverage = []
         for user in allUsersInRange:
-            if users_games[user] > scoreAverage:
+            if users_games_count[user.username] > gamesAverage:
                 userOverAverage.append(user)
         # se ci sono
         if userOverAverage:
@@ -93,14 +87,23 @@ def searchInRange(prevRange, scoreRange, userA):
         # comunico che non è stato trovato un abbinamento nel range
         return None
 
-# funzione che ritorna il numero di partite attive di un giocatore (##user)
-def getNumberOfActiveGames(user):
-    # prendo le partite dell'utente
-    games = Game.query.filter(Game.users.any(User.id == user.id))
-    # le filtro per quelle attive (non hanno un winner)
-    activeGames = games.filter(Game.ended == False)
-    # ritorno il numero delle partite
-    return activeGames.count()
+# funzione che ritorna il numero di partite attive dei giocatori (##users)
+def getNumberOfActiveGames(users):
+    # devo considerare solo i giocatori in ##users
+    users_usernames = [user.username for user in users]
+    # ottengo una lista di tuple (username, games_count)
+    players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(partecipation).filter(User.username in users_usernames).group_by(User.username).all()
+    # converto la lista di tuple (username, games_count) in un dictionary
+    users_games_count = {}
+    for e in players_with_games:
+        users_games_count[e.__dict__["username"]] = e.__dict__["games_count"]
+    # utenti ancora non inseriti
+    userRange = [user for user in users if user.username not in users_games_count.keys()]
+    # completo il dictionary con gli utenti senza partite
+    for user in userRange:
+        users_games_count[user.username] = 0
+    return users_games_count
+
 
 # funzione che ritorna il numero di partite tra due giocatori (##user_A, ##user_B)
 def getNumberOfGames(user_A, user_B):

@@ -6,7 +6,7 @@ from app.game.models import *
 from app.utils import doTransaction
 from app.decorators import auth_required, fetch_models, needs_values
 from app.exceptions import ChangeFailed, Forbidden
-from app.game.utils import updateScore
+from app.game.utils import updateScore, searchInRange
 
 game = Blueprint("game", __name__, url_prefix = "/game")
 
