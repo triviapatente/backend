@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 # crawler built based on:
 seed = 'http://m.patentati.it/quiz-patente-b/lista-domande.php'
 baseUrl = 'http://m.patentati.it/'

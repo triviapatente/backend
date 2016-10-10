@@ -9,8 +9,10 @@ adduser ted
 sudo -u postgres bash -c "createuser -P -s -e ted"
 #creo il db
 sudo -u postgres bash -c "psql -c \"CREATE DATABASE triviapatente \""
+sudo -u postgres bash -c "psql -c \"CREATE DATABASE triviapatente_test \""
 #do il privilegio all'utente ted
 sudo -u postgres bash -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE triviapatente TO ted\""
+sudo -u postgres bash -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE triviapatente_test TO ted\""
 
 #questi 6 linee di codice ricercano questi pattern nei file e se non lo trovano lo inseriscono
 #i commenti sono fondamentali per evidenziare che questi sono i comandi che abbiamo inserito noi

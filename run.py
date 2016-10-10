@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
 import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 from subprocess import call
 
 #se lo script non è stato chiamato con la flag che forza l'avvio impedendo l'inizializzazione
