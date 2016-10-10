@@ -29,7 +29,7 @@ class MissingParameter(TPException):
 
 #eccezione chiamata quando l'utente da inserire è già esistente
 class AlreadyRegisteredUser(TPException):
-    status_code = 400 #bad request
+    status_code = 401 #unauthorized
 
     def __init__(self, previousUser, username, email):
         TPException.__init__(self)
