@@ -11,6 +11,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
 from app.base.models import Base, CommonPK
 from app.game.models import partecipation
 from werkzeug.utils import secure_filename
+import os
 
 class User(Base, CommonPK):
   #valori identificativi dell'utente, devono essere unici
@@ -25,7 +26,6 @@ class User(Base, CommonPK):
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])
   #partite giocate dal giocatore
   games = relationship("Game", secondary = partecipation, back_populates = "users")
-  
 
   #metodo che permette di modificare il nome dell'immagine adattandolo al nome utente in modo sicuro
   def getFileName(self, filename):
@@ -51,6 +51,9 @@ class Keychain(Base, CommonPK):
   #TODO: aggiungere controllo, uno dei due tra password o facebookToken deve essere sempre settato
 
   password = Column(String)
+  #nonce per permettere l'invalidazione anticipata del token
+  nonce = Column(String)
+
   #facebookToken dell'utente
   facebookToken = Column(String)
 
@@ -60,8 +63,8 @@ class Keychain(Base, CommonPK):
   def auth_token(self, expiration = 60 * 60 * 24 * 30):
       #ottengo il serializer
       s = self.getSerializer(expiration)
-      #critto l'id dell'utente proprietario del keychain e ne ottengo un token
-      return s.dumps({ 'id': self.user_id })
+      #critto l'id dell'utente proprietario del keychain e il nonce e ne ottengo un token
+      return s.dumps({ 'id': self.user_id, 'nonce': self.nonce })
 
   #metodo centrale che contiene l'istanza del serializer per generazione e verifica di token
   #muovendolo in un metodo centrale siamo sicuri che la chiave usata per generare/verificare è sempre la stessa
@@ -74,18 +77,29 @@ class Keychain(Base, CommonPK):
   def verify_auth_token(self, token):
       #ottengo il serializer
       s = self.getSerializer()
+      user = None
       try:
           #vedo se riesco a verificare il token
           data = s.loads(token)
-      #se non riesco ritorno null
+          user = User.query.get(data['id'])
+          #vedo se il token non è scaduto (controllo il nonce)
+          if Keychain.query.filter_by(user_id = user.id).first().nonce != data['nonce']:
+              # se lo è setto l'utente a None
+              user = None
+      #se non riesco ritorno None
       except:
-          return None
-      #se no torno l'utente associato
-      return User.query.get(data['id'])
+          user = None
+      # ritorno l'utente
+      return user
 
   #metodo che salva in password l'hash della password passata
   def hash_password(self, password):
       self.password = pwd_context.encrypt(password)
+
+  #metodo che salva genera, hasha e salva un nuovo nonce di lunghezza ##length numeri consecutivi (in media di 2/3 cifre)
+  def renew_nonce(self, length = 32):
+      self.nonce = ''.join(str(x) for x in map(ord, os.urandom(length)))
+
   #metodo che controlla se la password candidata è equivalente all'hash salvato
   def check_password(self, candidate):
       return pwd_context.verify(candidate, self.password)

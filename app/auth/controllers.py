@@ -33,7 +33,7 @@ def login():
 
     #controllo se la password dell'utente corrisponde a quella interna
     if keychain.check_password(password):
-        #se si, sei loggato! Ti torno anche un token, cosi la tua sessione inizia
+        #se si, sei loggato! Ti torno anche un token, così la tua sessione inizia
         return jsonify(user = user, token = keychain.auth_token)
     else:
         #se no, login fallito
@@ -63,6 +63,7 @@ def register():
         #posso creare il portachiavi dell'utente e associarlo all'utente stesso
         keychain = Keychain(user = user, lifes = app.config["INITIAL_LIFES"])
         keychain.hash_password(password)
+        keychain.renew_nonce()
         db.session.add(keychain)
         return (user, keychain.auth_token)
 
@@ -71,6 +72,17 @@ def register():
         user, token = output
         return jsonify(user = user, token = token)
     raise TPException() # trovare exception appropriata
+
+#api che effettua il logout dell'utente
+@auth.route("/logout", methods = ["POST"])
+@auth_required
+def logout():
+    keychain = getKeychain(g.user.id)
+    # cambio il token
+    keychain.renew_nonce()
+    db.session.add(keychain)
+    db.session.commit()
+    return jsonify(user = g.user)
 
 #api(s) per le modifiche
 
