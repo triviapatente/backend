@@ -97,7 +97,7 @@ class Keychain(Base, CommonPK):
       self.password = pwd_context.encrypt(password)
 
   #metodo che salva genera, hasha e salva un nuovo nonce di lunghezza ##length numeri consecutivi (in media di 2/3 cifre)
-  def renew_nonce(self, length = 32):
+  def renew_nonce(self, length = 16):
       self.nonce = ''.join(str(x) for x in map(ord, os.urandom(length)))
 
   #metodo che controlla se la password candidata è equivalente all'hash salvato
