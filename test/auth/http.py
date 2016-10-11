@@ -37,7 +37,7 @@ class AuthHTTPTestCase(TPTestCase):
 
     #TODO test change image
 
-    def getItalianRank(token):
+    def getItalianRank(self, token):
         response = self.app.get("/info/rank/italy", headers = {"tp-session-token":token})
         response.json = json.loads(response.data)
         return response
