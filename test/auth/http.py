@@ -2,6 +2,7 @@
 
 from test.utils import TPTestCase
 from flask import json
+from app import app
 class AuthHTTPTestCase(TPTestCase):
 
     #Utility methods
@@ -154,4 +155,35 @@ class AuthHTTPTestCase(TPTestCase):
         response = self.changeSurname(token, "surname")
         assert response.status_code == 200 and response.json.get("user").get("surname") == "surname"
 
-    # TODO test get rank e change image
+    def test_getItalianRank(self):
+        MAX = 20
+        for i in range (0, MAX):
+            self.register("user%s" % i, "user%s@gmail.com" % i, "user%s" % i)
+        token = self.login("user%s" % (MAX-1), "user%s" % (MAX-1)).json.get("token")
+
+        print "#1: Classifica ricevuta correttamente"
+        response = self.getItalianRank(token)
+        assert response.status_code == 200
+
+        number_of_results = app.config["RESULTS_LIMIT_RANK_ITALY"]
+        users = response.json.get("rank")
+        print "#2: Classifica di %s elementi come predefinito" % number_of_results
+        assert len(users) == number_of_results
+
+        # essendo il token dell'ultimo utente inserito, se è in classifica il metodo getRank funziona
+        print "#3: User in classifica"
+        exist = False
+        for user in users:
+            if user.get("username") == "user%s" % (MAX-1):
+                exist = True
+                break
+        assert exist
+
+        print "#4: La classifica è descrescente"
+        last = None
+        for user in users:
+            if last and last < user.get("score"):
+                assert False
+            last = user.get("score")
+
+        # altri test non vale la pena farli perchè implicherebbero l'implementazione del metodo stesso
