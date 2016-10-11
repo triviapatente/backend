@@ -74,7 +74,11 @@ class AuthHTTPTestCase(TPTestCase):
         response = self.register("aisdisdf", "wsdr@gmail.com", None)
         assert response.status_code == 400
 
-    #per creare un metodo di test basta mettere test_ prima del metodo
+        print "#4: Token valido"
+        response = self.register("token", "token@gmail.com", "token")
+        response = self.getCurrentUser(response.json.get("token"))
+        assert response.status_code == 200
+
     def test_login(self):
         #chiamata propedeutica
         self.register("user", "user@gmail.com", "user")
@@ -104,6 +108,11 @@ class AuthHTTPTestCase(TPTestCase):
         print "#4.1: password"
         response = self.login("user", None)
         assert response.status_code == 400
+
+        print "#5: Token valido"
+        response = self.login("user", "user")
+        response = self.getCurrentUser(response.json.get("token"))
+        assert response.status_code == 200
 
     def test_getCurrentUser(self):
         self.register("user", "user@gmail.com", "user")
