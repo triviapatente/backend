@@ -5,7 +5,7 @@ import unittest
 import tempfile
 from unittest import TestCase
 from tp import app, db, socketio
-
+from test.auth.http.api import register
 class TPTestCase(TestCase):
     def setUp(self):
         self.app = app.test_client()
@@ -16,5 +16,7 @@ class TPTestCase(TestCase):
 
 class TPAuthTestCase(TPTestCase):
     def setUp(self):
-        super.setUp()
-        #TODO: aggiungere autenticazione
+        super(TPAuthTestCase, self).setUp()
+        response = register(self.app, "pippo", "pippo@gmail.com", "pippo")
+        self.token = response.json.get("token")
+        self.user = response.json.get("user")
