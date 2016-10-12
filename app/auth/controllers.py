@@ -140,4 +140,24 @@ def getCurrentUser():
 @auth_required
 def getItalianRank():
     #chiedo la classifica (elenco utenti ordinato in base al punteggio) dei primi n utenti con le loro posizioni
-    return jsonify(rank = getRank())
+    MAX = app.config["RESULTS_LIMIT_RANK_ITALY"]
+    rank = getRank()
+    lastScore = rank[0].score
+    position = 1
+    userA = None
+    italianRank = []
+    for userB in rank:
+        if lastScore != userB.score:
+            position = position + 1
+            lastScore = userB.score
+        # ritorno il risultato come prima, anzichè andare a ricopiare il dictionary (è immutabile) che non è neanche accettato da jsonify
+        u = {}
+        u["user"] = userB
+        u["position"] = position
+        italianRank.append(u)
+        if g.user.username == userB.username:
+            userA = u
+    italianRank = italianRank[:MAX]
+    if userA not in italianRank:
+        italianRank[MAX-1] = userA
+    return jsonify(rank = italianRank)
