@@ -14,12 +14,10 @@ class AuthSocketTestCase(TPTestCase):
 
         response = login(self.socket, token)
         assert response.json.get("success") == True
-        assert response.json.get("user")
-        assert response.json.get("token")
 
     def test_logout(self):
         token = register(self.app, "pippo", "pippo@gmail.com", "pippo")
         response = login(self.socket, token)
         assert response.json.get("success") == True
-        response = logout()
+        response = logout(self.socket)
         assert response.json.get("success") == True
