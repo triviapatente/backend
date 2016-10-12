@@ -1,19 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from test.shared import TPAuthTestCase
-from flask import json
 from tp.preferences.models import Preferences
+from api import *
 
 class PreferencesHTTPTestCase(TPAuthTestCase):
-    #Utility methods
-
-    def changePreferences(self, url, new_value):
-        response = self.app.post(url, headers = {"tp-session-token":self.token}, data = {"new_value": new_value})
-        response.json = json.loads(response.data)
-        return response
-
-    def getEnumValues(self, attr):
-        return Preferences.__dict__[attr].property.columns[0].type.enums
 
     ###TEST METHODS###
     #per creare un metodo di test basta mettere test_ prima del metodo
@@ -27,24 +18,24 @@ class PreferencesHTTPTestCase(TPAuthTestCase):
         for i in range(0, len(notification_types)):
             print "#" + str(i+1) + ": Cambio notifiche %s effettuato" % notification_types[i]
             # essendo di default True, testo che diventi False
-            response = self.changePreferences("/preferences/notification/%s/edit" % notification_types[i], False)
+            response = changePreferences(self, "/preferences/notification/%s/edit" % notification_types[i], False)
             assert response.status_code == 200 and response.json.get("preferences").get(notification_prefix + notification_types[i]) == False
 
     def test_changeStatsPreferences(self):
         url = "/preferences/stats/edit"
 
-        enum_values = self.getEnumValues("stats")
+        enum_values = getEnumValues("stats")
         for i in range(0, len(enum_values)):
             print "#" + str(i+1) + ": Cambio preferenze statistiche in %s" % enum_values[i]
-            response = self.changePreferences(url, enum_values[i])
+            response = changePreferences(self, url, enum_values[i])
             assert response.status_code == 200 and response.json.get("preferences").get("stats") == enum_values[i]
 
 
     def test_changeChatPreferences(self):
         url = "/preferences/chat/edit"
 
-        enum_values = self.getEnumValues("chat")
+        enum_values = getEnumValues("chat")
         for i in range(0, len(enum_values)):
             print "#" + str(i+1) + ": Cambio preferenze chat in %s" % enum_values[i]
-            response = self.changePreferences(url, enum_values[i])
+            response = changePreferences(self, url, enum_values[i])
             assert response.status_code == 200 and response.json.get("preferences").get("chat") == enum_values[i]
