@@ -3,6 +3,7 @@
 from test.utils import TPTestCase
 from flask import json
 from app import app
+import os, io
 class AuthHTTPTestCase(TPTestCase):
 
     #Utility methods
@@ -36,7 +37,10 @@ class AuthHTTPTestCase(TPTestCase):
         response.json = json.loads(response.data)
         return response
 
-    #TODO test change image
+    def changeImage(self, token, image):
+        response = self.app.post("account/image/edit", content_type='multipart/form-data', data = {"image": image}, headers = {"tp-session-token": token})
+        response.json = json.loads(response.data)
+        return response
 
     def getItalianRank(self, token):
         response = self.app.get("/info/rank/italy", headers = {"tp-session-token":token})
@@ -125,7 +129,7 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#2: Accesso negato con token non valido"
         response = self.getCurrentUser("INVALID_TOKEN")
-        assert response.status_code != 200
+        assert response.status_code == 403
 
     def test_logout(self):
         self.register("user", "user@gmail.com", "user")
@@ -154,6 +158,29 @@ class AuthHTTPTestCase(TPTestCase):
         print "#1: Cambio di cognome effettuato"
         response = self.changeSurname(token, "surname")
         assert response.status_code == 200 and response.json.get("user").get("surname") == "surname"
+
+    def test_changeImage(self):
+        self.register("user", "user@gmail.com", "user")
+        token = self.login("user", "user").json.get("token")
+
+        validImage = (io.BytesIO(b'my file contents'), "image.jpg")
+        invalidImage = (io.BytesIO(b'my file contents'), "image.exe")
+
+        print "#1: Immagine non salvata se non valida"
+        response = self.changeImage(token, invalidImage)
+        assert response.status_code == 405
+
+        print "#2: Immagine salvata correttamente se valida"
+        response = self.changeImage(token, validImage)
+        imagePath = response.json.get("user")["image"]
+        assert response.status_code == 200 and imagePath
+
+        print "#3: L'immagine salvata si chiama come il nome utente e si trova in %s" % app.config["UPLOAD_FOLDER"]
+        assert imagePath == app.config["UPLOAD_FOLDER"] + "user.jpg"
+
+        print "#4: L'immagine esiste nel folder"
+        assert os.path.isfile(imagePath)
+
 
     def test_getItalianRank(self):
         number_of_results = app.config["RESULTS_LIMIT_RANK_ITALY"]
