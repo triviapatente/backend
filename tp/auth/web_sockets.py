@@ -5,6 +5,7 @@ from flask import session, g
 from flask_socketio import emit, disconnect
 from models import Keychain
 from tp.decorators import needs_values
+from tp.ws_decorators import ws_auth_required
 
 @socketio.on("auth")
 @needs_values("SOCKET", "token")
@@ -18,6 +19,7 @@ def authenticate(data):
     emit("auth", {"success": user != None})
 
 @socketio.on("logout")
+@ws_auth_required
 def logout(data = None):
     # rimuovo il token se presente
     session.pop("token", None)
