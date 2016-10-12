@@ -21,6 +21,13 @@ app.json_encoder = TPJSONEncoder
 # This line imports contents of config.py in app.config
 app.config.from_object('config')
 
+import __builtin__
+if hasattr(__builtin__, "TESTING") and __builtin__.TESTING:
+    if hasattr(__builtin__, "CI") and __builtin__.CI:
+        app.config["SQLALCHEMY_TEST_DATABASE_URI"].replace("localhost", "postgres")
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"]
+
+
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)

@@ -15,9 +15,14 @@ call(["sudo", "sh", "scripts/init_test.sh"])
 
 
 if __name__ == '__main__':
+    import __builtin__
+    
+    __builtin__.TESTING = True
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "-ci":
+        __builtin__.CI = True
     from app import app
     app.config['TESTING'] = True
     #sostituisco il normale db con quello fittizio
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config["SQLALCHEMY_TEST_DATABASE_URI"]
     unittest.main()
     app.config['TESTING'] = False
