@@ -3,8 +3,8 @@ apt-get -qqy install postgresql python-psycopg2
 apt-get -qqy install python-flask python-sqlalchemy
 apt-get -qqy install python-pip
 
-#aggiungo l'utente ted nel sistema operativo
-adduser ted
+#aggiungo l'utente ted con la password già inserita (e crittata)
+sudo useradd -p $(echo ted | openssl passwd -1 -stdin) ted
 #lo creo a livello di postgres
 sudo -u postgres bash -c "createuser -P -s -e ted"
 #creo il db
