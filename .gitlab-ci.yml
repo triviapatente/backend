@@ -1,7 +1,7 @@
 before_script:
-  - sudo sh scripts/init.sh
-  - sudo sh scripts/dependencies.sh
-  - sudo sh scripts/init_test.sh
+  - sh scripts/init.sh
+  - sh scripts/dependencies.sh
+  - sh scripts/init_test.sh
 
 test:
   script:
