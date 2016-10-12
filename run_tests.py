@@ -12,10 +12,6 @@ if __name__ == '__main__':
     tp.init(True, need_ci)
 
     import unittest
-
-    #creiamo le tabelle necessarie al testing
-    from subprocess import call
-    call(["sudo", "sh", "scripts/init_test.sh"])
     #elimino eventuali parametri aggiuntivi se presenti
     sys.argv = sys.argv[:1]
 
