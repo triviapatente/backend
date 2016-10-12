@@ -10,14 +10,14 @@ class AuthSocketTestCase(TPTestCase):
     #TEST METHODS
 
     def test_login(self):
-        token = register(self.app, "pippo", "pippo@gmail.com", "pippo")
+        token = register(self, "pippo", "pippo@gmail.com", "pippo")
 
-        response = login(self.socket, token)
+        response = login(self, token)
         assert response.json.get("success") == True
 
     def test_logout(self):
-        token = register(self.app, "pippo", "pippo@gmail.com", "pippo")
-        response = login(self.socket, token)
+        token = register(self, "pippo", "pippo@gmail.com", "pippo")
+        response = login(self, token)
         assert response.json.get("success") == True
-        response = logout(self.socket)
+        response = logout(self)
         assert response.json.get("success") == True

@@ -19,13 +19,13 @@ class TPTestCase(TestCase):
 class TPAuthTestCase(TPTestCase):
     def setUp(self, socket = False):
         super(TPAuthTestCase, self).setUp()
-        response = register(self.app, "pippo", "pippo@gmail.com", "pippo")
+        response = register(self, "pippo", "pippo@gmail.com", "pippo")
         self.token = response.json.get("token")
         self.user = response.json.get("user")
         assert self.token
         assert self.user
         if socket:
-            response = login(self.socket, self.token)
+            response = login(self, self.token)
             assert response.json.get("success") == True
 
 #metodo che ottiene il client per fare il test, un pò modificato
