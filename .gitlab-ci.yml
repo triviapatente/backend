@@ -6,3 +6,11 @@ before_script:
 test:
   script:
     - python run_tests.py
+
+services:
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: triviapatente_test
+  POSTGRES_USER: ted
+  POSTGRES_PASSWORD: ted
