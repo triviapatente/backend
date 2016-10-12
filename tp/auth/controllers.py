@@ -65,12 +65,12 @@ def register():
         keychain.hash_password(password)
         keychain.renew_nonce()
         db.session.add(keychain)
-        return (user, keychain.auth_token)
+        return (user, keychain)
 
     output = doTransaction(createUser)
     if output:
-        user, token = output
-        return jsonify(user = user, token = token)
+        user, keychain = output
+        return jsonify(user = user, token = keychain.auth_token)
     raise TPException() # trovare exception appropriata
 
 #api che effettua il logout dell'utente
