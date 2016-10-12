@@ -5,9 +5,12 @@ if __name__ == '__main__':
 
     reload(sys)
     sys.setdefaultencoding('utf8')
-
-    import unittest
+    #importo il progetto e la inizializzo
+    import tp
+    tp.init(True, need_ci)
     
+    import unittest
+
     #creiamo le tabelle necessarie al testing
     from subprocess import call
     call(["sudo", "sh", "scripts/init_test.sh"])
@@ -16,9 +19,7 @@ if __name__ == '__main__':
     #elimino eventuali parametri aggiuntivi se presenti
     sys.argv = sys.argv[:1]
 
-    #importo il progetto e la inizializzo
-    import tp
-    tp.init(True, need_ci)
+
     #importo l'app
     from tp import app
     #importo i test
