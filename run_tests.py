@@ -9,14 +9,13 @@ if __name__ == '__main__':
     import tp
     #controllo se si tratta di gitlab:ci
     need_ci = len(sys.argv) >= 2 and sys.argv[1] == "-ci"
-    print need_ci
     tp.init(True, need_ci)
 
     import unittest
     #elimino il parametro -ci, perchè unittest esamina i parametri in cerca di testcase singoli
     if need_ci:
         try:
-            i = sys.argv("-ci")
+            i = sys.argv.index("-ci")
             del sys.argv[i]
         except ValueError:
             pass
