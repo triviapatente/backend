@@ -20,7 +20,7 @@ def init(testing = False, ci = False):
     from tp.base.utils import TPJSONEncoder
 
     # Import SocketIO
-    from flask_socketio import SocketIO
+    from flask_socketio import SocketIO, emit
 
     # Define the WSGI application object
     app = Flask(__name__)
@@ -36,7 +36,7 @@ def init(testing = False, ci = False):
     if testing:
         print "enabling testing mode.."
         if ci:
-            print "enabling ci mode..."
+            print "enabling ci mode.."
             app.config["SQLALCHEMY_TEST_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"].replace("localhost", "postgres")
         app.config["SQLALCHEMY_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"]
 
@@ -47,6 +47,8 @@ def init(testing = False, ci = False):
     socketio = SocketIO(app, json = json)
 
     from tp.exceptions import TPException
+    from flask import request
+    import traceback, sys
     #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
     @app.errorhandler(TPException)
     def handleTPException(error):
@@ -61,9 +63,13 @@ def init(testing = False, ci = False):
             response = json.dumps(error.to_dict())
             print "Socket Error %d: %s" % (error.status_code, error.message)
         else:
-            response = str(error)
-            print "Socket Error %s" % response
-        emit("error", response)
+            error = str(error)
+            response = {"error": error, "success": False}
+            print "Socket Error %s" % error
+        print "Traceback: %s" % traceback.format_exc(sys.exc_info())
+
+        event = request.event["message"]
+        emit(event, response)
 
 
     from tp.auth.controllers import auth, account, info
