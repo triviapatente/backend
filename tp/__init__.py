@@ -34,10 +34,10 @@ def init(testing = False, ci = False):
 
 
     if testing:
-        print "enter on testing"
+        print "enabling testing mode.."
         if ci:
-            print "enter on ci"
-            app.config["SQLALCHEMY_TEST_DATABASE_URI"].replace("localhost", "postgres")
+            print "enabling ci mode..."
+            app.config["SQLALCHEMY_TEST_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"].replace("localhost", "postgres")
         app.config["SQLALCHEMY_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"]
 
 
