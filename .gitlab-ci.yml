@@ -1,0 +1,15 @@
+before_script:
+  - sh scripts/init_ci.sh
+  - sh scripts/dependencies.sh
+
+test:
+  script:
+    - python run_tests.py
+
+services:
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: triviapatente_test
+  POSTGRES_USER: ted
+  POSTGRES_PASSWORD: ted

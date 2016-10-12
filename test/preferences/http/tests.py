@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from test.utils import TPTestCase
+from test.shared import TPTestCase
 from flask import json
 from app.preferences.models import Preferences
 class PreferencesHTTPTestCase(TPTestCase):
