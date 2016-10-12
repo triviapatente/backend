@@ -1,7 +1,6 @@
 before_script:
   - sh scripts/init_ci.sh
   - sh scripts/dependencies.sh
-  - sh scripts/init_test.sh
 
 test:
   script:
