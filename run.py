@@ -13,8 +13,10 @@ if len(sys.argv) >= 2 and sys.argv[1] == "-update":
     call(["sudo", "sh", "scripts/dependencies.sh"])
 
 
+import tp
+tp.init()
 
-from app import app, socketio
+from tp import app, socketio
 
 debug = app.config["DEBUG"]
 port = app.config["PORT"]

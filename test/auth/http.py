@@ -2,7 +2,7 @@
 
 from test.utils import TPTestCase
 from flask import json
-from app import app
+from tp import app
 import os, io
 class AuthHTTPTestCase(TPTestCase):
 

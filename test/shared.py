@@ -4,7 +4,7 @@ import os
 import unittest
 import tempfile
 from unittest import TestCase
-from app import app, db, socketio
+from tp import app, db, socketio
 
 class TPTestCase(TestCase):
     def setUp(self):

@@ -2,7 +2,7 @@
 from patentati import routines
 from utils import utils
 
-from app.game.models import Quiz, Image, Category
+from tp.game.models import Quiz, Image, Category
 
 baseUrl = ''
 

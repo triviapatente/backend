@@ -6,14 +6,16 @@ sys.setdefaultencoding('utf8')
 seed = 'http://m.patentati.it/quiz-patente-b/lista-domande.php'
 baseUrl = 'http://m.patentati.it/'
 # path where images are saved
-from app import app
+import tp
+tp.init()
+from tp import app
 imgPath = app.config["QUIZ_IMAGE_FOLDER"]
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from crawler import crawler
-from app import db
+from tp import db
 
 # Create directory if it doesn't exist
 import os
