@@ -19,13 +19,7 @@ def getUserFromUsernameOrEmail(username, email):
 
 # ritorna la classifica
 def getRank():
-    # a = aliased(User, name="a")
-    # b = aliased(User, name="user")
-    ## funziona per magia, non toccare assolutamente, qualunque modifica, anche sensata, potrebbe rovinare tutto ##
-    #getPosition è la subquery, da chiamare per ogni record di b per il valore del campo position.
-    #conta il numero di distinti valori di punteggio superiori a quelli del record corrente a
-    # getPosition = db.session.query(func.count(distinct(a.score))).filter(a.score > b.score).subquery()
-    #ritorna tutti i campi della tabella user, e aggiunge la colonna position prendendo i valori dalla subquery getPosition
-    #ordina i record in modo discendente in base alla
-    # return db.session.query(b, getPosition.as_scalar().label("position")).order_by("position").limit(app.config["RESULTS_LIMIT_RANK_ITALY"]).all()
-    return User.query.order_by(User.score).all()
+    return User.query.order_by(User.score).limit(app.config["RESULTS_LIMIT_RANK_ITALY"])
+
+def getUserPosition(user):
+    return db.session.query(func.count(distinct(User.score))).filter(User.score > user.score).scalar() + 1
