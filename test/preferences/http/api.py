@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from flask import json
 from tp.preferences.models import Preferences
 
 #Utility methods
