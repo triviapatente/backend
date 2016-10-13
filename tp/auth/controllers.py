@@ -157,5 +157,4 @@ def getItalianRank():
     user = {"user": g.user, "position": getUserPosition(g.user)}
     if user not in italianRank:
         italianRank[-1] = user
-    print italianRank
     return jsonify(rank = italianRank)
