@@ -78,7 +78,9 @@ def init(testing = False, ci = False):
     from tp.message.controllers import message
     from tp.push.controllers import push
     from tp.preferences.controllers import preferences
-    from tp.purchases.controllers import shop
+    from tp.purchases.controllers import shop, initPrices
+    # init prices
+    initPrices()
 
 
     # Register blueprint(s)
