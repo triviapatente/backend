@@ -11,7 +11,7 @@ from test.auth.socket.api import login
 class TPTestCase(TestCase):
     def setUp(self):
         self.app = get_test_client()
-        self.socket = socketio.test_client(app)
+        self.socket = get_socket_client()
         #il db è inizializzato a ogni test
         db.drop_all()
         db.create_all()
@@ -19,13 +19,13 @@ class TPTestCase(TestCase):
 class TPAuthTestCase(TPTestCase):
     def setUp(self, socket = False):
         super(TPAuthTestCase, self).setUp()
-        response = register(self.app, "pippo", "pippo@gmail.com", "pippo")
+        response = register(self, "pippo", "pippo@gmail.com", "pippo")
         self.token = response.json.get("token")
         self.user = response.json.get("user")
         assert self.token
         assert self.user
         if socket:
-            response = login(self.socket, self.token)
+            response = login(self, self.token)
             assert response.json.get("success") == True
 
 #metodo che ottiene il client per fare il test, un pò modificato
@@ -36,6 +36,10 @@ def get_test_client():
     test_client.post = fake_request(test_client, "post")
     return test_client
 
+def get_socket_client():
+    socket_client = socketio.test_client(app)
+    socket_client.get_received = fake_socket_request(socket_client)
+    return socket_client
 #metodo che ritorna uno specifico metodo di app con delle modifiche
 
 #ESEMPIO
@@ -64,3 +68,15 @@ def fake_request(test_client, fn):
         response.json = json.loads(response.data)
         return response
     return request
+
+def fake_socket_request(socket):
+    oldmethod = socket.get_received
+    def get_received():
+        #chiamo il metodo che si chiamava fn in app, ripassando gli argomenti misti contenuti in args come argomenti della funzione
+        response = oldmethod()
+        args = response[0].get("args")
+        json = args[0]
+        output = lambda: None
+        output.json = json
+        return output
+    return get_received
