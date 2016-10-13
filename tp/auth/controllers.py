@@ -142,17 +142,11 @@ def getItalianRank():
     #chiedo la classifica (elenco utenti ordinato in base al punteggio) dei primi n utenti
     rank = getRank()
     # calcolo le posizioni per gli utenti nella top 10
-    lastScore = rank[0].score
-    position = 1
-    italianRank = []
+    lastScore, position, italianRank = rank[0].score, 1, []
     for player in rank:
         if lastScore != player.score:
-            position = position + 1
-            lastScore = player.score
-        u = {}
-        u["user"] = player
-        u["position"] = position
-        italianRank.append(u)
+            position, lastScore = position + 1, player.score
+        italianRank.append({"user": player, "position": position})
     # prendo la posizione dell'utente e verifico che sia presente
     user = {"user": g.user, "position": getUserPosition(g.user)}
     if user not in italianRank:
