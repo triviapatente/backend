@@ -28,7 +28,7 @@ def filter_input_room(f):
             g.roomName = roomName(id, type)
             return f(*args, **kwargs)
         else:
-            raise ChangeFailed()
+            raise NotAllowed()
     return decorated_function
 
 #funzione che controlla che l'utente sia nella room giusta per effettuare la richiesta
