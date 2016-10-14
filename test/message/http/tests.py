@@ -53,5 +53,5 @@ class MessageHTTPTestCase(TPAuthTestCase):
 
         print "#4: Number of messages less then max per scroll when there are more then max to get"
         # come 2 ma ce ne sono più del massimo che sono più vecchi di quella data
-        messageList = getList(self, self.game_id, datetime.now()).json.get("messages")
+        messageList = getList(self, self.game_id).json.get("messages")
         assert len(messageList) <= self.maxMessages
