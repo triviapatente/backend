@@ -10,6 +10,11 @@ from tp.base.models import *
 from tp.game.models import *
 from tp.preferences.models import *
 import traceback
+
+# enumeration of room type
+from enum import Enum
+class RoomType(Enum):
+    game = "game"
 # routine per le transazioni in db, riceve come parametro una funzione ##transaction che contiene le operazioni della transazione
 # in ##params sono contenuti i parametri da passare alla funzione (sono un dizionario)
 def doTransaction(transaction, **params):
