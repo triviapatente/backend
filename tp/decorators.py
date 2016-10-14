@@ -65,7 +65,8 @@ def fetch_models(keys):
             for key, model in keys.items():
                 id = input.get(key)
                 obj = None
-                if id: obj = db.session.query(model).filter_by(id = id).first()
+                if id:
+                    obj = db.session.query(model).filter_by(id = id).first()
                 if obj:
                     g.models[key] = obj
                 else:
