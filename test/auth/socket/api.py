@@ -9,8 +9,6 @@ def login(self, socket = None, token = None):
     socket.emit("auth", {"token": token})
     return socket.get_received()
 
-def logout(self, socket = None):
-    if not socket:
-        socket = self.socket
+def logout(socket):
     socket.emit("logout")
     return socket.get_received()
