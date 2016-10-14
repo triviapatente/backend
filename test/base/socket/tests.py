@@ -51,9 +51,9 @@ class BaseSocketTestCase(TPAuthTestCase):
 
     def test_leave_room(self):
         game_id = self.game.get("id")
+        join_room(self.socket, game_id, "game")
 
         print "#1 mi tolgo da una room in cui sono presente"
-        join_room(self.socket, game_id, "game")
         response = leave_room(self.socket, game_id, "game")
         assert response.json.get("success") == True
 
