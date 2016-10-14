@@ -74,7 +74,7 @@ def randomSearch():
 @auth_required
 def getPendingInvites():
     invites = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).all()
-    return jsonify(invites = invites)
+    return jsonify(success = True, invites = invites)
 
 #considerare di dare questa info alla creazione del websocket
 @game.route("/invites/badge", methods = ["GET"])
