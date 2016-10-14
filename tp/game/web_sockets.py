@@ -20,12 +20,13 @@ def init_round(data):
     #ottengo i modelli
     game = g.models["game"]
     number = g.models["number"]
-    #ottengo gli utenti del match
-    users = User.query.with_entities(User.id).join(Game).filter(Game.id == game.id)
-    #controllo se ci sono risposte non date dagli utenti
-    unanswered_questions_count = Question.query.filter_by(round_id = number - 1).filter(answer is None).filter(Question.user_id in users).count()
-    if unanswered_questions_count:
-        raise NotAllowed()
+    if number > 2:
+        #ottengo gli utenti del match
+        users = User.query.with_entities(User.id).join(Game).filter(Game.id == game.id)
+        #controllo se ci sono risposte non date dagli utenti
+        unanswered_questions_count = Question.query.filter(Question.number == number - 2).filter(answer is None).filter(Question.user_id in users).count()
+        if unanswered_questions_count:
+            raise NotAllowed()
     #ottengo il round di riferimento
     round = Round.query.filter(game_id = game.id, number = number).one()
     #se è nullo
