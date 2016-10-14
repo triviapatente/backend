@@ -55,7 +55,7 @@ def needs_values(method, *keys):
     return decorator
 
 #per controllare le coppie classi id per vedere che l'id sia valido
-def fetch_models(keys):
+def fetch_models(**keys):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):

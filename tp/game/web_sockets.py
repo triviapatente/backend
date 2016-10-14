@@ -10,9 +10,9 @@ from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 
 #TODO: test
-@socketio.on("round")
+@socketio.on("init_round")
 @needs_values("SOCKET", "number", "game")
-@fetch_models({"game": Game})
+@fetch_models(game = Game)
 @check_in_room("game", "game")
 def init_round(data):
     #ottengo i modelli
@@ -53,7 +53,7 @@ def init_round(data):
 #TODO: test
 @socketio.on("get_questions")
 @needs_values("SOCKET", "round_id", "game", "category")
-@fetch_models({"round_id": Round, "game": Game, "category": Category})
+@fetch_models(round_id = Round, game = Game, category = Category)
 @check_in_room("game", "game")
 def get_questions(data):
     #ottengo i modelli dalla richiesta
@@ -79,9 +79,9 @@ def get_questions(data):
 @socketio.on("get_categories")
 @needs_values("SOCKET", "round_id", "game")
 #round id, non round number!!!
-@fetch_models({"round_id": Round, "game": Game})
+@fetch_models(round_id = Round, game = Game)
 @check_in_room("game", "game")
-def get_random_categories():
+def get_random_categories(data):
     #ottengo i modelli dalla richiesta
     round = g.models["round_id"]
     game = g.models["game"]
@@ -106,7 +106,7 @@ def get_random_categories():
 #TODO: test
 @socketio.on("answer")
 @needs_values("SOCKET", "answer", "game", "question")
-@fetch_models({"game": Game, "question": Question})
+@fetch_models(game = Game, question = Question)
 @check_in_room("game", "game")
 def answer(data):
     #ottengo i modelli
@@ -131,7 +131,7 @@ def answer(data):
 #TODO: test
 @socketio.on("choose_category")
 @needs_values("SOCKET", "category", "game", "round")
-@fetch_models({"game": Game, "round": Round, "category": Category})
+@fetch_models(game = Game, round = Round, category = Category)
 @check_in_room("game", "game")
 def choose_category(data):
     #ottengo i modelli

@@ -25,7 +25,7 @@ def welcome():
 @game.route("/new", methods = ["POST"])
 @auth_required
 # @need_values("POST", "number_of_players")
-@fetch_models({"opponent": User})
+@fetch_models(opponent = User)
 def newGame():
     opponent = g.models["opponent"]
     output = doTransaction(createGame, **({"opponent": opponent}))
@@ -87,7 +87,7 @@ def getPendingInvitesBadge():
 #TODO: controllare che l'invito non sia già stato accettato
 @game.route("/invites/<int:game_id>", methods = ["POST"])
 @needs_values("POST", "accepted")
-@fetch_models({"game_id": Game})
+@fetch_models(game_id = Game)
 @auth_required
 def processInvite(game_id):
     invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id).first()
