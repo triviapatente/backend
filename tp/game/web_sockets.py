@@ -19,6 +19,12 @@ def init_round(data):
     #ottengo i modelli
     game = g.models["game"]
     number = g.models["number"]
+    #ottengo gli utenti del match
+    users = User.query.with_entities(User.id).join(Game).filter(Game.id == game.id)
+    #controllo se ci sono risposte non date dagli utenti
+    unanswered_questions_count = Question.query.filter_by(round_id = number - 1).filter(answer is None).filter(Question.user_id in users).count()
+    if unanswered_questions_count:
+        raise NotAllowed()
     #ottengo il round di riferimento
     round = Round.query.filter(game_id = game.id, number = number).one()
     #se è nullo
@@ -30,16 +36,17 @@ def init_round(data):
         #lo salvo in db
         db.session.add(round)
         db.session.commit()
+
     #risposta standard
     output = {"round": round, success: True}
+    #se questo non è il primo round
+    if round.number > 1:
+        #vado a prendere le risposte del precedente round degli altri giocatori
+        previousAnswers = Question.query.filter_by(user_id != g.user.id, game_id = game.id, number = round.number - 1).all()
+        # le aggiungo alla risposta
+        output["previous_answers"] = previous_answers
     #se il dealer sono io
     if round.dealer_id == g.user.id:
-        #se questo non è il primo round
-        if round.number > 1:
-            #vado a prendere le risposte del precedente round degli altri giocatori
-            previousAnswers = Question.query.filter_by(user_id != g.user.id, game_id = game.id, number = round.number - 1).all()
-            # le aggiungo alla risposta
-            output["previous_answers"] = previous_answers
         #invio la risposta
         emit("round", output)
     elif round.category_id is None:
