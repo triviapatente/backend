@@ -15,6 +15,7 @@ class TPException(Exception):
         rv['message'] = self.message
         rv['parameters'] = self.parameters
         rv['success'] = False
+        rv["status_code"] = self.status_code
         rv = {k: v for k, v in rv.items() if v != None}
         return rv
 
