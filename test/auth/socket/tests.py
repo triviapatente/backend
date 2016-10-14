@@ -6,11 +6,12 @@ class AuthSocketTestCase(TPAuthTestCase):
     #TEST METHODS
     def test_login(self):
         print "#2: Successfull Login"
-        response = login(self, self.token)
+        response = login(self)
         assert response.json.get("success") == True
 
     def test_logout(self):
-        response = login(self, self.token)
+        response = login(self)
+        
         print "#1: Successfull logout"
         response = logout(self)
         assert response.json.get("success") == True

@@ -10,7 +10,3 @@ def login(self, token = None):
 def logout(self):
     self.socket.emit("logout")
     return self.socket.get_received()
-
-def register(self, username, email, password):
-    response = register_user(self, username, email, password)
-    return response.json.get("token")
