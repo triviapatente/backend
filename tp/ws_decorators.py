@@ -8,7 +8,7 @@ from tp.game.models import partecipation
 from tp.exceptions import ChangeFailed, NotAllowed
 from tp.auth.utils import authenticate
 from tp.base.utils import roomName
-
+from utils import RoomType
 #per controllare che l'utente possa accedere alla room alla quale vuole accedere
 def filter_input_room(f):
     @wraps(f)
@@ -19,7 +19,7 @@ def filter_input_room(f):
         type = params.get("type")
         enabled = True
         #unico caso al momento, ma in caso di riutilizzo del sistema room ci saranno altri casi
-        if type == "game":
+        if type == RoomType.game.value:
             query = db.session.query(partecipation).filter_by(user_id = g.user.id, game_id = id)
             enabled = query.count() > 0
         else:
