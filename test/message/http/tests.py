@@ -28,7 +28,7 @@ class MessageHTTPTestCase(TPAuthTestCase):
         join_room(self.socket, self.game_id, "game")
         # creo un numero di messaggi superiore a quello di massimo di getList
         for i in range(0, self.maxMessages + 10):
-            self.messages.append(send_message(self.socket, self.game_id, "Message%s" % i).json.get("message"))
+            self.messages.append(send_message(self.game_id, "Message%s" % i).json.get("message"))
 
     ###TEST METHODS###
     #per creare un metodo di test basta mettere test_ prima del metodo
