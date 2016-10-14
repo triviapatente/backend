@@ -85,3 +85,31 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = get_pending_invites(self, opponent_token)
         assert response.json.get("success") == True
         assert len(response.json.get("invites")) == 3
+
+    def test_get_pending_invites_badge(self):
+        #ottengo id e token dell'opponent del quale voglio vedere gli inviti
+        opponent_id = self.first_opponent.get("user").get("id")
+        opponent_token = self.first_opponent.get("token")
+
+        print "#1 ottengo gli inviti, con 0 inviti"
+        response = get_pending_invites_badge(self, opponent_token)
+        assert response.json.get("success") == True
+        assert response.json.get("badge") == 0
+
+        print "#2 ottengo gli inviti, con 1 invito"
+        new_game(self, opponent_id)
+        response = get_pending_invites_badge(self, opponent_token)
+        assert response.json.get("success") == True
+        assert response.json.get("badge") == 1
+
+        print "#2 ottengo gli inviti, con 2 inviti"
+        new_game(self, opponent_id)
+        response = get_pending_invites_badge(self, opponent_token)
+        assert response.json.get("success") == True
+        assert response.json.get("badge") == 2
+
+        print "#3 ottengo gli inviti, con 3 inviti"
+        new_game(self, opponent_id)
+        response = get_pending_invites_badge(self, opponent_token)
+        assert response.json.get("success") == True
+        assert response.json.get("badge") == 3
