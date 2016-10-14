@@ -11,6 +11,7 @@ from flask import g
 
 #TODO: test
 @socketio.on("init_round")
+@ws_auth_required
 @needs_values("SOCKET", "number", "game")
 @fetch_models(game = Game)
 @check_in_room("game", "game")
@@ -52,6 +53,7 @@ def init_round(data):
 
 #TODO: test
 @socketio.on("get_questions")
+@ws_auth_required
 @needs_values("SOCKET", "round_id", "game", "category")
 @fetch_models(round_id = Round, game = Game, category = Category)
 @check_in_room("game", "game")
@@ -77,6 +79,7 @@ def get_questions(data):
 
 #TODO: test
 @socketio.on("get_categories")
+@ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
 #round id, non round number!!!
 @fetch_models(round_id = Round, game = Game)
@@ -105,6 +108,7 @@ def get_random_categories(data):
 
 #TODO: test
 @socketio.on("answer")
+@ws_auth_required
 @needs_values("SOCKET", "answer", "game", "question")
 @fetch_models(game = Game, question = Question)
 @check_in_room("game", "game")
@@ -130,6 +134,7 @@ def answer(data):
 
 #TODO: test
 @socketio.on("choose_category")
+@ws_auth_required
 @needs_values("SOCKET", "category", "game", "round")
 @fetch_models(game = Game, round = Round, category = Category)
 @check_in_room("game", "game")
