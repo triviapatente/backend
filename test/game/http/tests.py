@@ -9,13 +9,13 @@ class GameHTTPTestCase(TPAuthTestCase):
 
     def setUp(self):
         super(GameHTTPTestCase, self).setUp()
-        self.first_opponent = register(self, "test1", "test1@gmail.com", "test").json.get("user")
-        self.second_opponent = register(self, "test2", "test2@gmail.com", "test").json.get("user")
-        self.third_opponent = register(self, "test3", "test3@gmail.com", "test").json.get("user")
+        self.first_opponent = register(self, "test1", "test1@gmail.com", "test").json
+        self.second_opponent = register(self, "test2", "test2@gmail.com", "test").json
+        self.third_opponent = register(self, "test3", "test3@gmail.com", "test").json
 
 
     def test_new_game(self):
-        opponent_id = self.first_opponent.get("id")
+        opponent_id = self.first_opponent.get("user").get("id")
 
         print "#1 creazione game"
         response = new_game(self, opponent_id)
@@ -57,3 +57,31 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert user3
 
         print "Opponents: ", user1.get("id"), user2.get("id"), user3.get("id")
+
+    def test_get_pending_invites(self):
+        #ottengo id e token dell'opponent del quale voglio vedere gli inviti
+        opponent_id = self.first_opponent.get("user").get("id")
+        opponent_token = self.first_opponent.get("token")
+
+        print "#1 ottengo gli inviti, con 0 inviti"
+        response = get_pending_invites(self, opponent_token)
+        assert response.json.get("success") == True
+        assert len(response.json.get("invites")) == 0
+
+        print "#2 ottengo gli inviti, con 1 invito"
+        new_game(self, opponent_id)
+        response = get_pending_invites(self, opponent_token)
+        assert response.json.get("success") == True
+        assert len(response.json.get("invites")) == 1
+
+        print "#2 ottengo gli inviti, con 2 inviti"
+        new_game(self, opponent_id)
+        response = get_pending_invites(self, opponent_token)
+        assert response.json.get("success") == True
+        assert len(response.json.get("invites")) == 2
+
+        print "#3 ottengo gli inviti, con 3 inviti"
+        new_game(self, opponent_id)
+        response = get_pending_invites(self, opponent_token)
+        assert response.json.get("success") == True
+        assert len(response.json.get("invites")) == 3

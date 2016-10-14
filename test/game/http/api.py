@@ -6,8 +6,10 @@ def new_game(self, opponent_id):
 def new_random_game(self):
     return self.app.post("/game/new/random", token = self.token)
 
-def get_pending_invites(self):
-    return self.app.post("/game/invites", token = self.token)
+def get_pending_invites(self, token = None):
+    if token is None:
+        token = self.token
+    return self.app.get("/game/invites", token = token)
 
 def get_pending_invites_badge(self):
     return self.app.post("/game/invites/badge", token = self.token)
