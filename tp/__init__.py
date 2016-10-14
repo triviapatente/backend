@@ -60,7 +60,7 @@ def init(testing = False, ci = False):
     def handle_socket_error(error):
         response = None
         if issubclass(error.__class__, TPException):
-            response = json.dumps(error.to_dict())
+            response = error.to_dict()
             print "Socket Error %d: %s" % (error.status_code, error.message)
         else:
             error = str(error)
