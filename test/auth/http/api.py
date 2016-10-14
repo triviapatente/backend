@@ -1,6 +1,5 @@
 from flask import json
 
-#Utility methods
 def login(self, username, password):
     return self.app.post("/auth/login", data = {"user": username, "password": password})
 def register(self, username, email, password):
