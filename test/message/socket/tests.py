@@ -7,7 +7,8 @@ from test.game.http.api import new_game
 from api import *
 
 class MessageSocketTestCase(TPAuthTestCase):
-    opponent_client, game_id = None, None
+    opponent_socket = None
+    game_id = None
 
     def setUp(self):
         super(MessageSocketTestCase, self).setUp(True)
