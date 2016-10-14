@@ -25,7 +25,7 @@ class TPAuthTestCase(TPTestCase):
         assert self.token
         assert self.user
         if socket:
-            response = login(self, self.token)
+            response = login(self, None, self.token)
             assert response.json.get("success") == True
 
 #metodo che ottiene il client per fare il test, un pò modificato
