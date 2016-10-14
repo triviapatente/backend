@@ -2,11 +2,6 @@
 from test.shared import TPTestCase
 from api import *
 class AuthSocketTestCase(TPTestCase):
-
-    #Utility methods
-
-
-
     #TEST METHODS
 
     def test_login(self):
