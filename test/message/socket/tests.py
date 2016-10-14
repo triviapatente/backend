@@ -26,7 +26,7 @@ class MessageSocketTestCase(TPAuthTestCase):
         content = "Test"
 
         print "#1: Send message on right room"
-        message_sent = send_message(self.game_id, content).json
+        message_sent = send_message(self.socket, self.game_id, content).json
         # check success
         assert message_sent.get("success")
         # check message and message content
@@ -37,6 +37,6 @@ class MessageSocketTestCase(TPAuthTestCase):
         assert False
 
         print "#3: Send message on wrong room"
-        message_sent = send_message(self.game_id + 1, content).json
+        message_sent = send_message(self.socket, self.game_id + 1, content).json
         # check success == False
         assert message_sent.get("success") == False
