@@ -95,7 +95,7 @@ class AuthHTTPTestCase(TPTestCase):
         token = login(self, "user", "user").json.get("token")
 
         print "#1: Cambio di nome effettuato"
-        response = changeName(self, token, "name")
+        response = changeName(self, "name", token)
         assert response.status_code == 200 and response.json.get("user").get("name") == "name"
 
     def test_changeSurname(self):
@@ -103,7 +103,7 @@ class AuthHTTPTestCase(TPTestCase):
         token = login(self, "user", "user").json.get("token")
 
         print "#1: Cambio di cognome effettuato"
-        response = changeSurname(self, token, "surname")
+        response = changeSurname(self, "surname", token)
         assert response.status_code == 200 and response.json.get("user").get("surname") == "surname"
 
     def test_changeImage(self):
@@ -114,11 +114,11 @@ class AuthHTTPTestCase(TPTestCase):
         invalidImage = (io.BytesIO(b'my file contents'), "image.exe")
 
         print "#1: Immagine non salvata se non valida"
-        response = changeImage(self, token, invalidImage)
+        response = changeImage(self, invalidImage, token)
         assert response.status_code == 405
 
         print "#2: Immagine salvata correttamente se valida"
-        response = changeImage(self, token, validImage)
+        response = changeImage(self, validImage, token)
         imagePath = response.json.get("user")["image"]
         assert response.status_code == 200 and imagePath
 
