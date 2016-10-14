@@ -8,15 +8,6 @@ from random import randint
 from flask import g
 from tp.utils import doTransaction
 
-# utils per il calcolo del punteggio
-
-# enumeration of possible results for match
-from enum import Enum
-class Score(Enum):
-    win = 1
-    draw = 0.5
-    loss = 0
-
 #metodo transazionale per la creazione di una partita
 def createGame(**params):
     new_game = Game(creator = g.user)
@@ -28,6 +19,14 @@ def createGame(**params):
     invite = Invite(sender = g.user, receiver = opponent, game = new_game)
     db.session.add(invite)
     return new_game
+
+# utils per il calcolo del punteggio
+# enumeration of possible results for match
+from enum import Enum
+class Score(Enum):
+    win = 1
+    draw = 0.5
+    loss = 0
 
 # dato il risultato effettivo (##effective), quello previsto (##expected) e il vecchio punteggio (##score)
 # ritorna il punteggio effettivo
@@ -47,6 +46,66 @@ def k_factor(n_games, friendly_game):
 def expectedScore(score_A, score_B, scoreRange):
     expected = 1 / ( 1 + 10**((score_B - score_A) / scoreRange))
     return expected
+
+# funzione che aggiorna il punteggio di una partita (##game) trovata con un abbinamento in ##scoreRange
+def updateScore(game, scoreRange):
+    # prendo gli utenti di una partita
+    users = getUsersFromGame(game)
+    # prendo il vincitore
+    winner = getWinner(game)
+    # creo un dictionary che contenga i parametri per l'update del punteggio
+    updateParams = {}
+    for user in users:
+        params = {}
+        params["effectiveResult"] = getEffectiveResult(user, winner)
+        params["expectedScore"] = getExpectedScoreForUser(user, users, scoreRange)
+        params["k_factor"] = getMultiplierFactorForUser(user, users)
+        updateParams[user] = params
+    # calcolo i nuovi punteggi
+    # params = {"users": users, "updateParams": {"effectiveResult": effectiveResult, "expectedScore": expectedScore, "k_factor": k_factor}}
+    def newScores(**params):
+        for user in params["users"]:
+            # assegno ad ogni utente il suo nuovo punteggio
+            user.score = new_score(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"], user.score)
+            db.session.add(user)
+        return users
+    return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
+
+# funzione che ritorna gli utenti di una partita (##game)
+def getUsersFromGame(game):
+    # return User.query.with_entities(User).join(Game).filter(Game.id == game.id).all()
+    return User.query.filter(User.games.any(id = game.id)).all()
+
+# funzione che ritorna l'utente vincitore di una partita (##game)
+def getWinner(game):
+    return User.query.filter_by(id = game.winner_id).first()
+
+# funzione che ritorna il risultato previsto per ##user_A dati gli ##users di una partita avvenuta in ##scoreRange
+def getExpectedScoreForUser(user_A, users, scoreRange):
+    # il punteggio aspettato di ogni giocatore è calcolato come la media dei punteggi aspettati di tutte le subpartite
+    return sum(expectedScore(user_A.score, user_B.score, float(scoreRange)) for user_B in users if not user_B == user_A)/(len(users)-1)
+
+# funzione che ritorna il coefficiente moltiplicativo per l'utente (##user_A) dati gli utenti (##users)
+def getMultiplierFactorForUser(user_A, users):
+    friendly_game = False
+    # friendly_game = game.friendly_game # decommentare questa riga una volta introdotte le amichevoli
+    # media dei fattori moltiplicativi di tutte le sub partite
+    return sum(k_factor(getNumberOfGames(user_A, user_B), friendly_game) for user_B in users if not user_B == user_A)/(len(users)-1)
+
+# funzione che ritorna il risultato effettivo per l'utente (##user) dato il vincitore (##winner)
+def getEffectiveResult(user, winner):
+    # se non esiste un vincitore
+    if not winner:
+        # pareggio
+        return Score.draw.value
+    # se l'utente è il vincitore
+    elif user == winner:
+        # vittoria
+        return Score.win.value
+    # se l'utente ha perso
+    else:
+        # sconfitta
+        return Score.loss.value
 
 #metodo che genera il dealer del round (colui che può scegliere la categoria)
 ##game_id: id del gioco di appartenenza, ##number: numero del round
@@ -123,68 +182,7 @@ def getNumberOfActiveGames(users):
         users_games_count[user.username] = 0
     return users_games_count
 
-
 # funzione che ritorna il numero di partite tra due giocatori (##user_A, ##user_B)
 def getNumberOfGames(user_A, user_B):
     # prendo le partite dell'utente e le conto
     return Game.query.filter(Game.users.any(User.id == user_A.id)).filter(Game.users.any(User.id == user_B.id)).count()
-
-# funzione che aggiorna il punteggio di una partita (##game) trovata con un abbinamento in ##scoreRange
-def updateScore(game, scoreRange):
-    # prendo gli utenti di una partita
-    users = getUsersFromGame(game)
-    # prendo il vincitore
-    winner = getWinner(game)
-    # creo un dictionary che contenga i parametri per l'update del punteggio
-    updateParams = {}
-    for user in users:
-        params = {}
-        params["effectiveResult"] = getEffectiveResult(user, winner)
-        params["expectedScore"] = getExpectedScoreForUser(user, users, scoreRange)
-        params["k_factor"] = getMultiplierFactorForUser(user, users)
-        updateParams[user] = params
-    # calcolo i nuovi punteggi
-    # params = {"users": users, "updateParams": {"effectiveResult": effectiveResult, "expectedScore": expectedScore, "k_factor": k_factor}}
-    def newScores(**params):
-        for user in params["users"]:
-            # assegno ad ogni utente il suo nuovo punteggio
-            user.score = new_score(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"], user.score)
-            db.session.add(user)
-        return users
-    return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
-
-# funzione che ritorna gli utenti di una partita (##game)
-def getUsersFromGame(game):
-    # return User.query.with_entities(User).join(Game).filter(Game.id == game.id).all()
-    return User.query.filter(User.games.any(id = game.id)).all()
-
-# funzione che ritorna l'utente vincitore di una partita (##game)
-def getWinner(game):
-    return User.query.filter_by(id = game.winner_id).first()
-
-# funzione che ritorna il risultato previsto per ##user_A dati gli ##users di una partita avvenuta in ##scoreRange
-def getExpectedScoreForUser(user_A, users, scoreRange):
-    # il punteggio aspettato di ogni giocatore è calcolato come la media dei punteggi aspettati di tutte le subpartite
-    return sum(expectedScore(user_A.score, user_B.score, float(scoreRange)) for user_B in users if not user_B == user_A)/(len(users)-1)
-
-# funzione che ritorna il coefficiente moltiplicativo per l'utente (##user_A) dati gli utenti (##users)
-def getMultiplierFactorForUser(user_A, users):
-    friendly_game = False
-    # friendly_game = game.friendly_game # decommentare questa riga una volta introdotte le amichevoli
-    # media dei fattori moltiplicativi di tutte le sub partite
-    return sum(k_factor(getNumberOfGames(user_A, user_B), friendly_game) for user_B in users if not user_B == user_A)/(len(users)-1)
-
-# funzione che ritorna il risultato effettivo per l'utente (##user) dato il vincitore (##winner)
-def getEffectiveResult(user, winner):
-    # se non esiste un vincitore
-    if not winner:
-        # pareggio
-        return Score.draw.value
-    # se l'utente è il vincitore
-    elif user == winner:
-        # vittoria
-        return Score.win.value
-    # se l'utente ha perso
-    else:
-        # sconfitta
-        return Score.loss.value
