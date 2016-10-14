@@ -5,7 +5,7 @@ from tp.auth.models import User
 from tp.game.models import *
 from tp.utils import doTransaction
 from tp.decorators import auth_required, fetch_models, needs_values
-from tp.exceptions import ChangeFailed, Forbidden
+from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
 from tp.game.utils import updateScore, searchInRange, createGame
 
 game = Blueprint("game", __name__, url_prefix = "/game")
@@ -81,19 +81,20 @@ def getPendingInvites():
 @auth_required
 def getPendingInvitesBadge():
     badge = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).count()
-    return jsonify(badge = badge)
+    return jsonify(success = True, badge = badge)
 
 #considerare di dare questa info alla creazione del websocket
 #TODO: controllare che l'invito non sia già stato accettato
 @game.route("/invites/<int:game_id>", methods = ["POST"])
 @needs_values("POST", "accepted")
+@fetch_models({"game_id": Game})
 @auth_required
 def processInvite(game_id):
     invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id).first()
     if not invite:
-        raise ChangeFailed()
+        raise NotAllowed()
     #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
     invite.accepted = g.post["accepted"]
     db.session.add(invite)
     db.session.commit()
-    return jsonify(success = True)
+    return jsonify(success = True, invite = invite)
