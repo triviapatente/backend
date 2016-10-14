@@ -127,35 +127,35 @@ class GameHTTPTestCase(TPAuthTestCase):
         foreign_game = new_game(self, other_opponent_id, opponent_token).json.get("game")
 
         print "#1 accetto/rifiuto un invito di un game valido"
-        response = process_invite(self, opponent_token, game_id, True)
+        response = process_invite(self, game_id, True, opponent_token)
         assert response.json.get("success") == True
         assert response.json.get("invite")
 
-        response = process_invite(self, opponent_token, game_id, False)
+        response = process_invite(self, game_id, False, opponent_token)
         assert response.json.get("success") == True
         assert response.json.get("invite")
 
         print "#2 accetto/rifiuto un invito di un game inesistente"
-        response = process_invite(self, opponent_token, 32423, True)
+        response = process_invite(self, 32423, True, opponent_token, )
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        response = process_invite(self, opponent_token, 32423, False)
+        response = process_invite(self, 32423, False, opponent_token)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
         print "#3 accetto/rifiuto un invito di un game a cui non partecipo"
-        response = process_invite(self, opponent_token, foreign_game.get("id"), True)
+        response = process_invite(self, foreign_game.get("id"), True, opponent_token)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        response = process_invite(self, opponent_token, foreign_game.get("id"), False)
+        response = process_invite(self, foreign_game.get("id"), False, opponent_token)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
         print "#4 Parametri mancanti"
         print "#4.1 accept mancante"
-        response = process_invite(self, opponent_token, game_id, None)
+        response = process_invite(self, game_id, None, opponent_token)
         assert response.json.get("success") == False
         print response.json.get("status_code")
         assert response.json.get("status_code") == 400

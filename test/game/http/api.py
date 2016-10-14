@@ -13,12 +13,12 @@ def get_pending_invites(self, token = None):
         token = self.token
     return self.app.get("/game/invites", token = token)
 
-def get_pending_invites_badge(self, token):
+def get_pending_invites_badge(self, token = None):
     if not token:
         token = self.token
     return self.app.get("/game/invites/badge", token = token)
 
-def process_invite(self, token, game_id, accepted):
+def process_invite(self, game_id, accepted, token = None):
     if not token:
         token = self.token
     return self.app.post("/game/invites/%s" % game_id, token = token, data = {"accepted": accepted})
