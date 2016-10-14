@@ -78,9 +78,7 @@ def init(testing = False, ci = False):
     from tp.message.controllers import message
     from tp.push.controllers import push
     from tp.preferences.controllers import preferences
-    from tp.purchases.controllers import shop, initPrices
-    # init prices
-    initPrices()
+    from tp.purchases.controllers import shop
 
 
     # Register blueprint(s)
@@ -137,3 +135,6 @@ def init(testing = False, ci = False):
 
     # This will create the database file using SQLAlchemy
     db.create_all()
+
+    from tp.purchases.controllers import initPrices
+    initPrices()
