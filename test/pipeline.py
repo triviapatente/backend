@@ -6,3 +6,4 @@ from auth.socket.tests import *
 from preferences.http.tests import *
 from purchases.http.tests import *
 from base.socket.tests import *
+from game.http.tests import *
