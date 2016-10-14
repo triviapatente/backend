@@ -11,10 +11,7 @@ from tp.game.models import *
 from tp.preferences.models import *
 import traceback
 
-# enumeration of room type
-from enum import Enum
-class RoomType(Enum):
-    game = "game"
+
 # routine per le transazioni in db, riceve come parametro una funzione ##transaction che contiene le operazioni della transazione
 # in ##params sono contenuti i parametri da passare alla funzione (sono un dizionario)
 def doTransaction(transaction, **params):
@@ -74,5 +71,5 @@ def getAllRequestParams():
     if hasattr(request, "form"): stores.append(request.form)
     if hasattr(request, "args"): stores.append(request.args)
     if hasattr(request, "view_args"): stores.append(request.view_args)
-    
+
     return {k: v for d in stores for k, v in d.items()}

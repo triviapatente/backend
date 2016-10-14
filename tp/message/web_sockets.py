@@ -7,11 +7,12 @@ from tp.message.utils import *
 from tp.game.models import Game
 from tp.decorators import needs_values
 from tp.ws_decorators import ws_auth_required, check_in_room
+from tp.base.utils import RoomType
 
 @socketio.on("send_message")
 @ws_auth_required
 @needs_values("SOCKET", "game_id", "content")
-@check_in_room("game", "game_id")
+@check_in_room(RoomType.game, "game_id")
 def on_message(data):
     game = Game.query.filter_by(id = g.params["game_id"]).first()
     message = saveMessage(user = g.user, game = game, message = data["content"])

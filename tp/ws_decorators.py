@@ -8,7 +8,7 @@ from tp.game.models import partecipation
 from tp.exceptions import ChangeFailed, NotAllowed
 from tp.auth.utils import authenticate
 from tp.base.utils import roomName
-from utils import RoomType
+from tp.base.utils import RoomType
 #per controllare che l'utente possa accedere alla room alla quale vuole accedere
 def filter_input_room(f):
     @wraps(f)
