@@ -19,6 +19,7 @@ def join_room_request(data):
 @socketio.on("leave_room")
 @ws_auth_required
 @needs_values("SOCKET", "id", "type")
+@filter_input_room
 def leave_room_request(data):
     #id della room (id del gioco, per esempio)
     id = data.get("id")
