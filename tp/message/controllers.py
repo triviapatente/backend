@@ -13,7 +13,7 @@ def welcome():
     return jsonify(output)
 
 
-@message.route("/list/<int:game_id>/", methods = ["GET"])
+@message.route("/list/<int:game_id>", methods = ["GET"])
 @auth_required
 @needs_values("GET", "datetime")
 def list(game_id):
