@@ -12,7 +12,7 @@ class BaseSocketTestCase(TPAuthTestCase):
         response = register(self, "opponent", "opponent@gmail.com", "opponent")
         self.opponent = response.json.get("user")
         #viene eseguito prima di ogni singolo metodo
-        response = new_game(self, self.token, self.opponent.get("id"))
+        response = new_game(self, self.opponent.get("id"))
         self.game = response.json.get("game")
         print self.game, self.opponent
 

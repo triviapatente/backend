@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db
-from tp.game.models import Game, Round, partecipation
+from tp.game.models import Game, Round, Invite, partecipation
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func
 from random import randint
+from flask import g
 from tp.utils import doTransaction
 
 # utils per il calcolo del punteggio
@@ -15,6 +16,18 @@ class Score(Enum):
     win = 1
     draw = 0.5
     loss = 0
+
+#metodo transazionale per la creazione di una partita
+def createGame(**params):
+    new_game = Game(creator = g.user)
+    opponent = params["opponent"]
+    new_game.users.append(opponent)
+    new_game.users.append(g.user)
+    db.session.add(new_game)
+    #TODO: gestire la logica per mandare le notifiche push a chi di dovere
+    invite = Invite(sender = g.user, receiver = opponent, game = new_game)
+    db.session.add(invite)
+    return new_game
 
 # dato il risultato effettivo (##effective), quello previsto (##expected) e il vecchio punteggio (##score)
 # ritorna il punteggio effettivo
@@ -56,11 +69,17 @@ def get_dealer(game, number):
         #ritorno l'utente immediatamente successivo
         return users[(previous_dealer_position + 1) % n_users]
 
-# funzione che cerca un accoppiamento all'interno del ##range per l'utente ##userA
+# funzione che cerca un accoppiamento all'interno del ##range per l'utente ##current_user
 # ##prevRange serve a evitare di considerare i range già considerati
-def searchInRange(prevRange, scoreRange, userA):
-    # ottengo gli utenti compresi nel range ([userA.score-range;userA.score-prevRange] U [userA.score+prevRange;userA.score+range])
-    allUsersInRange = User.query.filter(or_(and_(User.score < (userA.score + scoreRange), User.score > (userA.score + prevRange)), and_(User.score > userA.score - scoreRange, User.score < userA.score - prevRange))).all()
+def searchInRange(prevRange, scoreRange, current_user):
+    #left_interval rappresenta a livello matematico: [current_user.score-range;current_user.score-prevRange]
+    left_interval = and_(User.score <= (current_user.score + scoreRange), User.score >= (current_user.score + prevRange))
+    #right_interval rappresenta a livello matematico: [current_user.score+prevRange;current_user.score+range]
+    right_interval = and_(User.score >= current_user.score - scoreRange, User.score <= current_user.score - prevRange)
+    #intervals_union rappresenta a livello matematico: ([current_user.score-range;current_user.score-prevRange] U [current_user.score+prevRange;current_user.score+range])
+    intervals_union = or_(left_interval, right_interval)
+    #ottengo gli utenti nell'intervallo che non sono me
+    allUsersInRange = User.query.filter(User.id != current_user.id).filter(intervals_union).all()
     candidates = allUsersInRange
     # vedo se ci sono users nel range
     if allUsersInRange:

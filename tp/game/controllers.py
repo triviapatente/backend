@@ -6,7 +6,7 @@ from tp.game.models import *
 from tp.utils import doTransaction
 from tp.decorators import auth_required, fetch_models, needs_values
 from tp.exceptions import ChangeFailed, Forbidden
-from tp.game.utils import updateScore, searchInRange
+from tp.game.utils import updateScore, searchInRange, createGame
 
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -22,51 +22,53 @@ def welcome():
     return jsonify(output)
 
 #creazione della partita
-@game.route("/new_game", methods = ["POST"])
+@game.route("/new", methods = ["POST"])
 @auth_required
 # @need_values("POST", "number_of_players")
 @fetch_models({"opponent": User})
 def newGame():
-    output = doTransaction(createGame, **({"opponent":g.models["opponent"]}))
+    opponent = g.models["opponent"]
+    output = doTransaction(createGame, **({"opponent": opponent}))
     if output:
-        return jsonify(success = True, game = output)
+        return jsonify(success = True, game = output, user = opponent)
     else:
         raise ChangeFailed()
 
 # ricerca aleatoria di un avversario
-@game.route("/new_game/random", methods = ["POST"])
+@game.route("/new/random", methods = ["POST"])
 @auth_required
 def randomSearch():
     # definisco il numero di cicli massimo di ricerca
     users_scores = User.query.order_by(User.score.desc()).all()
+    # massimo range in cui andare a cercare
     maxRangeToCover = max(users_scores[0].score - g.user.score, g.user.score - users_scores[-1].score)
-    rangeIncrement = app.config["RANGE_INCREMENT"]
-    prevRange = 0
+    #incremento del range, range di partenza
+    rangeIncrement, initialRange = app.config["RANGE_INCREMENT"], app.config["INITIAL_RANGE"]
+    #utente candidato
     opponent = None
-    for scoreRange in range(app.config["INITIAL_RANGE"], maxRangeToCover + rangeIncrement, rangeIncrement):
-        user = searchInRange(prevRange, scoreRange, g.user)
+    #il +1 serve nel caso in cui esistono tutti utenti con lo stesso punteggio (maxRangeToCover sarebbe 0)
+    scoreRange, prevRange = range(initialRange, maxRangeToCover + initialRange + 1, rangeIncrement), 0
+    #per ogni punteggio nello score
+    for entry in scoreRange:
+        #ottengo l'utente candidato nel sottorange
+        user = searchInRange(prevRange, entry, g.user)
+        #se lo trovo, lo prendo
         if user:
             opponent = user
             break
-        prevRange = scoreRange
-
+        prevRange = entry
+    #controllo se non ho trovato nessun utente
+    if opponent is None:
+        return jsonify(success = False)
+    #eseguo la transazione con l'utente trovato
     output = doTransaction(createGame, **({"opponent":opponent}))
+    #gestisco l'output
     if output:
-        return jsonify(game = output)
+        return jsonify(success = True, game = output, user = opponent)
     else:
         raise ChangeFailed()
 
-#metodo transazionale per la creazione di una partita
-def createGame(**params):
-    new_game = Game(creator = g.user)
-    opponent = params["opponent"]
-    new_game.users.append(opponent)
-    new_game.users.append(g.user)
-    db.session.add(new_game)
-    #TODO: gestire la logica per mandare le notifiche push a chi di dovere
-    invite = Invite(sender = g.user, receiver = opponent, game = new_game)
-    db.session.add(invite)
-    return new_game
+
 
 @game.route("/invites", methods = ["GET"])
 @auth_required
