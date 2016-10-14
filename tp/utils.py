@@ -67,6 +67,7 @@ def getAllRequestParams():
     stores = []
     if hasattr(request, "event") and request.event.get("args"): stores.append(request.event.args[0])
     if hasattr(request, "form"): stores.append(request.form)
-    if hasattr(request, "query"): stores.append(request.query)
-    return {k: v for d in stores for k, v in d.items()}
+    if hasattr(request, "args"): stores.append(request.args)
+    if hasattr(request, "view_args"): stores.append(request.view_args)
     
+    return {k: v for d in stores for k, v in d.items()}
