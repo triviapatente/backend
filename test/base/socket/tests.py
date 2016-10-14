@@ -8,7 +8,7 @@ class BaseSocketTestCase(TPAuthTestCase):
     game = None
     opponent = None
     def setUp(self):
-        super(BaseSocketTestCase, self).setUp(True)
+        super(BaseSocketTestCase, self).setUp(socket = True)
         response = register(self, "opponent", "opponent@gmail.com", "opponent")
         self.opponent = response.json.get("user")
         #viene eseguito prima di ogni singolo metodo

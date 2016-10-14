@@ -12,7 +12,7 @@ class MessageSocketTestCase(TPAuthTestCase):
     game_id = None
 
     def setUp(self):
-        super(MessageSocketTestCase, self).setUp(True)
+        super(MessageSocketTestCase, self).setUp(socket = True)
         # creo l'utente con cui conversare
         opponent_response = register(self, "opponent", "opponent@gmail.com", "opponent")
         opponent_id = opponent_response.json.get("user")["id"]
