@@ -29,7 +29,7 @@ def welcome():
 def newGame():
     output = doTransaction(createGame, **({"opponent":g.models["opponent"]}))
     if output:
-        return jsonify(game = output)
+        return jsonify(success = True, game = output)
     else:
         raise ChangeFailed()
 
