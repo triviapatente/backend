@@ -2,8 +2,6 @@
 
 from tp.preferences.models import Preferences
 
-#Utility methods
-
 def changePreferences(self, url, new_value):
     return self.app.post(url, token = self.token, data = {"new_value": new_value})
 
