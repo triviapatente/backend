@@ -9,8 +9,6 @@ import io, os
 class AuthHTTPTestCase(TPTestCase):
 
     ###TEST METHODS###
-    #per creare un metodo di test basta mettere test_ prima del metodo
-
     def test_register(self):
         print "#1: Registrazione corretta"
         response = register(self, "user", "user@gmail.com", "dfsdvsv")
