@@ -3,6 +3,7 @@
 from test.shared import TPAuthTestCase, get_socket_client
 from test.base.socket.api import join_room
 from test.auth.http.api import register
+from test.auth.socket.api import login
 from test.game.http.api import new_game
 from api import *
 
@@ -13,9 +14,13 @@ class MessageSocketTestCase(TPAuthTestCase):
     def setUp(self):
         super(MessageSocketTestCase, self).setUp(True)
         # creo l'utente con cui conversare
-        opponent_id = register(self, "opponent", "opponent@gmail.com", "opponent").json.get("user")["id"]
+        opponent_response = register(self, "opponent", "opponent@gmail.com", "opponent")
+        opponent_id = opponent_response.json.get("user")["id"]
+        opponent_token = opponent_response.json.get("token")
         # creo un socket per il nuovo utente
         self.opponent_socket = get_socket_client()
+        # il socket opponent accede
+        login(self, self.opponent_socket, opponent_token)
         # creo una nuova partita tra l'utente e opponent
         self.game_id = new_game(self, opponent_id).json.get("game")["id"]
         # entrambi gli utenti joinano la loro room
@@ -34,7 +39,7 @@ class MessageSocketTestCase(TPAuthTestCase):
         assert message and message["content"] == content
 
         print "#2: Send message on right room, opponent receives message"
-        assert False
+        print "agvds", self.opponent_socket.get_received()
 
         print "#3: Send message on wrong room"
         message_sent = send_message(self.socket, self.game_id + 1, content).json

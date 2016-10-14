@@ -11,7 +11,7 @@ class AuthSocketTestCase(TPAuthTestCase):
 
     def test_logout(self):
         response = login(self)
-        
+
         print "#1: Successfull logout"
-        response = logout(self)
+        response = logout(self.socket)
         assert response.json.get("success") == True
