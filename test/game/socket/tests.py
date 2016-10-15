@@ -28,7 +28,7 @@ class GameSocketTestCase(TPAuthTestCase):
         self.game_id = self.game.get("id")
         join_room(self.socket, self.game_id, "game")
         join_room(self.opponent_socket, self.game_id, "game")
-
+        #faccio partire il dumb crawler, per generare categorie e domande casualmente
         dumb_crawler()
 
 
@@ -52,7 +52,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 403
         join_room(self.socket, self.game_id, "game")
 
-        print "#3 Creo il primo round e il dealer è il creatore della partita"
+        print "#5 Creo il primo round e il dealer è il creatore della partita"
         Round.query.delete()
         db.session.commit()
         response = init_round(self.opponent_socket, self.game_id, 1)
@@ -60,20 +60,50 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("round")
         assert response.json.get("round").get("dealer_id") == self.game.get("creator_id")
 
-        print "#4 Accedo al round ma il dealer ne sta scegliendo la categoria"
+        print "#6 Accedo al round ma il dealer ne sta scegliendo la categoria"
         Round.query.delete()
         db.session.commit()
-        init_round(self.socket, self.game_id, 1)
-        response = init_round(self.opponent_socket, self.game_id, 1)
+        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        chosen_category_id = get_categories(self.socket, self.game_id, round_id).json.get("categories")[0].get("id")
+        choose_category(self.socket, chosen_category_id, self.game_id, round_id)
+        questions = get_questions(self.socket, round_id, self.game_id).json.get("questions")
+        for question in questions:
+            question_id = question.get("id")
+            answer(self.socket, True, self.game_id, round_id, question_id)
+            answer(self.opponent_socket, True, self.game_id, round_id, question_id)
+
+        response = init_round(self.socket, self.game_id, 2)
         assert response.json.get("success") == True
         assert response.json.get("round")
         assert response.json.get("waiting") == "category"
+        Question.query.delete()
+        ProposedCategory.query.delete()
+        ProposedQuestion.query.delete()
+        Round.query.delete()
+        db.session.commit()
 
-        print "#5 Accedo al round ma colui che dovrebbe essere il nuovo dealer sta ancora giocando il precedente"
+        print "#7 Accedo al round ma colui che dovrebbe essere il nuovo dealer sta ancora giocando il precedente"
+        Round.query.delete()
+        db.session.commit()
+        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        chosen_category_id = get_categories(self.socket, self.game_id, round_id).json.get("categories")[0].get("id")
+        choose_category(self.socket, chosen_category_id, self.game_id, round_id)
+        questions = get_questions(self.socket, round_id, self.game_id).json.get("questions")
+        for question in questions:
+            question_id = question.get("id")
+            #risponde solo self.socket perchè self.opponent_socket è il dealer del round successivo e quindi sta ancora giocando
+            answer(self.socket, True, self.game_id, round_id, question_id)
 
+        response = init_round(self.socket, self.game_id, 2)
+        assert response.json.get("success") == True
+        assert response.json.get("waiting") == "game"
+        Question.query.delete()
+        ProposedCategory.query.delete()
+        ProposedQuestion.query.delete()
+        Round.query.delete()
+        db.session.commit()
 
-
-        print "#6 Accedo a un round senza aver risposto alle domande del precedente"
+        print "#8 Accedo a un round senza aver risposto alle domande del precedente"
         Round.query.delete()
         db.session.commit()
         response = init_round(self.socket, self.game_id, 1)
@@ -81,7 +111,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#7 Creo un round che non è il primo e ricevo le precedenti risposte"
+        print "#9 Creo un round che non è il primo e ricevo le precedenti risposte"
         Round.query.delete()
         db.session.commit()
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
@@ -102,23 +132,23 @@ class GameSocketTestCase(TPAuthTestCase):
         Round.query.delete()
         db.session.commit()
 
-        print "#7 game_id inesistente"
+        print "#10 game_id inesistente"
         response = init_round(self.socket, 234, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#8 round_id casuale"
+        print "#11 round_id casuale"
         response = init_round(self.socket, self.game_id, 2341)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#8 Parametri mancanti"
-        print "#8.1 game_id"
+        print "#12 Parametri mancanti"
+        print "#12.1 game_id"
         response = init_round(self.socket, None, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#8.2 number"
+        print "#12.2 number"
         response = init_round(self.socket, self.game_id, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400

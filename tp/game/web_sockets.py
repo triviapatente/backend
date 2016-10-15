@@ -22,17 +22,18 @@ def init_round(data):
     #ottengo i modelli
     game = g.models["game"]
     number = g.params["number"]
+    NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     if number > 2:
         #ottengo gli utenti del match
         users = getUsersFromGame(game, User.id)
         #controllo se ci sono risposte non date dagli utenti nel round precedente a quello in cui ho appena giocato
         answered_count = Round.query.filter(Round.number == number - 2).filter(Round.game_id == game.id).join(Question).filter(Question.user_id.in_(users)).count()
-        if answered_count != len(users) * app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
+        if answered_count != len(users) * NUMBER_OF_QUESTIONS_PER_ROUND:
             raise NotAllowed()
     if number > 1:
         #controllo se ci sono risposte non date da me nel round in cui ho appena giocato
         my_answered_count = Round.query.filter(Round.number == number - 1).filter(Round.game_id == game.id).join(Question).filter(Question.user_id == g.user.id).count()
-        if my_answered_count != app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
+        if my_answered_count != NUMBER_OF_QUESTIONS_PER_ROUND:
             raise NotAllowed()
     #ottengo il round di riferimento
     round = Round.query.filter(Round.game_id == game.id, Round.number == number).first()
@@ -56,18 +57,15 @@ def init_round(data):
         previousAnswers = Question.query.filter(Question.user_id != g.user.id).join(Round).filter(Round.number == number - 1).filter(Round.game_id == game.id).all()
         # le aggiungo alla risposta
         output["previous_answers"] = previousAnswers
-    #se il dealer sono io
-    if round.dealer_id == g.user.id:
-        #invio la risposta
-        emit("init_round", output)
-    elif round.cat_id is None:
-        #invio la risposta standard più l'info che stiamo aspettando per la scelta della category
-        output["waiting"] = "category"
-        emit("init_round", output)
-    else:
-        #invio la risposta standard più l'info che stiamo aspettando perchè altri giocatori giocano
-        output["waiting"] = "game"
-        emit("init_round", output)
+    #se il dealer non sono io
+    if round.dealer_id != g.user.id:
+        if Question.query.filter(Question.user_id == round.dealer_id).join(Round).filter(Round.number == number - 1).count() < NUMBER_OF_QUESTIONS_PER_ROUND:
+            #invio la risposta standard più l'info che stiamo aspettando perchè altri giocatori giocano
+            output["waiting"] = "game"
+        elif round.cat_id is None:
+            #invio la risposta standard più l'info che stiamo aspettando per la scelta della category
+            output["waiting"] = "category"
+    emit("init_round", output)
 
 @socketio.on("get_categories")
 @ws_auth_required
