@@ -5,7 +5,7 @@ from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
 from tp.game.utils import get_dealer, getUsersFromGame
 from tp.auth.models import User
-from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory
+from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
 from tp.decorators import needs_values, fetch_models
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
@@ -26,12 +26,12 @@ def init_round(data):
         #ottengo gli utenti del match
         users = getUsersFromGame(game, User.id)
         #controllo se ci sono risposte non date dagli utenti nel round precedente a quello in cui ho appena giocato
-        answered_count = Round.query.filter(Round.number == number - 2).filter(Round.game_id == game.id).join(Question).filter(Question.answer != None).filter(Question.user_id.in_(users)).count()
+        answered_count = Round.query.filter(Round.number == number - 2).filter(Round.game_id == game.id).join(Question).filter(Question.user_id.in_(users)).count()
         if answered_count != len(users) * app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
             raise NotAllowed()
     if number > 1:
         #controllo se ci sono risposte non date da me nel round in cui ho appena giocato
-        my_answered_count = Round.query.filter(Round.number == number - 1).filter(Round.game_id == game.id).join(Question).filter(Question.answer != None).filter(Question.user_id == g.user.id).count()
+        my_answered_count = Round.query.filter(Round.number == number - 1).filter(Round.game_id == game.id).join(Question).filter(Question.user_id == g.user.id).count()
         if my_answered_count != app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
             raise NotAllowed()
     #ottengo il round di riferimento
@@ -120,56 +120,51 @@ def choose_category(data):
     #aggiorno la categoria e salvo in db
     round.cat_id = category.id
     db.session.add(round)
+    # genero le domande random, pescando da quelle della categoria richiesta
+    proposed = Quiz.query.filter(Quiz.category_id == category.id).order_by(func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"])
+    #e le aggiungo come questions in db
+    for candidate in proposed:
+        q = ProposedQuestion(round_id = round.id, quiz_id = candidate.id)
+        db.session.add(q)
+    db.session.commit()
     db.session.commit()
     #rispondo anche con info sulla category scelta
     emit("choose_category", {"success": True, "category": category})
-    
+
 #TODO: test
 @socketio.on("get_questions")
 @ws_auth_required
-@needs_values("SOCKET", "round_id", "game", "category")
-@fetch_models(round_id = Round, game = Game, category = Category)
+@needs_values("SOCKET", "round_id", "game")
+@fetch_models(round_id = Round, game = Game)
 @check_in_room(RoomType.game, "game")
 def get_questions(data):
     #ottengo i modelli dalla richiesta
     round = g.models["round_id"]
-    game = g.models["game"]
-    category = g.models["category"]
+    if not round.cat_id:
+        raise NotAllowed()
     #ottengo le domande proposte precedentemente per lo stesso turno, se ci sono
-    proposed = Quiz.query.with_entities(Question).filter(Question.game_id == game.id, Question.user_id == g.user.id, Question.round_id == round.number, Question.category_id == category.id).all()
-    #se non ci sono
-    if len(proposed) == 0:
-        #le genero random, pescando da quelle della categoria richiesta
-        proposed = Quiz.query.filter(Quiz.category_id == category.id).order_by(func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"])
-        #e le aggiungo come questions in db
-        for candidate in proposed:
-            q = Question(game_id = game.id, round_id = round.id, quiz_id = candidate.id, user_id = g.user.id)
-            db.session.add(q)
-        db.session.commit()
+    proposed = Quiz.query.join(ProposedQuestion).filter(ProposedQuestion.round_id == round.id).all()
+    proposed = sorted([p.json for p in proposed], key = lambda q: q.get("id"))
     #dopodichè, rispondo
     emit("get_questions", {"questions": proposed, "success": True})
 
 #TODO: test
 @socketio.on("answer")
 @ws_auth_required
-@needs_values("SOCKET", "answer", "game", "question")
-@fetch_models(game = Game, question = Question)
+@needs_values("SOCKET", "answer", "game", "round_id", "quiz_id")
+@fetch_models(game = Game, round_id = Round, quiz_id = Quiz)
 @check_in_room(RoomType.game, "game")
 def answer(data):
     #ottengo i modelli
-    question = g.models["question"]
     answer = g.models["answer"]
-    #se sto cercando di rispondere a una question che non mi è stata posta vengo buttato fuori
-    if question.user_id != g.user.id:
-        raise NotAllowed()
+    round = g.models["round_id"]
+    quiz = g.models["quiz_id"]
+    question = Question.query.find(Question.round_id == round.id, Question.user_id == g.user.id, Question.quiz_id == quiz.id).first()
     #se ho già risposto, non posso più farlo
-    if question.answer != None:
-        raise ChangeFailed()
-    #modifico la risposta e la salvo in db
-    question.answer = answer
+    if question:
+        raise NotAllowed()
+    question = Question(round_id = round.id, user_id = g.user.id, quiz_id = quiz.id, answer = answer)
     db.session.add(question)
     db.session.save()
-    #ottengo il quiz di riferimento
-    quiz = Quiz.query.filter(Quiz.id == question.quiz_id).one()
     #rispondo anche dicendo se ho dato la risposta giusta o sbagliata
     emit("answer", {"success": True, "correct_answer": quiz.answer == question.answer})

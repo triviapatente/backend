@@ -4,9 +4,9 @@ def init_round(socket, game, number):
     socket.emit("init_round", {"number": number, "game": game})
     return socket.get_received()
 
-def get_questions(self, round_id, game, category):
-    self.socket.emit("get_questions", token = token, data = {"round_id": round_id, "game": game, "category": category})
-    return self.socket.get_received()
+def get_questions(socket, round_id, game):
+    socket.emit("get_questions", {"round_id": round_id, "game": game})
+    return socket.get_received()
 
 def get_categories(socket, game, round_id):
     socket.emit("get_categories", {"round_id": round_id, "game": game})

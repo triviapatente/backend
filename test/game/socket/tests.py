@@ -105,7 +105,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
-        
+
         print "#1 Sono dealer del round e richiedo le categorie"
         response = get_categories(self.socket, self.game_id, round_id)
         assert response.json.get("success") == True
@@ -157,7 +157,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
     def test_choose_category(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
-        categories = get_categories(self.socket, self.game_id, 1).json.get("categories")
+        categories = get_categories(self.socket, self.game_id, round_id).json.get("categories")
         chosen_category_id = categories[0].get("id")
 
         print "#1 La categoria non è tra le proposte"
@@ -216,11 +216,71 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#7 non appartengo alla room"
         leave_room(self.socket, self.game_id, "game")
-        response = choose_category(self.socket, chosen_category_id, self.game_id, 1)
+        response = choose_category(self.socket, chosen_category_id, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
     def test_get_questions(self):
-        pass
+        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        categories = get_categories(self.socket, self.game_id, round_id).json.get("categories")
+        chosen_category_id = categories[0].get("id")
+
+        print "#1 non ho ancora scelto la categoria"
+        response = get_questions(self.socket, self.game_id, round_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        choose_category(self.socket, chosen_category_id, self.game_id, round_id)
+
+        print "#2 non appartengo alla room"
+        leave_room(self.socket, self.game_id, "game")
+        response = get_questions(self.socket, self.game_id, round_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+        join_room(self.socket, self.game_id, "game")
+
+        print "#3 ottengo correttamente le domande come primo utente"
+        response = get_questions(self.socket, self.game_id, round_id)
+        assert response.json.get("success") == True
+        questions_a = response.json.get("questions")
+        assert questions_a
+
+        print "#4 ottengo correttamente le domande come secondo utente"
+        response = get_questions(self.opponent_socket, self.game_id, round_id)
+        assert response.json.get("success") == True
+        questions_b = response.json.get("questions")
+        assert questions_b
+
+        print "#5 Le richiedo e sono le stesse"
+        n_questions = len(questions_a)
+        assert n_questions == len(questions_b)
+
+        for i in range(0, n_questions):
+            a = questions_a[i]
+            b = questions_b[i]
+            assert a.get("id") == b.get("id")
+
+        print "#6 Parametri inesistenti"
+        print "#6.1 round_id"
+        response = get_questions(self.socket, self.game_id, 234234)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#6.2 game"
+        response = get_questions(self.socket, 4543, round_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#7 Parametri mancanti"
+        print "#7.1 round_id"
+        response = get_questions(self.socket, self.game_id, None)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#7.2 game"
+        response = get_questions(self.socket, None, round_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
     def test_answer(self):
         pass
