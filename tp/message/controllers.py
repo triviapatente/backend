@@ -17,4 +17,6 @@ def welcome():
 @auth_required
 @needs_values("GET", "datetime")
 def list(game_id):
-    return jsonify(messages = getMessages(game_id, g.query.get("datetime")))
+    datetime = g.query.get("datetime")
+    print "User %s got messages from game %d from %s" % (g.user.username, game_id, datetime)
+    return jsonify(messages = getMessages(game_id, datetime))

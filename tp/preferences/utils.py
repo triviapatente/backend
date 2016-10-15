@@ -17,7 +17,9 @@ def changePreference(attribute_to_change, new_value):
         db.session.commit()
     except:
         #se la proprietà non esiste o non è ammesso il nuovo valore o non si può modificare per qualche motivo do errore
+        print "User %s attempt to modify %s without success." % (g.user.username, attribute_to_change)
         raise ChangeFailed()
+    print "User %s success in modify %s." % (g.user.username, attribute_to_change)
     return jsonify(preferences = preferences)
 
 #ritorna il record di preferenze dell'utente ##user

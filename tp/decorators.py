@@ -31,8 +31,6 @@ def needs_values(method, *keys):
             missing = []
             #dove andare a prendere i parametri
             store = storeForMethod(method)
-            print "Parametri della richiesta: ", store
-            print "Parametri richiesti: ", keys
             #dove andare a mettere i parametri pescati
             outputKey = outputKeyForMethod(method)
             #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente

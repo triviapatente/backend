@@ -48,7 +48,6 @@ def init_round(data):
         #lo salvo in db
         db.session.add(round)
         db.session.commit()
-
     #risposta standard
     output = {"round": round.json, "success": True}
     #se questo non è il primo round

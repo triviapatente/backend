@@ -30,10 +30,10 @@ def login():
     if not keychain:
         #se no, login fallito! NB: questa cosa non dovrebbe mai accadere, vorrebbe dire che c'è un problema a livello di registrazione
         raise LoginFailed()
-
     #controllo se la password dell'utente corrisponde a quella interna
     if keychain.check_password(password):
         #se si, sei loggato! Ti torno anche un token, così la tua sessione inizia
+        print "User: ", user
         return jsonify(user = user, token = keychain.auth_token)
     else:
         #se no, login fallito
@@ -70,6 +70,7 @@ def register():
     output = doTransaction(createUser)
     if output:
         user, keychain = output
+        print "User %s has registered." % user.username, user
         return jsonify(user = user, token = keychain.auth_token)
     raise TPException() # trovare exception appropriata
 
@@ -82,6 +83,7 @@ def logout():
     keychain.renew_nonce()
     db.session.add(keychain)
     db.session.commit()
+    print "%s just disconnected." % g.user.username
     return jsonify(user = g.user)
 
 #api(s) per le modifiche
@@ -94,6 +96,7 @@ def changeName():
     g.user.name = g.post.get("name")
     db.session.add(g.user)
     db.session.commit()
+    print "User %d change name to: %s." % (g.user.id, g.user.name)
     return jsonify(user = g.user)
 
 #api per il cambio del cognome (##surname)
@@ -104,6 +107,7 @@ def changeSurname():
     g.user.surname = g.post.get("surname")
     db.session.add(g.user)
     db.session.commit()
+    print "User %d change surname to: %s" % (g.user.id, g.user.surname)
     return jsonify(user = g.user)
 
 #api per il cambio dell'immagine (##image)
@@ -125,9 +129,13 @@ def changeImage():
             db.session.add(g.user)
             db.session.commit()
         except:
+            db.session.rollback()
+            print "Unable to change user image."
             raise ChangeFailed()
+        print "User %d change image to: %s." % (g.user.id, g.user.image)
         return jsonify(user = g.user)
     else:
+        print "User image not allowed."
         raise FormatNotAllowed()
 
 @account.route("/user", methods = ["GET"])
@@ -151,4 +159,5 @@ def getItalianRank():
     user = {"user": g.user, "position": getUserPosition(g.user)}
     if user not in italianRank:
         italianRank[-1] = user
+    print "User %s got italian rank." % g.user.username
     return jsonify(rank = italianRank)

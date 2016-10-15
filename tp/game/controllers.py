@@ -30,6 +30,7 @@ def newGame():
     opponent = g.models["opponent"]
     output = doTransaction(createGame, **({"opponent": opponent}))
     if output:
+        print "Game %d created." % output.id
         return jsonify(success = True, game = output, user = opponent)
     else:
         raise ChangeFailed()
@@ -59,21 +60,22 @@ def randomSearch():
         prevRange = entry
     #controllo se non ho trovato nessun utente
     if opponent is None:
+        print "No opponent found."
         return jsonify(success = False)
     #eseguo la transazione con l'utente trovato
     output = doTransaction(createGame, **({"opponent":opponent}))
     #gestisco l'output
     if output:
+        print "Game %d created." % output.id, output
         return jsonify(success = True, game = output, user = opponent)
     else:
         raise ChangeFailed()
-
-
 
 @game.route("/invites", methods = ["GET"])
 @auth_required
 def getPendingInvites():
     invites = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).all()
+    print "User %s got pending invites." % g.user.username
     return jsonify(success = True, invites = invites)
 
 #considerare di dare questa info alla creazione del websocket
@@ -81,6 +83,7 @@ def getPendingInvites():
 @auth_required
 def getPendingInvitesBadge():
     badge = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).count()
+    print "User %s got pending invites badges." % g.user.username
     return jsonify(success = True, badge = badge)
 
 #considerare di dare questa info alla creazione del websocket
@@ -92,9 +95,11 @@ def getPendingInvitesBadge():
 def processInvite(game_id):
     invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id).first()
     if not invite:
+        print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
         raise NotAllowed()
     #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
     invite.accepted = g.post["accepted"]
     db.session.add(invite)
     db.session.commit()
+    print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
     return jsonify(success = True, invite = invite)

@@ -24,4 +24,5 @@ def logout(data = None):
     # rimuovo il token se presente
     session.pop("token", None)
     emit("logout", {"success": session.get("token") == None})
-    disconnect() # chiude il socket, bisogna refreshare su socketio tester 
+    print "User disconnect from socket."
+    disconnect() # chiude il socket, bisogna refreshare su socketio tester

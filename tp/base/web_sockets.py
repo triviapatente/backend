@@ -13,7 +13,7 @@ from flask import g
 @filter_input_room
 def join_room_request(data):
     join_room(g.roomName)
-    print "L'utente %s si e' unito alla stanza %s" % (g.user.username, g.roomName)
+    print "User %s joined room %s." % (g.user.username, g.roomName)
     emit("join_room", {"success": True})
 
 @socketio.on("leave_room")
@@ -29,13 +29,13 @@ def leave_room_request(data):
     name = roomName(id, type)
     if name in rooms():
         leave_room(name)
-        print "L'utente %s ha lasciato alla stanza %s" % (g.user.username, name)
+        print "User %s leaved room %s." % (g.user.username, name)
     emit("leave_room", {"success": True})
 
 @socketio.on("connect")
 def connect():
-    print "Anonymous user just connected"
+    print "Anonymous user just connected."
 
 @socketio.on("disconnect")
 def disconnect():
-    print "User %s just disconnected" % g.user.username
+    print "User %s just disconnected." % g.user.username

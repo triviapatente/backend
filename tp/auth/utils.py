@@ -16,7 +16,7 @@ def authenticate(socket = False):
         token = session.get("token")
     else:
         token = tokenFromRequest()
-    print "Got token from request: %s" % token
+    print "Got token from request: %s." % token
     #provo a verificare il token e vedere se riesco a ottenere l'user
     user = Keychain.verify_auth_token(token)
     #se non lo ottengo vuol dire che il token non è verificato
@@ -24,6 +24,6 @@ def authenticate(socket = False):
         print "No user associated with token, forbidden!"
         #lancio un errore Forbidden
         raise Forbidden()
-    print "User %s associated with token" % user.username
+    print "User %s associated with token." % user.username
     #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente
     g.user = user

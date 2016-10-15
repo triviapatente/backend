@@ -65,7 +65,8 @@ def updateScore(game, scoreRange):
     # calcolo i nuovi punteggi
     # params = {"users": users, "updateParams": {"effectiveResult": effectiveResult, "expectedScore": expectedScore, "k_factor": k_factor}}
     def newScores(**params):
-        for user in params["users"]:
+        users = params["users"]
+        for user in users:
             # assegno ad ogni utente il suo nuovo punteggio
             user.score = new_score(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"], user.score)
             db.session.add(user)

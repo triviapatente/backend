@@ -13,4 +13,5 @@ def welcome():
 @shop.route("/list", methods = ["GET"])
 def getItems():
     output = ShopItem.query.all()
+    print "Anonymous user got shop items list."
     return jsonify(items = output)
