@@ -104,7 +104,50 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
     def test_get_categories(self):
-        pass
+        print "#1 Sono dealer del round e richiedo le categorie"
+        init_round(self.socket, self.game_id, 1)
+        response = get_categories(self.socket, self.game_id, 1)
+        assert response.json.get("success") == True
+        categories = response.json.get("categories")
+        n_categories = len(categories)
+        assert categories
+
+        print "#2 Le richiedo e sono le stesse"
+        response = get_categories(self.socket, self.game_id, 1)
+        assert response.json.get("success") == True
+        assert n_categories == len(response.json.get("categories"))
+        #controllo se le categorie sono uguali (l'ordine dovrebbe anche lui essere uguale)
+        for i in range(0, n_categories):
+            a = categories[i]
+            b = response.json.get("categories")[i]
+            assert a.get("id") == b.get("id")
+
+        print "#3 Non sono dealer e le richiedo"
+        response = get_categories(self.opponent_socket, self.game_id, 1)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#4 game inesistente"
+        response = get_categories(self.socket, 2342, 1)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#5 round inesistente"
+        response = get_categories(self.socket, self.game_id, 441)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#8 Parametri mancanti"
+        print "#8.1 game_id"
+        response = get_categories(self.socket, None, 1)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#8.2 number"
+        response = get_categories(self.socket, self.game_id, None)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
     def test_choose_category(self):
         pass
     def test_get_questions(self):

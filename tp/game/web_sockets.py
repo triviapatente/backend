@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-from flask import g, request
+from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
 from tp.game.utils import get_dealer, getUsersFromGame
 from tp.auth.models import User
-from tp.game.models import Game, Question, Round, Category, Quiz
+from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory
 from tp.decorators import needs_values, fetch_models
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 from tp.base.utils import RoomType
 from tp.exceptions import NotAllowed, ChangeFailed
+from sqlalchemy import func
 #TODO: test
 @socketio.on("init_round")
 @ws_auth_required
@@ -113,13 +114,14 @@ def get_random_categories(data):
     #se non ci sono
     if len(proposed) == 0:
         #le genero random
-        proposed = Category.query.order_by(func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"])
+        proposed = Category.query.order_by(func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"]).all()
         #e le aggiungo come proposed in db
         for candidate in proposed:
             c = ProposedCategory(round_id = round.id, category_id = candidate.id)
             db.session.add(c)
         db.session.commit()
     #dopodichè, rispondo
+    proposed = sorted([p.json for p in proposed], key = lambda cat: cat.get("id"))
     emit("get_categories", {"categories": proposed, "success": True})
 
 
