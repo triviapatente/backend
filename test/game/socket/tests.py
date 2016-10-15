@@ -46,7 +46,8 @@ class GameSocketTestCase(TPAuthTestCase):
             #se non crea un'eccezione è un problema
             assert False, "Duplicate key-value not called"
         except IntegrityError:
-            pass
+            #annullo la transazione
+            db.session.rollback()
 
         print "#2: Accedo al primo round ma il dealer è il creatore della partita"
         #pulisco i round della partita (come se fosse ricominciata)
