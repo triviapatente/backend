@@ -9,6 +9,7 @@ from api import *
 from tp.game.models import Round
 from tp import db
 from sqlalchemy.exc import IntegrityError
+from utils import dumb_crawler
 class GameSocketTestCase(TPAuthTestCase):
 
     opponent_id = None
@@ -27,6 +28,10 @@ class GameSocketTestCase(TPAuthTestCase):
         self.game_id = self.game.get("id")
         join_room(self.socket, self.game_id, "game")
         join_room(self.opponent_socket, self.game_id, "game")
+
+        dumb_crawler()
+
+
 
     def test_init_round(self):
         print "#1 creo due round con number uguale e game uguale"
