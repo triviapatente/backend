@@ -104,16 +104,17 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
     def test_get_categories(self):
+        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        
         print "#1 Sono dealer del round e richiedo le categorie"
-        init_round(self.socket, self.game_id, 1)
-        response = get_categories(self.socket, self.game_id, 1)
+        response = get_categories(self.socket, self.game_id, round_id)
         assert response.json.get("success") == True
         categories = response.json.get("categories")
         n_categories = len(categories)
         assert categories
 
         print "#2 Le richiedo e sono le stesse"
-        response = get_categories(self.socket, self.game_id, 1)
+        response = get_categories(self.socket, self.game_id, round_id)
         assert response.json.get("success") == True
         assert n_categories == len(response.json.get("categories"))
         #controllo se le categorie sono uguali (l'ordine dovrebbe anche lui essere uguale)
@@ -123,12 +124,12 @@ class GameSocketTestCase(TPAuthTestCase):
             assert a.get("id") == b.get("id")
 
         print "#3 Non sono dealer e le richiedo"
-        response = get_categories(self.opponent_socket, self.game_id, 1)
+        response = get_categories(self.opponent_socket, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
         print "#4 game inesistente"
-        response = get_categories(self.socket, 2342, 1)
+        response = get_categories(self.socket, 2342, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
@@ -139,7 +140,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#8 Parametri mancanti"
         print "#8.1 game_id"
-        response = get_categories(self.socket, None, 1)
+        response = get_categories(self.socket, None, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
@@ -150,61 +151,61 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#9 non appartengo alla room"
         leave_room(self.socket, self.game_id, "game")
-        response = get_categories(self.socket, self.game_id, 1)
+        response = get_categories(self.socket, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
     def test_choose_category(self):
-        init_round(self.socket, self.game_id, 1)
+        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
         categories = get_categories(self.socket, self.game_id, 1).json.get("categories")
         chosen_category_id = categories[0].get("id")
 
-        print "#1 Scelgo la categoria correttamente, sono dealer del turno"
-        response = choose_category(self.socket, chosen_category_id, self.game_id, 1)
+        print "#1 La categoria non è tra le proposte"
+        #creo una categoria nuova, che non era tra le proposte
+        not_proposed_category = create_random_category()
+        response = choose_category(self.socket, not_proposed_category.id, self.game_id, round_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#2 Non sono dealer"
+        response = choose_category(self.opponent_socket, chosen_category_id, self.game_id, round_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#3 Scelgo la categoria correttamente, sono dealer del turno"
+        response = choose_category(self.socket, chosen_category_id, self.game_id, round_id)
         assert response.json.get("success") == True
         assert response.json.get("category")
 
-        print "#2 La categoria è già stata scelta"
-        response = choose_category(self.socket, chosen_category_id, self.game_id, 1)
-        assert response.json.get("success") == False
-        assert response.json.get("status_code") == 403
-
-        print "#4 Non sono dealer"
-        response = choose_category(self.opponent_socket, chosen_category_id, self.game_id, 1)
-        assert response.json.get("success") == False
-        assert response.json.get("status_code") == 403
-
-        print "#4 La categoria non è tra le proposte"
-        #creo una categoria nuova, che non era tra le proposte
-        not_proposed_category = create_random_category()
-        response = choose_category(self.opponent_socket, not_proposed_category.id, self.game_id, 1)
+        print "#4 La categoria è già stata scelta"
+        response = choose_category(self.socket, chosen_category_id, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
         print "#5 Parametri inesistenti"
         print "#5.1 category"
-        response = choose_category(self.socket, 324324, self.game_id, 1)
+        response = choose_category(self.socket, 324324, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
         print "#5.2 game_id"
-        response = choose_category(self.socket, chosen_category_id, 3242, 1)
+        response = choose_category(self.socket, chosen_category_id, 3242, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
         print "#5.3 number"
-        response = choose_category(self.socket, chosen_category_id, self.game_id, 3)
+        response = choose_category(self.socket, chosen_category_id, self.game_id, 3234)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
         print "#6 Parametri mancanti"
         print "#6.1 category"
-        response = choose_category(self.socket, None, self.game_id, 1)
+        response = choose_category(self.socket, None, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
         print "#6.2 game_id"
-        response = choose_category(self.socket, chosen_category_id, None, 1)
+        response = choose_category(self.socket, chosen_category_id, None, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
@@ -218,7 +219,7 @@ class GameSocketTestCase(TPAuthTestCase):
         response = choose_category(self.socket, chosen_category_id, self.game_id, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
-        
+
     def test_get_questions(self):
         pass
     def test_answer(self):

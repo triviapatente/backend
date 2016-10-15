@@ -17,5 +17,5 @@ def answer(self, answer, game, question):
     return self.socket.get_received()
 
 def choose_category(socket, category, game, round):
-    socket.emit("choose_category", {"category": category, "game": game, "round": round})
+    socket.emit("choose_category", {"category": category, "game": game, "round_id": round})
     return socket.get_received()

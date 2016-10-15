@@ -69,33 +69,6 @@ def init_round(data):
         output["waiting"] = "game"
         emit("init_round", output)
 
-#TODO: test
-@socketio.on("get_questions")
-@ws_auth_required
-@needs_values("SOCKET", "round_id", "game", "category")
-@fetch_models(round_id = Round, game = Game, category = Category)
-@check_in_room(RoomType.game, "game")
-def get_questions(data):
-    #ottengo i modelli dalla richiesta
-    round = g.models["round_id"]
-    game = g.models["game"]
-    category = g.models["category"]
-    #ottengo le domande proposte precedentemente per lo stesso turno, se ci sono
-    proposed = Quiz.query.with_entities(Question).filter(Question.game_id == game.id, Question.user_id == g.user.id, Question.round_id == round.number, Question.category_id == category.id).all()
-    #se non ci sono
-    if len(proposed) == 0:
-        #le genero random, pescando da quelle della categoria richiesta
-        proposed = Quiz.query.filter(Quiz.category_id == category.id).order_by(func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"])
-        #e le aggiungo come questions in db
-        for candidate in proposed:
-            q = Question(game_id = game.id, round_id = round.id, quiz_id = candidate.id, user_id = g.user.id)
-            db.session.add(q)
-        db.session.commit()
-    #dopodichè, rispondo
-    emit("get_questions", {"questions": proposed, "success": True})
-
-
-#TODO: test
 @socketio.on("get_categories")
 @ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
@@ -124,6 +97,57 @@ def get_random_categories(data):
     proposed = sorted([p.json for p in proposed], key = lambda cat: cat.get("id"))
     emit("get_categories", {"categories": proposed, "success": True})
 
+@socketio.on("choose_category")
+@ws_auth_required
+@needs_values("SOCKET", "category", "game", "round_id")
+@fetch_models(game = Game, round_id = Round, category = Category)
+@check_in_room(RoomType.game, "game")
+def choose_category(data):
+    #ottengo i modelli
+    round = g.models["round_id"]
+    category = g.models["category"]
+    game = g.models["game"]
+
+    proposed = ProposedCategory.query.filter(ProposedCategory.round_id == round.id).filter(ProposedCategory.category_id == category.id).first()
+    if not proposed:
+        raise NotAllowed()
+    #se non sono il dealer, vengo buttato fuori
+    if round.dealer_id != g.user.id:
+        raise NotAllowed()
+    #se ho già scelto la categoria, non posso più farlo
+    if round.cat_id != None:
+        raise NotAllowed()
+    #aggiorno la categoria e salvo in db
+    round.cat_id = category.id
+    db.session.add(round)
+    db.session.commit()
+    #rispondo anche con info sulla category scelta
+    emit("choose_category", {"success": True, "category": category})
+    
+#TODO: test
+@socketio.on("get_questions")
+@ws_auth_required
+@needs_values("SOCKET", "round_id", "game", "category")
+@fetch_models(round_id = Round, game = Game, category = Category)
+@check_in_room(RoomType.game, "game")
+def get_questions(data):
+    #ottengo i modelli dalla richiesta
+    round = g.models["round_id"]
+    game = g.models["game"]
+    category = g.models["category"]
+    #ottengo le domande proposte precedentemente per lo stesso turno, se ci sono
+    proposed = Quiz.query.with_entities(Question).filter(Question.game_id == game.id, Question.user_id == g.user.id, Question.round_id == round.number, Question.category_id == category.id).all()
+    #se non ci sono
+    if len(proposed) == 0:
+        #le genero random, pescando da quelle della categoria richiesta
+        proposed = Quiz.query.filter(Quiz.category_id == category.id).order_by(func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"])
+        #e le aggiungo come questions in db
+        for candidate in proposed:
+            q = Question(game_id = game.id, round_id = round.id, quiz_id = candidate.id, user_id = g.user.id)
+            db.session.add(q)
+        db.session.commit()
+    #dopodichè, rispondo
+    emit("get_questions", {"questions": proposed, "success": True})
 
 #TODO: test
 @socketio.on("answer")
@@ -149,27 +173,3 @@ def answer(data):
     quiz = Quiz.query.filter(Quiz.id == question.quiz_id).one()
     #rispondo anche dicendo se ho dato la risposta giusta o sbagliata
     emit("answer", {"success": True, "correct_answer": quiz.answer == question.answer})
-
-
-#TODO: test
-@socketio.on("choose_category")
-@ws_auth_required
-@needs_values("SOCKET", "category", "game", "round")
-@fetch_models(game = Game, round = Round, category = Category)
-@check_in_room(RoomType.game, "game")
-def choose_category(data):
-    #ottengo i modelli
-    round = g.models["round"]
-    category = g.models["category"]
-    #se non sono il dealer, vengo buttato fuori
-    if round.dealer_id != g.user.id:
-        raise NotAllowed()
-    #se ho già scelto la categoria, non posso più farlo
-    if round.cat_id != None:
-        raise NotAllowed()
-    #aggiorno la categoria e salvo in db
-    round.cat_id = category.id
-    db.session.add(round)
-    db.session.commit()
-    #rispondo anche con info sulla category scelta
-    emit("choose_category", {"success": True, "category": category})
