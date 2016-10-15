@@ -59,7 +59,7 @@ class Question(Base):
   answer = Column(Boolean, nullable = False)
 
   round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
-  user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
+  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True)
 
 class Invite(Base):
     #il game a cui sei stato invitato

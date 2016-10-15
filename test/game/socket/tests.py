@@ -6,7 +6,7 @@ from test.game.http.api import new_game
 from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_room
 from api import *
-from tp.game.models import Round
+from tp.game.models import Round, Question, ProposedCategory, ProposedQuestion
 from tp import db
 from sqlalchemy.exc import IntegrityError
 from utils import dumb_crawler, generate_random_category, generate_random_question
@@ -54,6 +54,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#3 Creo il primo round e il dealer è il creatore della partita"
         Round.query.delete()
+        db.session.commit()
         response = init_round(self.opponent_socket, self.game_id, 1)
         assert response.json.get("success") == True
         assert response.json.get("round")
@@ -61,6 +62,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#4 Accedo al round ma il dealer ne sta scegliendo la categoria"
         Round.query.delete()
+        db.session.commit()
         init_round(self.socket, self.game_id, 1)
         response = init_round(self.opponent_socket, self.game_id, 1)
         assert response.json.get("success") == True
@@ -73,32 +75,50 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#6 Accedo a un round senza aver risposto alle domande del precedente"
         Round.query.delete()
+        db.session.commit()
         response = init_round(self.socket, self.game_id, 1)
         response = init_round(self.socket, self.game_id, 2)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
         print "#7 Creo un round che non è il primo e ricevo le precedenti risposte"
+        Round.query.delete()
+        db.session.commit()
+        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        chosen_category_id = get_categories(self.socket, self.game_id, round_id).json.get("categories")[0].get("id")
+        choose_category(self.socket, chosen_category_id, self.game_id, round_id)
+        questions = get_questions(self.socket, round_id, self.game_id).json.get("questions")
+        for question in questions:
+            question_id = question.get("id")
+            answer(self.socket, True, self.game_id, round_id, question_id)
+            answer(self.opponent_socket, False, self.game_id, round_id, question_id)
+
+        response = init_round(self.socket, self.game_id, 2)
+        assert response.json.get("success") == True
+        assert response.json.get("previous_answers")
+        Question.query.delete()
+        ProposedCategory.query.delete()
+        ProposedQuestion.query.delete()
+        Round.query.delete()
+        db.session.commit()
 
         print "#7 game_id inesistente"
-        Round.query.delete()
         response = init_round(self.socket, 234, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
+
         print "#8 round_id casuale"
-        Round.query.delete()
         response = init_round(self.socket, self.game_id, 2341)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
+
         print "#8 Parametri mancanti"
         print "#8.1 game_id"
-        Round.query.delete()
         response = init_round(self.socket, None, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
         print "#8.2 number"
-        Round.query.delete()
         response = init_round(self.socket, self.game_id, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
