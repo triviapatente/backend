@@ -64,6 +64,7 @@ def fake_request(test_client, fn):
         response = oldmethod(url, **args)
         #faccio l'encode della risposta
         response.data = response.data.encode("utf-8")
+        print "Risposta HTTP (url = %s): " % url, response.data
         #aggiungo il json alla risposta
         response.json = json.loads(response.data)
         return response
@@ -74,7 +75,9 @@ def fake_socket_request(socket):
     def get_received():
         #chiamo il metodo che si chiamava fn in app, ripassando gli argomenti misti contenuti in args come argomenti della funzione
         response = oldmethod()
+        event = response[0].get("name")
         args = response[0].get("args")
+        print "Risposta SOCKET (event = %s): " % event, args
         json = args[0]
         output = lambda: None
         output.json = json
