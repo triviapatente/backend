@@ -36,7 +36,7 @@ class Round(Base, CommonPK):
   cat_id = Column(Integer, ForeignKey("category.id"))
   chosen_category = relationship("Category")
 
-  UniqueConstraint('game_id', 'number')
+  __table_args__ = (UniqueConstraint('game_id', 'number', name = "unique_game_number"), )
 
 class Quiz(Base, CommonPK):
   #la domanda del quiz, in lettere
