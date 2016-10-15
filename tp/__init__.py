@@ -64,7 +64,8 @@ def init(testing = False, ci = False):
             print "Socket Error %d: %s" % (error.status_code, error.message)
         else:
             error = str(error)
-            response = {"error": error, "success": False}
+            #internal server error
+            response = {"error": error, "success": False, "status_code": 500}
             print "Socket Error %s" % error
         print "Traceback: %s" % traceback.format_exc(sys.exc_info())
 

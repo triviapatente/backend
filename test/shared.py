@@ -62,6 +62,7 @@ def fake_request(test_client, fn):
         args["headers"] = headers
         #chiamo il metodo che si chiamava fn in app, ripassando gli argomenti misti contenuti in args come argomenti della funzione
         response = oldmethod(url, **args)
+        assert response.status_code != 500, "Internal server error"
         #faccio l'encode della risposta
         response.data = response.data.encode("utf-8")
         print "Risposta HTTP (url = %s): " % url, response.data
@@ -77,8 +78,10 @@ def fake_socket_request(socket):
         response = oldmethod()
         event = response[0].get("name")
         args = response[0].get("args")
-        print "Risposta SOCKET (event = %s): " % event, args
         json = args[0]
+        print "Risposta SOCKET (event = %s): " % event, json
+        assert json, "No response from server"
+        assert json.get("status_code") != 500, "Internal server error"
         output = lambda: None
         output.json = json
         return output
