@@ -7,6 +7,7 @@ from sqlalchemy import or_, and_, func
 from random import randint
 from flask import g
 from tp.utils import doTransaction
+from tp.exceptions import NotAllowed
 
 #metodo transazionale per la creazione di una partita
 def createGame(**params):
@@ -72,9 +73,12 @@ def updateScore(game, scoreRange):
     return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
 
 # funzione che ritorna gli utenti di una partita (##game)
-def getUsersFromGame(game):
+def getUsersFromGame(game, columns = None):
     # return User.query.with_entities(User).join(Game).filter(Game.id == game.id).all()
-    return User.query.filter(User.games.any(id = game.id)).all()
+    query = User.query
+    if columns:
+        query = query.with_entities(columns)
+    return query.filter(User.games.any(id = game.id)).all()
 
 # funzione che ritorna l'utente vincitore di una partita (##game)
 def getWinner(game):
@@ -122,11 +126,15 @@ def get_dealer(game, number):
         if n_users == 0:
             return None
         #ottengo il round precedente a quello richiesto
-        previous_round = Round.query.with_entities(Round.dealer_id).filter(Round.number == number - 1).filter(Round.game_id == game.id).one()
-        #ottengo la posizione del precedente dealer nell'array ordinato degli utenti
-        previous_dealer_position = [k for (k, v) in enumerate(users) if v.id == round.dealer_id][0]
-        #ritorno l'utente immediatamente successivo
-        return users[(previous_dealer_position + 1) % n_users]
+        previous_round = Round.query.with_entities(Round.dealer_id).filter(Round.number == number - 1).filter(Round.game_id == game.id).first()
+        if previous_round:
+            #ottengo la posizione del precedente dealer nell'array ordinato degli utenti
+            previous_dealer_position = [k for (k, v) in enumerate(users) if v.id == previous_round.dealer_id][0]
+            #ritorno l'utente immediatamente successivo
+            return users[(previous_dealer_position + 1) % n_users]
+        else:
+            #se non c'è un previous round, non c'è dealer perchè c'è errore
+            raise NotAllowed()
 
 # funzione che cerca un accoppiamento all'interno del ##range per l'utente ##current_user
 # ##prevRange serve a evitare di considerare i range già considerati

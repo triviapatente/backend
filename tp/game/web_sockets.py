@@ -3,13 +3,14 @@ from flask import g, request
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
-from tp.game.utils import get_dealer
+from tp.game.utils import get_dealer, getUsersFromGame
+from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz
 from tp.decorators import needs_values, fetch_models
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 from tp.base.utils import RoomType
-
+from tp.exceptions import NotAllowed, ChangeFailed
 #TODO: test
 @socketio.on("init_round")
 @ws_auth_required
@@ -22,9 +23,9 @@ def init_round(data):
     number = g.params["number"]
     if number > 2:
         #ottengo gli utenti del match
-        users = User.query.with_entities(User.id).join(Game).filter(Game.id == game.id)
+        users = getUsersFromGame(game, User.id)
         #controllo se ci sono risposte non date dagli utenti
-        unanswered_questions_count = Question.query.filter(Question.number == number - 2).filter(answer is None).filter(Question.user_id in users).count()
+        unanswered_questions_count = Round.query.filter(Round.number == number -2).filter(Round.game_id == game.id).join(Question).filter(Question.answer == None).filter(Question.user_id.in_(users)).count()
         if unanswered_questions_count:
             raise NotAllowed()
     #ottengo il round di riferimento
@@ -35,6 +36,8 @@ def init_round(data):
         round = Round(game = game, number = number)
         #genero il dealer
         round.dealer_id = get_dealer(game, number)
+        if round.dealer_id is None:
+            raise ChangeFailed()
         #lo salvo in db
         db.session.add(round)
         db.session.commit()
