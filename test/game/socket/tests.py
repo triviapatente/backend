@@ -76,6 +76,8 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("round")
         assert response.json.get("waiting") == "category"
+        print "#5: Accedo ad un round diverso dal primo e ricevo le precedenti risposte"
+        assert response.json.get("previous_answers")
         Question.query.delete()
         ProposedCategory.query.delete()
         ProposedQuestion.query.delete()
