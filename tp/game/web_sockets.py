@@ -24,9 +24,14 @@ def init_round(data):
     if number > 2:
         #ottengo gli utenti del match
         users = getUsersFromGame(game, User.id)
-        #controllo se ci sono risposte non date dagli utenti
-        unanswered_questions_count = Round.query.filter(Round.number == number -2).filter(Round.game_id == game.id).join(Question).filter(Question.answer == None).filter(Question.user_id.in_(users)).count()
-        if unanswered_questions_count:
+        #controllo se ci sono risposte non date dagli utenti nel round precedente a quello in cui ho appena giocato
+        answered_count = Round.query.filter(Round.number == number - 2).filter(Round.game_id == game.id).join(Question).filter(Question.answer != None).filter(Question.user_id.in_(users)).count()
+        if answered_count != len(users) * app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
+            raise NotAllowed()
+    if number > 1:
+        #controllo se ci sono risposte non date da me nel round in cui ho appena giocato
+        my_answered_count = Round.query.filter(Round.number == number - 1).filter(Round.game_id == game.id).join(Question).filter(Question.answer != None).filter(Question.user_id == g.user.id).count()
+        if my_answered_count != app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
             raise NotAllowed()
     #ottengo il round di riferimento
     round = Round.query.filter(Round.game_id == game.id, Round.number == number).first()
@@ -37,7 +42,7 @@ def init_round(data):
         #genero il dealer
         round.dealer_id = get_dealer(game, number)
         if round.dealer_id is None:
-            raise ChangeFailed()
+            raise NotAllowed()
         #lo salvo in db
         db.session.add(round)
         db.session.commit()
@@ -47,9 +52,9 @@ def init_round(data):
     #se questo non è il primo round
     if round.number > 1:
         #vado a prendere le risposte del precedente round degli altri giocatori
-        previousAnswers = Question.query.filter_by(user_id != g.user.id, game_id = game.id, number = round.number - 1).all()
+        previousAnswers = Question.query.filter(Question.user_id != g.user.id).join(Round).filter(Round.number == number - 1).filter(Round.game_id == game.id).all()
         # le aggiungo alla risposta
-        output["previous_answers"] = previous_answers
+        output["previous_answers"] = previousAnswers
     #se il dealer sono io
     if round.dealer_id == g.user.id:
         #invio la risposta

@@ -131,7 +131,7 @@ def get_dealer(game, number):
             #ottengo la posizione del precedente dealer nell'array ordinato degli utenti
             previous_dealer_position = [k for (k, v) in enumerate(users) if v.id == previous_round.dealer_id][0]
             #ritorno l'utente immediatamente successivo
-            return users[(previous_dealer_position + 1) % n_users]
+            return users[(previous_dealer_position + 1) % n_users].id
         else:
             #se non c'è un previous round, non c'è dealer perchè c'è errore
             raise NotAllowed()

@@ -67,7 +67,9 @@ class GameSocketTestCase(TPAuthTestCase):
 
 
         print "#6 Accedo a un round senza aver risposto alle domande del precedente"
-        response = init_round(self.socket, self.game_id, 3)
+        Round.query.delete()
+        response = init_round(self.socket, self.game_id, 1)
+        response = init_round(self.socket, self.game_id, 2)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
