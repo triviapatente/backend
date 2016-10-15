@@ -18,6 +18,8 @@ def on_message(data):
     message = saveMessage(user = g.user, game = game, message = data["content"])
     if message:
         # send message to all in the room
+        print "User %s sent message to room %s:" % (g.user.username, g.roomName), message.json
         emit('send_message', {"success":True, "message": message.json}, room = g.roomName)
     else:
+        print "User %s unable to sent message." % g.user.username
         emit('send_message_result', {"success": False})

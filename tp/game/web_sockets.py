@@ -64,6 +64,7 @@ def init_round(data):
         elif round.cat_id is None:
             #invio la risposta standard più l'info che stiamo aspettando per la scelta della category
             output["waiting"] = "category"
+    print "User %s in init round got output:" % g.user.username, output
     emit("init_round", output)
 
 @socketio.on("get_categories")
@@ -92,6 +93,7 @@ def get_random_categories(data):
         db.session.commit()
     #dopodichè, rispondo
     proposed = sorted([p.json for p in proposed], key = lambda cat: cat.get("id"))
+    print "User %s got proposed categories." % g.user.username, proposed
     emit("get_categories", {"categories": proposed, "success": True})
 
 @socketio.on("choose_category")
@@ -126,6 +128,7 @@ def choose_category(data):
     db.session.commit()
     db.session.commit()
     #rispondo anche con info sulla category scelta
+    print "User %s has choosen category." % g.user.username, category
     emit("choose_category", {"success": True, "category": category})
 
 #TODO: test
@@ -143,6 +146,7 @@ def get_questions(data):
     proposed = Quiz.query.join(ProposedQuestion).filter(ProposedQuestion.round_id == round.id).all()
     proposed = sorted([p.json for p in proposed], key = lambda q: q.get("id"))
     #dopodichè, rispondo
+    print "User %s got questions." % g.user.username, proposed
     emit("get_questions", {"questions": proposed, "success": True})
 
 #TODO: test
@@ -167,4 +171,5 @@ def answer(data):
     db.session.add(question)
     db.session.commit()
     #rispondo anche dicendo se ho dato la risposta giusta o sbagliata
+    print "User %s answered to proposed question." % g.user.username, question
     emit("answer", {"success": True, "correct_answer": quiz.answer == question.answer})
