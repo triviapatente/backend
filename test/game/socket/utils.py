@@ -12,3 +12,9 @@ def dumb_crawler():
             q = Quiz(category_id = c.id, question = "Quiz %d della categoria %d" % (n, i), answer = (n % 2 == 0))
             db.session.add(q)
         db.session.commit()
+
+def create_random_category():
+    c = Category(name= "category_100")
+    db.session.add(c)
+    db.session.commit()
+    return c

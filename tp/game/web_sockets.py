@@ -162,13 +162,13 @@ def choose_category(data):
     round = g.models["round"]
     category = g.models["category"]
     #se non sono il dealer, vengo buttato fuori
-    if round.dealer_id != g.user_id:
+    if round.dealer_id != g.user.id:
         raise NotAllowed()
     #se ho già scelto la categoria, non posso più farlo
-    if round.category_id != None:
-        raise ChangeFailed()
+    if round.cat_id != None:
+        raise NotAllowed()
     #aggiorno la categoria e salvo in db
-    round.category_id = category.id
+    round.cat_id = category.id
     db.session.add(round)
     db.session.commit()
     #rispondo anche con info sulla category scelta
