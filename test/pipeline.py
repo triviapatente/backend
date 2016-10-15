@@ -10,6 +10,7 @@ from message.http.tests import *
 from message.socket.tests import *
 
 from game.http.tests import *
+from game.socket.tests import *
 
 from preferences.http.tests import *
 

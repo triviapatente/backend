@@ -40,7 +40,7 @@ def init_round(data):
         db.session.commit()
 
     #risposta standard
-    output = {"round": round, "success": True}
+    output = {"round": round.json, "success": True}
     #se questo non è il primo round
     if round.number > 1:
         #vado a prendere le risposte del precedente round degli altri giocatori
