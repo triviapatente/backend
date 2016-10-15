@@ -3,7 +3,6 @@ from test.shared import TPAuthTestCase
 from api import *
 
 class AuthSocketTestCase(TPAuthTestCase):
-    #TEST METHODS
     def test_login(self):
         print "#2: Successfull Login"
         response = login(self)

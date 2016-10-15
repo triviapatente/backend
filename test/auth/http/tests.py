@@ -7,8 +7,6 @@ from tp import app
 import io, os
 
 class AuthHTTPTestCase(TPTestCase):
-
-    ###TEST METHODS###
     def test_register(self):
         print "#1: Registrazione corretta"
         response = register(self, "user", "user@gmail.com", "dfsdvsv")

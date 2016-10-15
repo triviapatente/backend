@@ -39,7 +39,6 @@ class MessageSocketTestCase(TPAuthTestCase):
         assert message and message["content"] == content
 
         print "#2: Send message on right room, opponent receives message"
-        print "agvds", self.opponent_socket.get_received()
 
         print "#3: Send message on wrong room"
         message_sent = send_message(self.socket, self.game_id + 1, content).json
