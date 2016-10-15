@@ -68,39 +68,8 @@ class GameSocketTestCase(TPAuthTestCase):
         #essendo il primo round, il dealer dev'essere chi ha creato la partita
         assert response.json.get("round").get("dealer_id") == self.game.get("creator_id")
 
-        print "#4: Accedo al round ma il dealer ne sta scegliendo la categoria"
-        #pulisco i round della partita (come se fosse ricominciata)
-        Round.query.delete()
-        db.session.commit()
-        #accedo al round
-        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
-        #prendo la prima categoria tra le proposte
-        chosen_category_id = get_categories(self.socket, self.game_id, round_id).json.get("categories")[0].get("id")
-        choose_category(self.socket, chosen_category_id, self.game_id, round_id)
-        #prendo le domande per il round
-        questions = get_questions(self.socket, round_id, self.game_id).json.get("questions")
-        #rispondo alle domande con entrambi i giocatori
-        for question in questions:
-            question_id = question.get("id")
-            answer(self.socket, True, self.game_id, round_id, question_id)
-            answer(self.opponent_socket, True, self.game_id, round_id, question_id)
-        #accedo nuovamente al round con lo stesso giocatore, ma ora è opponent a dover scegliere la categoria
-        response = init_round(self.socket, self.game_id, 2)
-        assert response.json.get("success") == True
-        assert response.json.get("round")
-        assert response.json.get("waiting") == "category"
-
-        print "#5: Accedo ad un round diverso dal primo e ricevo le precedenti risposte"
-        assert response.json.get("previous_answers")
-
-        print "#6: Accedo al round ma colui che dovrebbe essere il nuovo dealer sta ancora giocando il precedente"
-        #cancello le modifiche in modo che sia come ricominciata la partita
-        Question.query.delete()
-        ProposedCategory.query.delete()
-        ProposedQuestion.query.delete()
-        Round.query.delete()
-        db.session.commit()
-        #stessa procedura di prima per svolgere il primo turno, ma opponent non gioca
+        print "#4: Accedo al round ma colui che dovrebbe essere il nuovo dealer sta ancora giocando il precedente"
+        #svolgo il primo turno ma opponent non gioca
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
         chosen_category_id = get_categories(self.socket, self.game_id, round_id).json.get("categories")[0].get("id")
         choose_category(self.socket, chosen_category_id, self.game_id, round_id)
@@ -114,19 +83,25 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("waiting") == "game"
 
-        print "#7: Accedo a un round senza aver risposto alle domande del precedente"
-        #cancello le modifiche in modo che sia come ricominciata la partita
-        Question.query.delete()
-        ProposedCategory.query.delete()
-        ProposedQuestion.query.delete()
-        Round.query.delete()
-        db.session.commit()
-        #accedo al primo turno
-        response = init_round(self.socket, self.game_id, 1)
-        #accedo senza completare il primo turno al secondo turno
-        response = init_round(self.socket, self.game_id, 2)
+        print "#5: Accedo a un round senza aver risposto alle domande del precedente"
+        #opponent accede senza completare il primo turno al secondo turno
+        response = init_round(self.opponent_socket, self.game_id, 2)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
+
+        print "#6: Accedo al round ma il dealer ne sta scegliendo la categoria"
+        #rispondo alle domande anche con opponent, finendo lo svolgimento del turno
+        for question in questions:
+            question_id = question.get("id")
+            answer(self.opponent_socket, True, self.game_id, round_id, question_id)
+        #accedo nuovamente al round con lo stesso giocatore, ma ora è opponent a dover scegliere la categoria
+        response = init_round(self.socket, self.game_id, 2)
+        assert response.json.get("success") == True
+        assert response.json.get("round")
+        assert response.json.get("waiting") == "category"
+
+        print "#7: Accedo ad un round diverso dal primo e ricevo le precedenti risposte"
+        assert response.json.get("previous_answers")
 
         print "#8: game_id inesistente"
         response = init_round(self.socket, 234, 1)
