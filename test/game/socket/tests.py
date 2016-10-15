@@ -75,6 +75,16 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#7 Creo un round che non è il primo e ricevo le precedenti risposte"
 
+        print "#7 game_id inesistente"
+        Round.query.delete()
+        response = init_round(self.socket, 234, 1)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+        print "#8 round_id casuale"
+        Round.query.delete()
+        response = init_round(self.socket, self.game_id, 2341)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
         print "#8 Parametri mancanti"
         print "#8.1 game_id"
         Round.query.delete()
