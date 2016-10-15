@@ -156,15 +156,18 @@ def get_questions(data):
 @check_in_room(RoomType.game, "game")
 def answer(data):
     #ottengo i modelli
-    answer = g.models["answer"]
+    answer = g.params["answer"]
     round = g.models["round_id"]
     quiz = g.models["quiz_id"]
-    question = Question.query.find(Question.round_id == round.id, Question.user_id == g.user.id, Question.quiz_id == quiz.id).first()
+    question = Question.query.filter(Question.round_id == round.id, Question.user_id == g.user.id, Question.quiz_id == quiz.id).first()
     #se ho già risposto, non posso più farlo
+    proposedQuestion = ProposedQuestion.query.filter(ProposedQuestion.round_id == round.id).filter(ProposedQuestion.quiz_id == quiz.id).first()
+    if not proposedQuestion:
+        raise NotAllowed()
     if question:
         raise NotAllowed()
     question = Question(round_id = round.id, user_id = g.user.id, quiz_id = quiz.id, answer = answer)
     db.session.add(question)
-    db.session.save()
+    db.session.commit()
     #rispondo anche dicendo se ho dato la risposta giusta o sbagliata
     emit("answer", {"success": True, "correct_answer": quiz.answer == question.answer})

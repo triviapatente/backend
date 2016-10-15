@@ -9,7 +9,7 @@ from api import *
 from tp.game.models import Round
 from tp import db
 from sqlalchemy.exc import IntegrityError
-from utils import dumb_crawler, create_random_category
+from utils import dumb_crawler, generate_random_category, generate_random_question
 class GameSocketTestCase(TPAuthTestCase):
 
     opponent_id = None
@@ -162,7 +162,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#1 La categoria non è tra le proposte"
         #creo una categoria nuova, che non era tra le proposte
-        not_proposed_category = create_random_category()
+        not_proposed_category = generate_random_category()
         response = choose_category(self.socket, not_proposed_category.id, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
@@ -283,4 +283,74 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
     def test_answer(self):
-        pass
+        round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        categories = get_categories(self.socket, self.game_id, round_id).json.get("categories")
+        chosen_category_id = categories[0].get("id")
+        choose_category(self.socket, chosen_category_id, self.game_id, round_id)
+        question_id = get_questions(self.opponent_socket, self.game_id, round_id).json.get("questions")[0].get("id")
+
+        print "#1 non sono iscritto alla room"
+        leave_room(self.socket, self.game_id, "game")
+        response = answer(self.socket, True, self.game_id, round_id, question_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+        join_room(self.socket, self.game_id, "game")
+
+        print "#2 rispondo a una domanda che non mi è stata posta"
+        not_proposed_question = generate_random_question(chosen_category_id)
+        response = answer(self.socket, False, self.game_id, round_id, not_proposed_question.id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#3 rispondo a una domanda di un'altra categoria che non mi è stata posta"
+        not_proposed_question = generate_random_question(categories[1].get("id"))
+        response = answer(self.socket, False, self.game_id, round_id, not_proposed_question.id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#4 rispondo alla domanda senza nessun errore del server"
+        response = answer(self.socket, True, self.game_id, round_id, question_id)
+        assert response.json.get("success") == True
+        assert response.json.get("correct_answer") is not None
+
+        print "#5 rispondo a una domanda a cui ho già risposto"
+        response = answer(self.socket, False, self.game_id, round_id, question_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#6 Parametri mancanti"
+        print "#6.1 answer"
+        response = answer(self.socket, None, self.game_id, round_id, question_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#6.2 game"
+        response = answer(self.socket, True, None, round_id, question_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#6.3 round"
+        response = answer(self.socket, False, self.game_id, None, question_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#6.4 quiz"
+        response = answer(self.socket, True, self.game_id, round_id, None)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#7 Parametri inesistenti"
+        print "#7.1 game"
+        response = answer(self.socket, True, 234234, round_id, question_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#7.2 round"
+        response = answer(self.socket, False, self.game_id, 3434, question_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#7.3 quiz"
+        response = answer(self.socket, True, self.game_id, round_id, 45454)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400

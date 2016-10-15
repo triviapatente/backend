@@ -12,9 +12,9 @@ def get_categories(socket, game, round_id):
     socket.emit("get_categories", {"round_id": round_id, "game": game})
     return socket.get_received()
 
-def answer(self, answer, game, question):
-    self.socket.emit("answer", {"answer": answer, "game": game, "question": question})
-    return self.socket.get_received()
+def answer(socket, answer, game, round, quiz):
+    socket.emit("answer", {"answer": answer, "game": game, "round_id": round, "quiz_id": quiz})
+    return socket.get_received()
 
 def choose_category(socket, category, game, round):
     socket.emit("choose_category", {"category": category, "game": game, "round_id": round})
