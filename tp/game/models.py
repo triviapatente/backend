@@ -56,7 +56,7 @@ class Question(Base):
   quiz_id = Column(Integer, ForeignKey("quiz.id"), nullable = False, primary_key = True)
   quiz = relationship("Quiz")
   #risposta data dall'utente
-  answer = Column(Boolean)
+  answer = Column(Boolean, nullable = False)
 
   round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
   user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
@@ -85,5 +85,12 @@ class Category(Base, CommonPK):
 class ProposedCategory(Base):
   #categoria proposta
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False, primary_key = True)
+  #turno in cui è stata proposta
+  round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
+
+#domande proposte al giocatore per un turno specifico
+class ProposedQuestion(Base):
+  #categoria proposta
+  quiz_id = Column(Integer, ForeignKey("quiz.id"), nullable = False, primary_key = True)
   #turno in cui è stata proposta
   round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
