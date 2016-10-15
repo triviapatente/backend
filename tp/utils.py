@@ -48,7 +48,11 @@ def storeForMethod(method):
     elif method == "FILE":
         return request.files
     elif method == "SOCKET":
-        return request.event["args"][0]
+        args = request.event["args"]
+        if args:
+            return args[0]
+        else:
+            return {}
     elif method == "GET":
         return request.args
     return None
@@ -67,9 +71,8 @@ def outputKeyForMethod(method):
 
 def getAllRequestParams():
     stores = []
-    if hasattr(request, "event") and request.event.get("args"): stores.append(request.event.args[0])
-    if hasattr(request, "form"): stores.append(request.form)
-    if hasattr(request, "args"): stores.append(request.args)
-    if hasattr(request, "view_args"): stores.append(request.view_args)
-
+    if hasattr(request, "event") and request.event and request.event.get("args"): stores.append(request.event.get("args")[0])
+    if hasattr(request, "form") and request.form: stores.append(request.form)
+    if hasattr(request, "args") and request.args: stores.append(request.args)
+    if hasattr(request, "view_args") and request.view_args: stores.append(request.view_args)
     return {k: v for d in stores for k, v in d.items()}
