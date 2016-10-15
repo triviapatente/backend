@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import g, request
-from tp import socketio, app
+from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
 from tp.game.utils import get_dealer
@@ -19,7 +19,7 @@ from tp.base.utils import RoomType
 def init_round(data):
     #ottengo i modelli
     game = g.models["game"]
-    number = g.models["number"]
+    number = g.params["number"]
     if number > 2:
         #ottengo gli utenti del match
         users = User.query.with_entities(User.id).join(Game).filter(Game.id == game.id)
@@ -28,19 +28,19 @@ def init_round(data):
         if unanswered_questions_count:
             raise NotAllowed()
     #ottengo il round di riferimento
-    round = Round.query.filter(game_id = game.id, number = number).one()
+    round = Round.query.filter(Round.game_id == game.id, Round.number == number).first()
     #se è nullo
     if round is None:
         #lo creo
-        round = Round(game_id = game.id, number = number)
+        round = Round(game = game, number = number)
         #genero il dealer
-        round.dealer = get_dealer(game, number)
+        round.dealer_id = get_dealer(game, number)
         #lo salvo in db
         db.session.add(round)
         db.session.commit()
 
     #risposta standard
-    output = {"round": round, success: True}
+    output = {"round": round, "success": True}
     #se questo non è il primo round
     if round.number > 1:
         #vado a prendere le risposte del precedente round degli altri giocatori
@@ -50,15 +50,15 @@ def init_round(data):
     #se il dealer sono io
     if round.dealer_id == g.user.id:
         #invio la risposta
-        emit("round", output)
+        emit("init_round", output)
     elif round.category_id is None:
         #invio la risposta standard più l'info che stiamo aspettando per la scelta della category
         output["waiting"] = "category"
-        emit("round", output)
+        emit("init_round", output)
     else:
         #invio la risposta standard più l'info che stiamo aspettando perchè altri giocatori giocano
         output["waiting"] = "game"
-        emit("round", output)
+        emit("init_round", output)
 
 #TODO: test
 @socketio.on("get_questions")
