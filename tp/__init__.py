@@ -97,6 +97,7 @@ def init(testing = False, ci = False):
     import tp.auth.web_sockets
     import tp.base.web_sockets
     import tp.message.web_sockets
+    import tp.game.web_sockets
     # Creazione directory per upload users pictures
     import os
 
