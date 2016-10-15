@@ -51,7 +51,7 @@ def init_round(data):
     if round.dealer_id == g.user.id:
         #invio la risposta
         emit("init_round", output)
-    elif round.category_id is None:
+    elif round.cat_id is None:
         #invio la risposta standard più l'info che stiamo aspettando per la scelta della category
         output["waiting"] = "category"
         emit("init_round", output)
