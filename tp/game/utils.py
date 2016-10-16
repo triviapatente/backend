@@ -38,8 +38,8 @@ class Score(Enum):
 
 # dato il risultato effettivo (##effective), quello previsto (##expected) e il vecchio punteggio (##score)
 # ritorna il punteggio effettivo
-def new_score(effective, expected, k, score):
-    return score + k * (effective - expected) + app.config["BONUS_SCORE"]
+def score_increment(effective, expected, k):
+    return k * (effective - expected) + app.config["BONUS_SCORE"]
 
 # calcola il fattore moltiplicativo per quella data partita, in funzione del numero di partite (##n_games) disputate tra i due giocatori
 def k_factor(n_games, friendly_game):
