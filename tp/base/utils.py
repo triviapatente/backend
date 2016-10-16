@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import g
-from tp.game.models import Game
-from tp.auth.models import User
+from tp.game.models import Partecipation
 
 # enumeration of room type
 from enum import Enum
@@ -26,11 +25,10 @@ def getInfosFromRoom(id):
 #se check_for_user è True ritorna solo il mio utente, se è presente nella room
 def getUsersFromRoom(type, game_id, check_for_user = False):
     #unico caso al momento, ma in caso di riutilizzo del sistema room ci saranno altri casi
-    print type, game_id, check_for_user
     if type == RoomType.game.value:
-        query = User.query.join(Game.users).filter(Game.id == game_id)
+        query = Partecipation.query.filter(Partecipation.game_id == game_id)
         if check_for_user:
-            query.filter(User.id == g.user.id)
+            query.filter(Partecipation.user_id == g.user.id)
         return query.all()
     return None
 

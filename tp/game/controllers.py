@@ -28,7 +28,7 @@ def welcome():
 @fetch_models(opponent = User)
 def newGame():
     opponent = g.models["opponent"]
-    output = doTransaction(createGame, **({"opponent": opponent}))
+    output = doTransaction(createGame, **({"opponents": [opponent]}))
     if output:
         print "Game %d created." % output.id
         return jsonify(success = True, game = output, user = opponent)
@@ -40,9 +40,10 @@ def newGame():
 @auth_required
 def randomSearch():
     # definisco il numero di cicli massimo di ricerca
-    users_scores = User.query.order_by(User.score.desc()).all()
+    firstUser = User.query.order_by(User.score.desc()).first()
+    lastUser = User.query.order_by(User.score).first()
     # massimo range in cui andare a cercare
-    maxRangeToCover = max(users_scores[0].score - g.user.score, g.user.score - users_scores[-1].score)
+    maxRangeToCover = max(firstUser.score - g.user.score, g.user.score - firstUser.score)
     #incremento del range, range di partenza
     rangeIncrement, initialRange = app.config["RANGE_INCREMENT"], app.config["INITIAL_RANGE"]
     #utente candidato
@@ -63,7 +64,7 @@ def randomSearch():
         print "No opponent found."
         return jsonify(success = False)
     #eseguo la transazione con l'utente trovato
-    output = doTransaction(createGame, **({"opponent":opponent}))
+    output = doTransaction(createGame, **({"opponents":[opponent]}))
     #gestisco l'output
     if output:
         print "Game %d created." % output.id, output

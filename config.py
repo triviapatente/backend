@@ -56,6 +56,8 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 NUMBER_OF_CATEGORIES_PROPOSED = 5
 #numero di domande per gioco
 NUMBER_OF_QUESTIONS_PER_ROUND = 4
+#numero di round per partita
+NUMBER_OF_ROUNDS = 10
 #percorso dove vengono salvate le immagini dei quiz
 QUIZ_IMAGE_FOLDER = "images/"
 #numero di risultati mostrati nella classifica italiana
@@ -63,9 +65,11 @@ RESULTS_LIMIT_RANK_ITALY = 10
 #fattore moltiplicativo massimo e minimo
 MAX_MULTIPLIER_FACTOR = 100
 MIN_MULTIPLIER_FACTOR = 32
+#bonus di punteggio per partita giocata
+BONUS_SCORE = 10
 #incremento di range ogni tentativo
-RANGE_INCREMENT = 200
+RANGE_INCREMENT = 50
 #range iniziale
-INITIAL_RANGE = 400
+INITIAL_RANGE = 200
 #numero di messaggi nuovi mostrati ad ogni scroll
 MESSAGE_PER_SCROLL = 50

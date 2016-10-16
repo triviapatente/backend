@@ -7,9 +7,10 @@ from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_room
 from api import *
 from tp.game.models import Round, Question, ProposedCategory, ProposedQuestion
-from tp import db
+from tp.base.utils import RoomType
+from tp import db, app
 from sqlalchemy.exc import IntegrityError
-from utils import dumb_crawler, generate_random_category, generate_random_question
+from utils import dumb_crawler, generate_random_category, generate_random_question, generateRound
 class GameSocketTestCase(TPAuthTestCase):
 
     opponent_id = None
@@ -30,8 +31,8 @@ class GameSocketTestCase(TPAuthTestCase):
         self.game = new_game(self, self.opponent_id).json.get("game")
         self.game_id = self.game.get("id")
         #entrambi i giocatori entrano nella room
-        join_room(self.socket, self.game_id, "game")
-        join_room(self.opponent_socket, self.game_id, "game")
+        join_room(self.socket, self.game_id, RoomType.game.value)
+        join_room(self.opponent_socket, self.game_id, RoomType.game.value)
         #faccio partire il dumb crawler, per generare categorie e domande casualmente
         dumb_crawler()
 
@@ -117,10 +118,33 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
         print "#10: Accedo a un round senza essere iscritto alla room"
-        leave_room(self.socket, self.game_id, "game")
+        leave_room(self.socket, self.game_id, RoomType.game.value)
         response = init_round(self.socket, self.game_id, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
+
+        join_room(self.socket, self.game_id, RoomType.game.value)
+
+        numberOfRounds = app.config["NUMBER_OF_ROUNDS"]
+        print "#11: Dopo %d turni la partita finisce" % numberOfRounds
+        #svolgo i turni
+        for i in range(1, numberOfRounds/2):
+            #svolgo il turno con dealer opponent
+            generateRound(self.game_id, i*2, self.opponent_socket, self.socket)
+            #svolgo il turno con dealer user
+            generateRound(self.game_id, i*2+1, self.socket, self.opponent_socket)
+        #svolgo l'ultimo turno
+        generateRound(self.game_id, numberOfRounds, self.opponent_socket, self.socket)
+        #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
+        response = init_round(self.socket, self.game_id, numberOfRounds+1)
+        assert response.json.get("ended")
+        partecipations = response.json.get("partecipations")
+        assert partecipations
+        # controllo che tutti i giocatori abbiano avuto un cambiamento nel punteggio
+        for p in partecipations:
+            score_inc = p.get("score_increment")
+            print "User %s got score increment: %d" % (p.get("user_id"), score_inc)
+            assert score_inc != 0
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
@@ -169,7 +193,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
         print "#7: non appartengo alla room"
-        leave_room(self.socket, self.game_id, "game")
+        leave_room(self.socket, self.game_id, RoomType.game.value)
         response = get_categories(self.socket, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
@@ -234,7 +258,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
         print "#7: Non appartengo alla room"
-        leave_room(self.socket, self.game_id, "game")
+        leave_room(self.socket, self.game_id, RoomType.game.value)
         response = choose_category(self.socket, chosen_category_id, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
@@ -295,7 +319,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
         print "#7: Non appartengo alla room"
-        leave_room(self.socket, self.game_id, "game")
+        leave_room(self.socket, self.game_id, RoomType.game.value)
         response = get_questions(self.socket, self.game_id, round_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
@@ -367,7 +391,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
         print "#7: Non sono iscritto alla room"
-        leave_room(self.socket, self.game_id, "game")
+        leave_room(self.socket, self.game_id, RoomType.game.value)
         response = answer(self.socket, True, self.game_id, round_id, question_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403

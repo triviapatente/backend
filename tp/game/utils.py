@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db
-from tp.game.models import Game, Round, Invite, partecipation
+from tp.game.models import Game, Round, Invite, Partecipation, Question
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func
 from random import randint
@@ -12,9 +12,16 @@ from tp.exceptions import NotAllowed
 #metodo transazionale per la creazione di una partita
 def createGame(**params):
     new_game = Game(creator = g.user)
-    opponent = params["opponent"]
-    new_game.users.append(opponent)
-    new_game.users.append(g.user)
+    opponents = params["opponents"]
+    #aggiungo tutti gli avversari alla partita
+    for opponent in opponents:
+        partecipation = Partecipation()
+        partecipation.user = opponent
+        new_game.users.append(partecipation)
+    #aggiungo l'utente alla partita
+    partecipation = Partecipation()
+    partecipation.user = g.user
+    new_game.users.append(partecipation)
     db.session.add(new_game)
     #TODO: gestire la logica per mandare le notifiche push a chi di dovere
     invite = Invite(sender = g.user, receiver = opponent, game = new_game)
@@ -29,12 +36,13 @@ class Score(Enum):
     draw = 0.5
     loss = 0
 
-# dato il risultato effettivo (##effective), quello previsto (##expected) e il vecchio punteggio (##score)
-# ritorna il punteggio effettivo
-def new_score(effective, expected, k, score):
-    return score + k * (effective - expected)
+# dato il risultato effettivo (##effective), quello previsto (##expected) e il coefficiente (##k)
+# ritorna l'incremento
+def score_increment(effective, expected, k):
+    return k * (effective - expected) + app.config["BONUS_SCORE"]
 
 # calcola il fattore moltiplicativo per quella data partita, in funzione del numero di partite (##n_games) disputate tra i due giocatori
+# ##friendly_game definisce se la partita è un'amichevole ed influisce sul fattore moltiplicativo
 def k_factor(n_games, friendly_game):
     min_k = app.config["MIN_MULTIPLIER_FACTOR"]
     max_k = app.config["MAX_MULTIPLIER_FACTOR"]
@@ -44,14 +52,39 @@ def k_factor(n_games, friendly_game):
 
 # funzione per calcolare la probabilità di vittoria di A dati:
 # ##score_A (punteggio del giocatore A), ##score_B (punteggio del giocatore B) ed il ##scoreRange di ricerca
-def expectedScore(score_A, score_B, scoreRange):
-    expected = 1 / ( 1 + 10**((score_B - score_A) / scoreRange))
-    return expected
+# in caso di ##friendly_game si fa tendere l'expected score a 0.5
+def expectedScore(score_A, score_B, scoreRange, friendly_game = False):
+    return 1 / ( 1 + 10**((score_B - score_A) /(scoreRange + 10000000 * friendly_game)))
 
-# funzione che aggiorna il punteggio di una partita (##game) trovata con un abbinamento in ##scoreRange
-def updateScore(game, scoreRange):
+# funzione che ritorna l'utente con lo score più alto del ##game
+def getFirstUser(game, *columns):
+    query = User.query
+    if columns:
+        query = query.with_entities(*columns)
+    return query.join(Partecipation).filter(Partecipation.game_id == game.id).order_by(User.score.desc()).first()
+
+# funzione che ritorna l'utente con lo score più basso del ##game
+def getLastUser(game, *columns):
+    query = User.query
+    if columns:
+        query = query.with_entities(*columns)
+    return query.join(Partecipation).filter(Partecipation.game_id == game.id).order_by(User.score).first()
+
+# funzione che dati gli ##users ricava il range di abbinamento
+def calculateGameRange(game):
+    distance = getFirstUser(game).score - getLastUser(game).score
+    gameRange = app.config["INITIAL_RANGE"]
+    rangeInc = app.config["RANGE_INCREMENT"]
+    while gameRange < distance:
+        gameRange = gameRange + rangeInc
+    return gameRange
+
+# funzione che aggiorna il punteggio di una partita (##game)
+def updateScore(game):
     # prendo gli utenti di una partita
     users = getUsersFromGame(game)
+    # calcolo lo score range
+    scoreRange = calculateGameRange(game)
     # prendo il vincitore
     winner = getWinner(game)
     # creo un dictionary che contenga i parametri per l'update del punteggio
@@ -66,20 +99,29 @@ def updateScore(game, scoreRange):
     # params = {"users": users, "updateParams": {"effectiveResult": effectiveResult, "expectedScore": expectedScore, "k_factor": k_factor}}
     def newScores(**params):
         users = params["users"]
+        game_id = params["game_id"]
         for user in users:
             # assegno ad ogni utente il suo nuovo punteggio
-            user.score = new_score(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"], user.score)
+            score_inc = score_increment(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"])
+            print "Saving user %s score increment (%d).." % (user.username, score_inc)
+            entry = Partecipation.query.filter(Partecipation.user_id == user.id and Partecipation.game_id == game_id).first()
+            entry.score_increment = score_inc
+            db.session.add(entry)
+            user.score = user.score + score_inc
             db.session.add(user)
         return users
-    return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
+    return doTransaction(newScores, **{"users": users, "updateParams": updateParams, "game_id": game.id})
+
+# funzione che ritorna i record di Partecipation inerenti ad un ##game
+def getPartecipationFromGame(game):
+    return Partecipation.query.filter_by(game_id = game.id).all()
 
 # funzione che ritorna gli utenti di una partita (##game)
-def getUsersFromGame(game, columns = None):
-    # return User.query.with_entities(User).join(Game).filter(Game.id == game.id).all()
+def getUsersFromGame(game, *columns):
     query = User.query
     if columns:
-        query = query.with_entities(columns)
-    return query.filter(User.games.any(id = game.id)).all()
+        query = query.with_entities(*columns)
+    return query.join(Partecipation).filter(Partecipation.game_id == game.id).all()
 
 # funzione che ritorna l'utente vincitore di una partita (##game)
 def getWinner(game):
@@ -120,7 +162,7 @@ def get_dealer(game, number):
         return game.creator_id
     else: #altrimenti
         #ottengo gli utenti che partecipano al gioco
-        users = User.query.with_entities(User.username, User.id).join((Game, User.games)).filter(Game.id == game.id).order_by(User.username).all()
+        users = User.query.join(Partecipation).filter(Partecipation.game_id == game.id).all()
         #li conto
         n_users = len(users)
         #se sono 0 (impossibile ma è gestito), il dealer è nullo
@@ -179,7 +221,7 @@ def getNumberOfActiveGames(users):
     # devo considerare solo i giocatori in ##users
     users_usernames = [user.username for user in users]
     # ottengo una lista di tuple (username, games_count)
-    players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(partecipation).filter(User.username in users_usernames).group_by(User.username).all()
+    players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(Partecipation).join(Game).filter(Partecipation.user_id == User.id and Game.ended == False).group_by(User.username).all()
     # converto la lista di tuple (username, games_count) in un dictionary
     users_games_count = {}
     for e in players_with_games:
@@ -195,3 +237,16 @@ def getNumberOfActiveGames(users):
 def getNumberOfGames(user_A, user_B):
     # prendo le partite dell'utente e le conto
     return Game.query.filter(Game.users.any(User.id == user_A.id)).filter(Game.users.any(User.id == user_B.id)).count()
+
+# funzione che definisce se una partita (##game) è finita o meno
+def gameEnded(game):
+    #prendo gli utenti della partita
+    users = getUsersFromGame(game)
+    #per ognuno di essi
+    for user in users:
+        #se non hanno finito l'ultimo round
+        if Question.query.filter(Question.user_id == user.id).join(Round).filter(Round.number == app.config["NUMBER_OF_ROUNDS"]).count() < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
+            #la partita non è finita
+            return False
+    #la partita è finita
+    return True

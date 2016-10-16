@@ -124,7 +124,7 @@ def init(testing = False, ci = False):
     #The following lines represents migration stuff
     #TODO: use flask-migrate
     from sqlalchemy.schema import CreateTable, DropTable
-    from tp.game.models import Round, Question, Game, Invite, partecipation
+    from tp.game.models import Round, Question, Game, Invite, Partecipation
 
     from sqlalchemy.ext.compiler import compiles
     #this line make droptable to be in cascade mode for postgresql
@@ -140,8 +140,8 @@ def init(testing = False, ci = False):
     #db.engine.execute(CreateTable(Question.__table__))
     #db.engine.execute(DropTable(Invite.__table__))
     #db.engine.execute(CreateTable(Invite.__table__))
-    #db.engine.execute(DropTable(partecipation))
-    #db.engine.execute(CreateTable(partecipation))
+    #db.engine.execute(DropTable(Partecipation))
+    #db.engine.execute(CreateTable(Partecipation))
     #end migration
 
     # This will create the database file using SQLAlchemy

@@ -4,7 +4,7 @@ from flask import request, g
 from functools import wraps
 from tp import db
 from flask_socketio import rooms
-from tp.game.models import partecipation
+from tp.game.models import Partecipation
 from tp.exceptions import ChangeFailed, NotAllowed
 from tp.auth.utils import authenticate
 from tp.base.utils import roomName, getUsersFromRoom
