@@ -104,6 +104,9 @@ def updateScore(game):
             db.session.add(user)
         return users
     return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
+# funzione che ritorna i record di Partecipation inerenti ad un ##game
+def getPartecipationFromGame(game):
+    return Partecipation.query.filter_by(game_id = game.id).all()
 
 # funzione che ritorna gli utenti di una partita (##game)
 def getUsersFromGame(game, *columns):

@@ -3,7 +3,7 @@ from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
-from tp.game.utils import get_dealer, getUsersFromGame, updateScore, gameEnded
+from tp.game.utils import get_dealer, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame
 from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
 from tp.decorators import needs_values, fetch_models
@@ -23,20 +23,18 @@ def init_round(data):
     game = g.models["game"]
     number = g.params["number"]
     #controllo che la partita non sia finita
-    if game.ended:
-        #TODO memorizzare da qualche parte il guadagno per quella partita per ritornarlo adesso
-        print "Scores already updated."
-        return emit("init_round", {"ended": True})
-    #evito di fare l'update più volte
-    elif number > app.config["NUMBER_OF_ROUNDS"] and gameEnded(game):
+    if number > app.config["NUMBER_OF_ROUNDS"] and gameEnded(game):
         #se è finita
-        game.ended = True
-        db.session.add(game)
-        db.session.commit()
-        print "Game %d ended. Updating scores.." % game.id
-        updatedUsers = [user.json for user in updateScore(game)]
-        print "User's score updated.", updatedUsers
-        return emit("init_round", {"updatedUsers": updatedUsers, "ended": True})
+        #evito di fare l'update più volte
+        if not game.ended:
+            game.ended = True
+            db.session.add(game)
+            db.session.commit()
+            print "Game %d ended. Updating scores.." % game.id
+            updatedUsers = updateScore(game)
+            print "User's score updated.", updatedUsers
+        partecipations = [p.json for p in getPartecipationFromGame(game)]
+        return emit("init_round", {"partecipations": partecipations, "ended": True})
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     if number > 2:
         #ottengo gli utenti del match
