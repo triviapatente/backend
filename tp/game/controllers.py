@@ -40,9 +40,10 @@ def newGame():
 @auth_required
 def randomSearch():
     # definisco il numero di cicli massimo di ricerca
-    users_scores = User.query.order_by(User.score.desc()).all()
+    firstUser = User.query.order_by(User.score.desc()).first()
+    lastUser = User.query.order_by(User.score).first()
     # massimo range in cui andare a cercare
-    maxRangeToCover = max(users_scores[0].score - g.user.score, g.user.score - users_scores[-1].score)
+    maxRangeToCover = max(firstUser.score - g.user.score, g.user.score - firstUser.score)
     #incremento del range, range di partenza
     rangeIncrement, initialRange = app.config["RANGE_INCREMENT"], app.config["INITIAL_RANGE"]
     #utente candidato
