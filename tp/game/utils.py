@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db
-from tp.game.models import Game, Round, Invite, partecipation
+from tp.game.models import Game, Round, Invite, partecipation, Question
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func
 from random import randint
@@ -48,10 +48,35 @@ def expectedScore(score_A, score_B, scoreRange):
     expected = 1 / ( 1 + 10**((score_B - score_A) / scoreRange))
     return expected
 
-# funzione che aggiorna il punteggio di una partita (##game) trovata con un abbinamento in ##scoreRange
-def updateScore(game, scoreRange):
+# funzione che ritorna l'utente con lo score più alto del ##game
+def getFirstUser(game, *columns):
+    query = User.query
+    if columns:
+        query = query.with_entities(*columns)
+    return query.filter(User.games.any(id = game.id)).order_by(User.score.desc()).first()
+
+# funzione che ritorna l'utente con lo score più basso del ##game
+def getLastUser(game, *columns):
+    query = User.query
+    if columns:
+        query = query.with_entities(*columns)
+    return query.filter(User.games.any(id = game.id)).order_by(User.score).first()
+
+# funzione che dati gli ##users ricava il range di abbinamento
+def calculateGameRange(game):
+    distance = getFirstUser(game).score - getLastUser(game).score
+    gameRange = app.config["INITIAL_RANGE"]
+    rangeInc = app.config["RANGE_INCREMENT"]
+    while gameRange < distance:
+        gameRange = gameRange + rangeInc
+    return gameRange
+
+# funzione che aggiorna il punteggio di una partita (##game)
+def updateScore(game):
     # prendo gli utenti di una partita
     users = getUsersFromGame(game)
+    # calcolo lo score range
+    scoreRange = calculateGameRange(game)
     # prendo il vincitore
     winner = getWinner(game)
     # creo un dictionary che contenga i parametri per l'update del punteggio
@@ -74,11 +99,11 @@ def updateScore(game, scoreRange):
     return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
 
 # funzione che ritorna gli utenti di una partita (##game)
-def getUsersFromGame(game, columns = None):
+def getUsersFromGame(game, *columns):
     # return User.query.with_entities(User).join(Game).filter(Game.id == game.id).all()
     query = User.query
     if columns:
-        query = query.with_entities(columns)
+        query = query.with_entities(*columns)
     return query.filter(User.games.any(id = game.id)).all()
 
 # funzione che ritorna l'utente vincitore di una partita (##game)
