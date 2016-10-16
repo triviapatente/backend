@@ -36,12 +36,13 @@ class Score(Enum):
     draw = 0.5
     loss = 0
 
-# dato il risultato effettivo (##effective), quello previsto (##expected) e il vecchio punteggio (##score)
-# ritorna il punteggio effettivo
+# dato il risultato effettivo (##effective), quello previsto (##expected) e il coefficiente (##k)
+# ritorna l'incremento
 def score_increment(effective, expected, k):
     return k * (effective - expected) + app.config["BONUS_SCORE"]
 
 # calcola il fattore moltiplicativo per quella data partita, in funzione del numero di partite (##n_games) disputate tra i due giocatori
+# ##friendly_game definisce se la partita è un'amichevole ed influisce sul fattore moltiplicativo
 def k_factor(n_games, friendly_game):
     min_k = app.config["MIN_MULTIPLIER_FACTOR"]
     max_k = app.config["MAX_MULTIPLIER_FACTOR"]
@@ -51,9 +52,9 @@ def k_factor(n_games, friendly_game):
 
 # funzione per calcolare la probabilità di vittoria di A dati:
 # ##score_A (punteggio del giocatore A), ##score_B (punteggio del giocatore B) ed il ##scoreRange di ricerca
-def expectedScore(score_A, score_B, scoreRange):
-    expected = 1 / ( 1 + 10**((score_B - score_A) / scoreRange))
-    return expected
+# in caso di ##friendly_game si fa tendere l'expected score a 0.5
+def expectedScore(score_A, score_B, scoreRange, friendly_game = False):
+    return 1 / ( 1 + 10**((score_B - score_A) /(scoreRange + 10000000 * friendly_game)))
 
 # funzione che ritorna l'utente con lo score più alto del ##game
 def getFirstUser(game, *columns):
