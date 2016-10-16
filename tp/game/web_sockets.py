@@ -131,7 +131,6 @@ def choose_category(data):
     print "User %s has choosen category." % g.user.username, category
     emit("choose_category", {"success": True, "category": category})
 
-#TODO: test
 @socketio.on("get_questions")
 @ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
@@ -149,7 +148,6 @@ def get_questions(data):
     print "User %s got questions." % g.user.username, proposed
     emit("get_questions", {"questions": proposed, "success": True})
 
-#TODO: test
 @socketio.on("answer")
 @ws_auth_required
 @needs_values("SOCKET", "answer", "game", "round_id", "quiz_id")
