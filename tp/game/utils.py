@@ -12,9 +12,16 @@ from tp.exceptions import NotAllowed
 #metodo transazionale per la creazione di una partita
 def createGame(**params):
     new_game = Game(creator = g.user)
-    opponent = params["opponent"]
-    new_game.users.append(opponent)
-    new_game.users.append(g.user)
+    opponents = params["opponents"]
+    #aggiungo tutti gli avversari alla partita
+    for opponent in opponents:
+        partecipation = Partecipation()
+        partecipation.user = opponent
+        new_game.users.append(partecipation)
+    #aggiungo l'utente alla partita
+    partecipation = Partecipation()
+    partecipation.user = g.user
+    new_game.users.append(partecipation)
     db.session.add(new_game)
     #TODO: gestire la logica per mandare le notifiche push a chi di dovere
     invite = Invite(sender = g.user, receiver = opponent, game = new_game)

@@ -28,7 +28,7 @@ def welcome():
 @fetch_models(opponent = User)
 def newGame():
     opponent = g.models["opponent"]
-    output = doTransaction(createGame, **({"opponent": opponent}))
+    output = doTransaction(createGame, **({"opponents": [opponent]}))
     if output:
         print "Game %d created." % output.id
         return jsonify(success = True, game = output, user = opponent)
@@ -64,7 +64,7 @@ def randomSearch():
         print "No opponent found."
         return jsonify(success = False)
     #eseguo la transazione con l'utente trovato
-    output = doTransaction(createGame, **({"opponent":opponent}))
+    output = doTransaction(createGame, **({"opponents":[opponent]}))
     #gestisco l'output
     if output:
         print "Game %d created." % output.id, output
