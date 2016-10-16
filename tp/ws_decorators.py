@@ -4,7 +4,7 @@ from flask import request, g
 from functools import wraps
 from tp import db
 from flask_socketio import rooms
-from tp.game.models import partecipation
+from tp.game.models import Partecipation
 from tp.exceptions import ChangeFailed, NotAllowed
 from tp.auth.utils import authenticate
 from tp.base.utils import roomName
@@ -20,7 +20,7 @@ def filter_input_room(f):
         enabled = True
         #unico caso al momento, ma in caso di riutilizzo del sistema room ci saranno altri casi
         if type == RoomType.game.value:
-            query = db.session.query(partecipation).filter_by(user_id = g.user.id, game_id = id)
+            query = Partecipation.query.filter_by(user_id = g.user.id, game_id = id)
             enabled = query.count() > 0
         else:
             enabled = False

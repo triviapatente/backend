@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db
-from tp.game.models import Game, Round, Invite, partecipation, Question
+from tp.game.models import Game, Round, Invite, Partecipation, Question
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func
 from random import randint
@@ -53,14 +53,14 @@ def getFirstUser(game, *columns):
     query = User.query
     if columns:
         query = query.with_entities(*columns)
-    return query.filter(User.games.any(id = game.id)).order_by(User.score.desc()).first()
+    return query.join(Partecipation).filter(Partecipation.game_id == game.id).order_by(User.score.desc()).first()
 
 # funzione che ritorna l'utente con lo score più basso del ##game
 def getLastUser(game, *columns):
     query = User.query
     if columns:
         query = query.with_entities(*columns)
-    return query.filter(User.games.any(id = game.id)).order_by(User.score).first()
+    return query.join(Partecipation).filter(Partecipation.game_id == game.id).order_by(User.score).first()
 
 # funzione che dati gli ##users ricava il range di abbinamento
 def calculateGameRange(game):
@@ -100,11 +100,10 @@ def updateScore(game):
 
 # funzione che ritorna gli utenti di una partita (##game)
 def getUsersFromGame(game, *columns):
-    # return User.query.with_entities(User).join(Game).filter(Game.id == game.id).all()
     query = User.query
     if columns:
         query = query.with_entities(*columns)
-    return query.filter(User.games.any(id = game.id)).all()
+    return query.join(Partecipation).filter(Partecipation.game_id == game.id).all()
 
 # funzione che ritorna l'utente vincitore di una partita (##game)
 def getWinner(game):
@@ -145,7 +144,7 @@ def get_dealer(game, number):
         return game.creator_id
     else: #altrimenti
         #ottengo gli utenti che partecipano al gioco
-        users = User.query.with_entities(User.username, User.id).join((Game, User.games)).filter(Game.id == game.id).order_by(User.username).all()
+        users = User.query.join(Partecipation).filter(Partecipation.game_id == game.id).all()
         #li conto
         n_users = len(users)
         #se sono 0 (impossibile ma è gestito), il dealer è nullo

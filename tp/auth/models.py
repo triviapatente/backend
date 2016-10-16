@@ -9,7 +9,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
 from tp.base.models import Base, CommonPK
-from tp.game.models import partecipation
+from tp.game.models import Partecipation
 from werkzeug.utils import secure_filename
 import os
 
@@ -25,7 +25,7 @@ class User(Base, CommonPK):
   #punteggio di partenza del giocatore
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])
   #partite giocate dal giocatore
-  games = relationship("Game", secondary = partecipation, back_populates = "users")
+  games = relationship("Partecipation", back_populates = "user")
 
   #metodo che permette di modificare il nome dell'immagine adattandolo al nome utente in modo sicuro
   def getFileName(self, filename):

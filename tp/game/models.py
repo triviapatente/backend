@@ -5,14 +5,16 @@ from sqlalchemy.orm import relationship
 
 from tp.base.models import Base, CommonPK
 
-partecipation = Table('partecipation', Base.metadata,
-    Column('user_id', Integer, ForeignKey('user.id'), primary_key = True),
-    Column('game_id', Integer, ForeignKey('game.id'), primary_key = True)
-)
+class Partecipation(Base):
+    user_id = Column('user_id', Integer, ForeignKey('user.id'), primary_key = True)
+    user = relationship("User", back_populates = "games")
+    game_id = Column('game_id', Integer, ForeignKey('game.id'), primary_key = True)
+    game = relationship("Game", back_populates = "users")
+    score_increment = Column('score_increment', Integer, default = 0)
 
 class Game(Base, CommonPK):
   #utenti che partecipano al gioco
-  users = relationship("User", secondary = partecipation, back_populates = "games")
+  users = relationship("Partecipation", back_populates = "game")
   #utente vincitore
   winner_id = Column(Integer, ForeignKey("user.id"))
   winner = relationship("User", foreign_keys = [winner_id])
