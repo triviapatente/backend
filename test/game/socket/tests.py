@@ -7,10 +7,10 @@ from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_room
 from api import *
 from tp.game.models import Round, Question, ProposedCategory, ProposedQuestion
-from tp import db
 from tp.base.utils import RoomType
+from tp import db, app
 from sqlalchemy.exc import IntegrityError
-from utils import dumb_crawler, generate_random_category, generate_random_question
+from utils import dumb_crawler, generate_random_category, generate_random_question, generateRound
 class GameSocketTestCase(TPAuthTestCase):
 
     opponent_id = None
@@ -118,10 +118,33 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 400
 
         print "#10: Accedo a un round senza essere iscritto alla room"
-        leave_room(self.socket, self.game_id, "game")
+        leave_room(self.socket, self.game_id, RoomType.game.value)
         response = init_round(self.socket, self.game_id, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
+
+        join_room(self.socket, self.game_id, RoomType.game.value)
+
+        numberOfRounds = app.config["NUMBER_OF_ROUNDS"]
+        print "#11: Dopo %d turni la partita finisce" % numberOfRounds
+        #svolgo i turni
+        for i in range(1, numberOfRounds/2):
+            #svolgo il turno con dealer opponent
+            generateRound(self.game_id, i*2, self.opponent_socket, self.socket)
+            #svolgo il turno con dealer user
+            generateRound(self.game_id, i*2+1, self.socket, self.opponent_socket)
+        #svolgo l'ultimo turno
+        generateRound(self.game_id, numberOfRounds, self.opponent_socket, self.socket)
+        #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
+        response = init_round(self.socket, self.game_id, numberOfRounds+1)
+        assert response.json.get("ended")
+        updatedUsers = response.json.get("updatedUsers")
+        assert updatedUsers
+        # controllo che i punteggi siano diversi da DEFAULT_USER_SCORE
+        defaultScore = app.config["DEFAULT_USER_SCORE"]
+        for user in updatedUsers:
+            print "New user %s score" % user.get("username"), user.get("score")
+            assert user.get("score") != defaultScore
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
