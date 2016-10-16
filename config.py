@@ -68,8 +68,8 @@ MIN_MULTIPLIER_FACTOR = 32
 #bonus di punteggio per partita giocata
 BONUS_SCORE = 10
 #incremento di range ogni tentativo
-RANGE_INCREMENT = 200
+RANGE_INCREMENT = 50
 #range iniziale
-INITIAL_RANGE = 400
+INITIAL_RANGE = 200
 #numero di messaggi nuovi mostrati ad ogni scroll
 MESSAGE_PER_SCROLL = 50
