@@ -220,7 +220,7 @@ def getNumberOfActiveGames(users):
     # devo considerare solo i giocatori in ##users
     users_usernames = [user.username for user in users]
     # ottengo una lista di tuple (username, games_count)
-    players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(partecipation).filter(User.username in users_usernames).group_by(User.username).all()
+    players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(Partecipation).join(Game).filter(Partecipation.user_id == User.id and Game.ended == False).group_by(User.username).all()
     # converto la lista di tuple (username, games_count) in un dictionary
     users_games_count = {}
     for e in players_with_games:
