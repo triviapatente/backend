@@ -7,8 +7,7 @@ from flask_socketio import rooms
 from tp.game.models import partecipation
 from tp.exceptions import ChangeFailed, NotAllowed
 from tp.auth.utils import authenticate
-from tp.base.utils import roomName
-from tp.base.utils import RoomType
+from tp.base.utils import roomName, getUsersFromRoom
 #per controllare che l'utente possa accedere alla room alla quale vuole accedere
 def filter_input_room(f):
     @wraps(f)
@@ -17,14 +16,8 @@ def filter_input_room(f):
         params = request.event["args"][0]
         id = params.get("id")
         type = params.get("type")
-        enabled = True
-        #unico caso al momento, ma in caso di riutilizzo del sistema room ci saranno altri casi
-        if type == RoomType.game.value:
-            query = db.session.query(partecipation).filter_by(user_id = g.user.id, game_id = id)
-            enabled = query.count() > 0
-        else:
-            enabled = False
-        if enabled:
+        output = getUsersFromRoom(type, id, True)
+        if output:
             g.roomName = roomName(id, type)
             return f(*args, **kwargs)
         else:

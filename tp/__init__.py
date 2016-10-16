@@ -17,13 +17,24 @@ def init(testing = False, ci = False):
     # Import SQLAlchemy
     from flask.ext.sqlalchemy import SQLAlchemy
 
-    from tp.base.utils import TPJSONEncoder
+    from flask.json import JSONEncoder
 
     # Import SocketIO
     from flask_socketio import SocketIO, emit
 
     # Define the WSGI application object
     app = Flask(__name__)
+
+    #classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
+    class TPJSONEncoder(JSONEncoder):
+        def default(self, obj):
+            #la classe ha la proprietà json? (Base e le sue derivate la hanno)
+            serialized = getattr(obj, "json", None)
+            if serialized:
+                #se si, ritornala direttamente
+                return serialized
+            #se no, gestisci con la classe padre (genererà un errore se la classe non è serializable)
+            return super(TPJSONEncoder, self).default(obj)
 
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder
@@ -77,7 +88,6 @@ def init(testing = False, ci = False):
     from tp.base.controllers import base
     from tp.game.controllers import game
     from tp.message.controllers import message
-    from tp.push.controllers import push
     from tp.preferences.controllers import preferences
     from tp.purchases.controllers import shop
 
@@ -87,7 +97,6 @@ def init(testing = False, ci = False):
     app.register_blueprint(base)
     app.register_blueprint(game)
     app.register_blueprint(message)
-    app.register_blueprint(push)
     app.register_blueprint(preferences)
     app.register_blueprint(account)
     app.register_blueprint(info)

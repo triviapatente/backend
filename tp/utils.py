@@ -5,11 +5,9 @@
 from tp.exceptions import *
 from tp import db
 from flask import g, request
-from tp.auth.models import *
-from tp.base.models import *
-from tp.game.models import *
-from tp.preferences.models import *
 import traceback
+
+
 
 
 # routine per le transazioni in db, riceve come parametro una funzione ##transaction che contiene le operazioni della transazione

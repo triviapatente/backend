@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from tp import socketio
-from flask import session, g
+from flask import session, g, request
 from flask_socketio import emit, disconnect
 from models import Keychain
+from tp import db
+from tp.events.models import Socket
 from tp.decorators import needs_values
 from tp.ws_decorators import ws_auth_required
 
@@ -15,6 +17,9 @@ def authenticate(data):
     if user:
         #assegno il token alla sessione
         session["token"] = token
+        s = Socket(user_id = user.id, socket_id = request.sid)
+        db.session.add(s)
+        db.session.commit()
         print "User %s just connected to socketio server." % user.username
     emit("auth", {"success": user != None})
 

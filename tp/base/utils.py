@@ -1,16 +1,7 @@
 # -*- coding: utf-8 -*-
-from flask.json import JSONEncoder
 from flask import g
-#classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
-class TPJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        #la classe ha la proprietà json? (Base e le sue derivate la hanno)
-        serialized = getattr(obj, "json", None)
-        if serialized:
-            #se si, ritornala direttamente
-            return serialized
-        #se no, gestisci con la classe padre (genererà un errore se la classe non è serializable)
-        return super(TPJSONEncoder, self).default(obj)
+from tp.game.models import Game
+from tp.auth.models import User
 
 # enumeration of room type
 from enum import Enum
@@ -21,3 +12,30 @@ def roomName(id, type):
     if isinstance(type, RoomType):
         type = type.value
     return "%s_%s" % (type, id)
+
+def getInfosFromRoom(id):
+    parts = id.split("_")
+    if parts and len(parts) == 2:
+        type = parts[0]
+        id = parts[1]
+        return (RoomType.__members__.get(type), id)
+    return (None, None)
+
+#ottiene gli utenti di una room in base al tipo
+#se la room non è conosciuta ritorna None
+#se check_for_user è True ritorna solo il mio utente, se è presente nella room
+def getUsersFromRoom(type, game_id, check_for_user = False):
+    #unico caso al momento, ma in caso di riutilizzo del sistema room ci saranno altri casi
+    print type, game_id, check_for_user
+    if type == RoomType.game.value:
+        query = User.query.join(Game.users).filter(Game.id == game_id)
+        if check_for_user:
+            query.filter(User.id == g.user.id)
+        return query.all()
+    return None
+
+def getRoomsFor(type, user):
+    rooms = []
+    if type == RoomType.game:
+        rooms = Game.query.with_entities(Game.id).join(User).filter(User.id == user.id)
+    return [roomName(id, type) for id in rooms]
