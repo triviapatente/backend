@@ -195,3 +195,16 @@ def getNumberOfActiveGames(users):
 def getNumberOfGames(user_A, user_B):
     # prendo le partite dell'utente e le conto
     return Game.query.filter(Game.users.any(User.id == user_A.id)).filter(Game.users.any(User.id == user_B.id)).count()
+
+# funzione che definisce se una partita (##game) è finita o meno
+def gameEnded(game):
+    #prendo gli utenti della partita
+    users = getUsersFromGame(game)
+    #per ognuno di essi
+    for user in users:
+        #se non hanno finito l'ultimo round
+        if Question.query.filter(Question.user_id == user.id).join(Round).filter(Round.number == app.config["NUMBER_OF_ROUNDS"]).count() < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
+            #la partita non è finita
+            return False
+    #la partita è finita
+    return True
