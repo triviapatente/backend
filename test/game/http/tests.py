@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from api import *
 from test.shared import TPAuthTestCase
-from tp.game.models import Invite, Game
+from tp.game.models import Invite, Game, Partecipation
 from test.auth.http.api import register
+from tp import db
 class GameHTTPTestCase(TPAuthTestCase):
     first_opponent = None
     second_opponent = None
@@ -41,12 +44,20 @@ class GameHTTPTestCase(TPAuthTestCase):
         user1 = response.json.get("user")
         assert user1
 
+        #azzero i database se no l'utente scelto è sempre lo stesso (l'unico con game attivi)
+        Partecipation.query.delete()
+        db.session.commit()
+
         print "#2: Creazione game"
         response = new_random_game(self)
         assert response.json.get("success") == True
         assert response.json.get("game")
         user2 = response.json.get("user")
         assert user2
+
+        #azzero i database se no l'utente scelto è sempre lo stesso (l'unico con game attivi)
+        Partecipation.query.delete()
+        db.session.commit()
 
         print "#3: Creazione game"
         response = new_random_game(self)
@@ -55,7 +66,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         user3 = response.json.get("user")
         assert user3
 
-        print "Opponents: ", user1.get("id"), user2.get("id"), user3.get("id")
+        print "Opponents: ", user1.get("username"), user2.get("username"), user3.get("username")
 
     def test_get_pending_invites(self):
         #ottengo id e token dell'opponent del quale voglio vedere gli inviti
