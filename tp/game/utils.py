@@ -98,12 +98,19 @@ def updateScore(game):
     # params = {"users": users, "updateParams": {"effectiveResult": effectiveResult, "expectedScore": expectedScore, "k_factor": k_factor}}
     def newScores(**params):
         users = params["users"]
+        game_id = params["game_id"]
         for user in users:
             # assegno ad ogni utente il suo nuovo punteggio
-            user.score = new_score(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"], user.score)
+            score_inc = score_increment(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"])
+            print "Saving user %s score increment (%d).." % (user.username, score_inc)
+            entry = Partecipation.query.filter(Partecipation.user_id == user.id and Partecipation.game_id == game_id).first()
+            entry.score_increment = score_inc
+            db.session.add(entry)
+            user.score = user.score + score_inc
             db.session.add(user)
         return users
-    return doTransaction(newScores, **{"users": users, "updateParams": updateParams})
+    return doTransaction(newScores, **{"users": users, "updateParams": updateParams, "game_id": game.id})
+
 # funzione che ritorna i record di Partecipation inerenti ad un ##game
 def getPartecipationFromGame(game):
     return Partecipation.query.filter_by(game_id = game.id).all()
