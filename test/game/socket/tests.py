@@ -138,13 +138,13 @@ class GameSocketTestCase(TPAuthTestCase):
         #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
         response = init_round(self.socket, self.game_id, numberOfRounds+1)
         assert response.json.get("ended")
-        updatedUsers = response.json.get("updatedUsers")
-        assert updatedUsers
-        # controllo che i punteggi siano diversi da DEFAULT_USER_SCORE
-        defaultScore = app.config["DEFAULT_USER_SCORE"]
-        for user in updatedUsers:
-            print "New user %s score" % user.get("username"), user.get("score")
-            assert user.get("score") != defaultScore
+        partecipations = response.json.get("partecipations")
+        assert partecipations
+        # controllo che tutti i giocatori abbiano avuto un cambiamento nel punteggio
+        for p in partecipations:
+            score_inc = p.get("score_increment")
+            print "User %s got score increment: %d" % (p.get("user_id"), score_inc)
+            assert score_inc != 0
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
