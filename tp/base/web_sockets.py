@@ -16,7 +16,7 @@ def join_room_request(data):
     join_room(g.roomName)
     print "User %s joined room %s." % (g.user.username, g.roomName)
     emit("join_room", {"success": True})
-    #events.user_joined(g.roomName)
+    events.user_joined(g.roomName)
 
 @socketio.on("leave_room")
 @ws_auth_required
@@ -31,7 +31,7 @@ def leave_room_request(data):
     name = roomName(id, type)
     if name in rooms():
         leave_room(name)
-        #events.user_left(name)
+        events.user_left(name)
         print "User %s leaved room %s." % (g.user.username, name)
     emit("leave_room", {"success": True})
 
