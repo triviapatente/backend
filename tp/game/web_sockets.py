@@ -13,6 +13,7 @@ from tp.base.utils import RoomType
 from tp.exceptions import NotAllowed, ChangeFailed
 from sqlalchemy import func
 import events
+
 @socketio.on("init_round")
 @ws_auth_required
 @needs_values("SOCKET", "number", "game")
@@ -50,8 +51,9 @@ def init_round(data):
             raise NotAllowed()
     #ottengo il round di riferimento
     round = Round.query.filter(Round.game_id == game.id, Round.number == number).first()
+    need_new_round = round is None
     #se è nullo
-    if round is None:
+    if need_new_round:
         #lo creo
         round = Round(game = game, number = number)
         #genero il dealer
@@ -79,6 +81,9 @@ def init_round(data):
             output["waiting"] = "category"
     print "User %s in init round got output:" % g.user.username, output
     emit("init_round", output)
+    if need_new_round:
+        events.round_started(g.roomName, round)
+
 
 @socketio.on("get_categories")
 @ws_auth_required

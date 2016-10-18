@@ -51,7 +51,7 @@ class GameSocketTestCase(TPAuthTestCase):
             #annullo la transazione
             db.session.rollback()
 
-        print "#2: Accedo al primo round ma il dealer è il creatore della partita"
+        print "#2: Accedo al primo round e il dealer è il creatore della partita"
         #pulisco i round della partita (come se fosse ricominciata)
         Round.query.delete()
         db.session.commit()
@@ -62,7 +62,12 @@ class GameSocketTestCase(TPAuthTestCase):
         #essendo il primo round, il dealer dev'essere chi ha creato la partita
         assert response.json.get("round").get("dealer_id") == self.game.get("creator_id")
 
-        print "#3: Accedo al round ma colui che dovrebbe essere il nuovo dealer sta ancora giocando il precedente"
+        print "#3: Event Test: Controllo che all'avversario sia arrivato il giusto evento"
+        response = self.socket.get_received()
+        assert response.json.get("action") == "create"
+        assert response.json.get("round")
+        
+        print "#4: Accedo al round ma colui che dovrebbe essere il nuovo dealer sta ancora giocando il precedente"
         #svolgo il primo turno ma opponent non gioca
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
         chosen_category_id = get_categories(self.socket, self.game_id, round_id).json.get("categories")[0].get("id")
@@ -77,16 +82,17 @@ class GameSocketTestCase(TPAuthTestCase):
 
         #quando ri-accedo alla room per continuare con il round successivo mi viene comunicato che l'altro sta ancora giocando
         response = init_round(self.socket, self.game_id, 2)
+        self.opponent_socket.get_received() #consumo l'evento round_started, innescato dalla precedente chiamata a init_round
         assert response.json.get("success") == True
         assert response.json.get("waiting") == "game"
 
-        print "#4: Accedo a un round senza aver risposto alle domande del precedente"
+        print "#5: Accedo a un round senza aver risposto alle domande del precedente"
         #opponent accede senza completare il primo turno al secondo turno
         response = init_round(self.opponent_socket, self.game_id, 2)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#5: Accedo al round ma il dealer ne sta scegliendo la categoria"
+        print "#6: Accedo al round ma il dealer ne sta scegliendo la categoria"
         #rispondo alle domande anche con opponent, finendo lo svolgimento del turno
         for question in questions:
             question_id = question.get("id")
@@ -99,31 +105,31 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("round")
         assert response.json.get("waiting") == "category"
 
-        print "#6: Accedo ad un round diverso dal primo e ricevo le precedenti risposte"
+        print "#7: Accedo ad un round diverso dal primo e ricevo le precedenti risposte"
         assert response.json.get("previous_answers")
 
-        print "#7: game_id inesistente"
+        print "#8: game_id inesistente"
         response = init_round(self.socket, 234, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#8: round_id casuale"
+        print "#9: round_id casuale"
         response = init_round(self.socket, self.game_id, 2341)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#9: Parametri mancanti"
-        print "#9.1: game_id"
+        print "#10: Parametri mancanti"
+        print "#10.1: game_id"
         response = init_round(self.socket, None, 1)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#9.2: number"
+        print "#10.2: number"
         response = init_round(self.socket, self.game_id, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#10: Accedo a un round senza essere iscritto alla room"
+        print "#11: Accedo a un round senza essere iscritto alla room"
         leave_room(self.socket, self.game_id, RoomType.game.value)
         response = init_round(self.socket, self.game_id, 1)
         assert response.json.get("success") == False
@@ -132,7 +138,7 @@ class GameSocketTestCase(TPAuthTestCase):
         join_room(self.socket, self.game_id, RoomType.game.value)
         self.opponent_socket.get_received() #consumo l'evento user_joined provocato dal join room di self.socket
         numberOfRounds = app.config["NUMBER_OF_ROUNDS"]
-        print "#11: Dopo %d turni la partita finisce" % numberOfRounds
+        print "#12: Dopo %d turni la partita finisce" % numberOfRounds
         #svolgo i turni
         for i in range(1, numberOfRounds/2):
             #svolgo il turno con dealer opponent
@@ -154,6 +160,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        self.opponent_socket.get_received() #consumo l'evento round_started, innescato dalla precedente chiamata a init_round
 
         print "#1: Sono dealer del round e richiedo le categorie"
         response = get_categories(self.socket, self.game_id, round_id)
@@ -206,6 +213,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
     def test_choose_category(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
+        self.opponent_socket.get_received() #consumo l'evento round_started, innescato dalla precedente chiamata a init_round
         categories = get_categories(self.socket, self.game_id, round_id).json.get("categories")
         chosen_category_id = categories[0].get("id")
 
