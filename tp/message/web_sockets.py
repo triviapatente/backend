@@ -8,6 +8,7 @@ from tp.game.models import Game
 from tp.decorators import needs_values
 from tp.ws_decorators import ws_auth_required, check_in_room
 from tp.base.utils import RoomType
+import events
 
 @socketio.on("send_message")
 @ws_auth_required
@@ -19,7 +20,8 @@ def on_message(data):
     if message:
         # send message to all in the room
         print "User %s sent message to room %s:" % (g.user.username, g.roomName), message.json
-        emit('send_message', {"success":True, "message": message.json}, room = g.roomName)
+        emit('send_message', {"success":True, "message": message.json})
+        events.send_message(g.roomName, message)
     else:
         print "User %s unable to sent message." % g.user.username
-        emit('send_message_result', {"success": False})
+        emit('send_message', {"success": False})

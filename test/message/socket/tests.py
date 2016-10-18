@@ -26,6 +26,7 @@ class MessageSocketTestCase(TPAuthTestCase):
         # entrambi gli utenti joinano la loro room
         join_room(self.opponent_socket, self.game_id, "game")
         join_room(self.socket, self.game_id, "game")
+        self.opponent_socket.get_received() #consuma l'evento user_joined generato dal join di self.socket
 
     def test_on_message(self):
         content = "Test"
@@ -38,7 +39,15 @@ class MessageSocketTestCase(TPAuthTestCase):
         message = message_sent.get("message")
         assert message and message["content"] == content
 
-        print "#2: Send message on right room, opponent receives message"
+        print "#2: opponent receives message"
+        send_message(self.socket, self.game_id, content)
+        opponent_response = self.opponent_socket.get_received()
+
+        assert opponent_response.json.get("message")
+        assert opponent_response.json.get("message").get("id")
+        assert opponent_response.json.get("action") == "create"
+        assert opponent_response.json.get("name") == "message"
+
 
         print "#3: Send message on wrong room"
         message_sent = send_message(self.socket, self.game_id + 1, content).json
