@@ -349,6 +349,13 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("correct_answer") is not None
 
+        print "#8 Event Test: arriva l'evento corretto all'avversario"
+        answer_response = self.opponent_socket.get_received()
+        assert answer_response.json.get("action") == "answer"
+        assert answer_response.json.get("correct") is not None
+        assert answer_response.json.get("quiz")
+        assert answer_response.json.get("user")
+
         print "#4: Rispondo a una domanda a cui ho già risposto"
         response = answer(self.socket, False, self.game_id, round_id, question_id)
         assert response.json.get("success") == False
