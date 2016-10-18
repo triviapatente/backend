@@ -12,7 +12,7 @@ from flask import g
 from tp.base.utils import RoomType
 from tp.exceptions import NotAllowed, ChangeFailed
 from sqlalchemy import func
-#TODO: test
+import events
 @socketio.on("init_round")
 @ws_auth_required
 @needs_values("SOCKET", "number", "game")
@@ -143,6 +143,7 @@ def choose_category(data):
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
     emit("choose_category", {"success": True, "category": category})
+    events.category_chosen(g.roomName, category)
 
 @socketio.on("get_questions")
 @ws_auth_required
