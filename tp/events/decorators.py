@@ -6,7 +6,7 @@ from flask import g
 from utils import getUsersFromRoomID
 from functools import wraps
 
-def event(name, action, include_self, preferences_key = None, needs_push = True):
+def event(name, action, preferences_key = None, needs_push = True):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -14,6 +14,7 @@ def event(name, action, include_self, preferences_key = None, needs_push = True)
             if not users:
                 return None
             data["action"] = action.value
+            data["name"] = name
             #users è una stanza
             if isinstance(users, basestring):
                 users = getUsersFromRoomID(users)
@@ -21,11 +22,11 @@ def event(name, action, include_self, preferences_key = None, needs_push = True)
                 users = [u for u in getUsersFromRoomID(r) for r in users]
             if not users:
                 return (users, data, include_self, preferences_key, needs_push)
-            if not include_self:
-                users = [u for u in users if u.id != g.user.id]
+            #elimino il currentuser
+            users = [u for u in users if u.id != g.user.id]
             for user in users:
                 send(name, user, data, preferences_key, needs_push)
-            return (users, data, include_self, preferences_key, needs_push)
+            return (users, data, preferences_key, needs_push)
         return decorated_function
     return decorator
 
@@ -33,7 +34,7 @@ def send(name, user, data, preferences_key, needs_push):
     sockets = Socket.query.filter(Socket.user_id == user.id).all()
     if sockets:
         for socket in sockets:
-            print "[SOCKET EVENT, name = %s, user = %d]" % (name, user.id), data
+            print "[SOCKET EVENT, name = %s, user = %d, sid = %s]" % (name, user.id, socket.socket_id), data
             emit(name, data, room = socket.socket_id)
     elif needs_push:
         if preferences_key:
