@@ -5,6 +5,8 @@ from models import Socket
 from flask import g
 from utils import getUsersFromRoomID
 from functools import wraps
+from tp import socketio
+from tp.preferences.models import Preferences
 
 def event(name, action, preferences_key = None, needs_push = True):
     def decorator(f):
@@ -35,7 +37,8 @@ def send(name, user, data, preferences_key, needs_push):
     if sockets:
         for socket in sockets:
             print "[SOCKET EVENT, name = %s, user = %d, sid = %s]" % (name, user.id, socket.socket_id), data
-            emit(name, data, room = socket.socket_id)
+            socketio.emit(name, data, room = socket.socket_id)
+
     elif needs_push:
         if preferences_key:
             preferences = Preferences.query.filter(Preferences.user_id == user.id).first()

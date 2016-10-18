@@ -33,6 +33,6 @@ def game_left(room, game):
     return (room, data)
 
 @event("new_game", action = EventActions.create, preferences_key = "notification_new_game")
-def new_game(room, game):
+def new_game(users, game):
     data = {"game": game.json}
-    return (room, data)
+    return (users, data)
