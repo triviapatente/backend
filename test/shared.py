@@ -76,9 +76,13 @@ def fake_socket_request(socket):
     def get_received():
         #chiamo il metodo che si chiamava fn in app, ripassando gli argomenti misti contenuti in args come argomenti della funzione
         response = oldmethod()
+        assert response, "Null response"
         event = response[0].get("name")
         args = response[0].get("args")
-        json = args[0]
+        if isinstance(args, list):
+            json = args[0]
+        else:
+            json = args
         print "Risposta SOCKET (event = %s): " % event, json
         assert json, "No response from server"
         assert json.get("status_code") != 500, "Internal server error"
