@@ -31,8 +31,9 @@ class GameSocketTestCase(TPAuthTestCase):
         self.game = new_game(self, self.opponent_id).json.get("game")
         self.game_id = self.game.get("id")
         #entrambi i giocatori entrano nella room
-        join_room(self.socket, self.game_id, RoomType.game.value)
         join_room(self.opponent_socket, self.game_id, RoomType.game.value)
+        join_room(self.socket, self.game_id, RoomType.game.value)
+        self.opponent_socket.get_received() #consumo l'evento user_joined provocato dal join room di self.socket
         #faccio partire il dumb crawler, per generare categorie e domande casualmente
         dumb_crawler()
 
@@ -124,7 +125,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 403
 
         join_room(self.socket, self.game_id, RoomType.game.value)
-
+        self.opponent_socket.get_received() #consumo l'evento user_joined provocato dal join room di self.socket
         numberOfRounds = app.config["NUMBER_OF_ROUNDS"]
         print "#11: Dopo %d turni la partita finisce" % numberOfRounds
         #svolgo i turni
