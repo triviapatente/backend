@@ -34,11 +34,11 @@ class AlreadyRegisteredUser(TPException):
 
     def __init__(self, previousUser, username, email):
         TPException.__init__(self)
-        self.message = "Esiste già un utente con questo "
+        self.message = "Esiste già un utente con questo"
         if username == previousUser.username:
-            self.message = self.message + "username: {0}".format(username)
-        elif email == previousUser.email:
-            self.message = self.message + "indirizzo email: {0}".format(email)
+            self.message = self.message + " username: {0}".format(username)
+        if email == previousUser.email:
+            self.message = self.message + " email: {0}".format(email)
 
 #eccezione chiamata quando il login dell'utente fallisce
 class LoginFailed(TPException):
