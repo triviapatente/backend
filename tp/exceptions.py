@@ -35,10 +35,14 @@ class AlreadyRegisteredUser(TPException):
     def __init__(self, previousUser, username, email):
         TPException.__init__(self)
         self.message = "Esiste già un utente con questo"
-        if username == previousUser.username:
+        duplicateUsername = (username == previousUser.username)
+        duplicateEmail = (email == previousUser.email)
+        if duplicateUsername and duplicateEmail:
+            self.message = self.message + " username e questa email: {0}, {1}".format(username, email)
+        elif duplicateEmail:
+            self.message = self.message + " indirizzo email: {0}".format(email)
+        elif duplicateUsername:
             self.message = self.message + " username: {0}".format(username)
-        if email == previousUser.email:
-            self.message = self.message + " email: {0}".format(email)
 
 #eccezione chiamata quando il login dell'utente fallisce
 class LoginFailed(TPException):
@@ -46,7 +50,7 @@ class LoginFailed(TPException):
 
     def __init__(self):
         TPException.__init__(self)
-        self.message = "Login fallito"
+        self.message = "Associazione username (o email) e password errata. Riprova!"
 
 #eccezione chiamata quando il login dell'utente fallisce
 class Forbidden(TPException):
