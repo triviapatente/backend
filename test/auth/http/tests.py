@@ -41,6 +41,10 @@ class AuthHTTPTestCase(TPTestCase):
         response = getCurrentUser(self, response.json.get("token"))
         assert response.status_code == 200
 
+        print "#5: Stringa vuota nella richiesta"
+        response = register(self, "", "", "")
+        assert response.status_code == 400
+
     def test_login(self):
         #chiamata propedeutica
         register(self, "user", "user@gmail.com", "user")

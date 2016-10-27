@@ -40,7 +40,9 @@ def needs_values(method, *keys):
                 missing_on_array = isinstance(store, list) and key not in store
                 #lo store è una map? controllo se è presente (è il caso di request.form)
                 missing_on_dict = isinstance(store, dict) and store.get(key) == None
-                if missing_on_dict or missing_on_array:
+                #il parametro nello store è una stringa vuota?
+                empty_string = isinstance(store, dict) and isinstance(store.get(key), basestring) and not store.get(key)
+                if missing_on_dict or missing_on_array or empty_string:
                     missing.append(key)
                 else:
                     output[key] = store[key]
