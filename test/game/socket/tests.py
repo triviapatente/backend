@@ -66,7 +66,7 @@ class GameSocketTestCase(TPAuthTestCase):
         response = self.socket.get_received()
         assert response.json.get("action") == "create"
         assert response.json.get("round")
-        
+
         print "#4: Accedo al round ma colui che dovrebbe essere il nuovo dealer sta ancora giocando il precedente"
         #svolgo il primo turno ma opponent non gioca
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
@@ -79,7 +79,6 @@ class GameSocketTestCase(TPAuthTestCase):
             #risponde solo self.socket perchè self.opponent_socket è il dealer del round successivo e quindi sta ancora giocando
             answer(self.socket, True, self.game_id, round_id, question_id)
             self.opponent_socket.get_received() #consumo l'evento question_answered, innescato dalla precedente chiamata a answer
-
         #quando ri-accedo alla room per continuare con il round successivo mi viene comunicato che l'altro sta ancora giocando
         response = init_round(self.socket, self.game_id, 2)
         self.opponent_socket.get_received() #consumo l'evento round_started, innescato dalla precedente chiamata a init_round
@@ -142,11 +141,11 @@ class GameSocketTestCase(TPAuthTestCase):
         #svolgo i turni
         for i in range(1, numberOfRounds/2):
             #svolgo il turno con dealer opponent
-            generateRound(self.game_id, i*2, self.opponent_socket, self.socket)
+            generateRound(self.game_id, i*2, (self.opponent_socket, True), (self.socket, True))
             #svolgo il turno con dealer user
-            generateRound(self.game_id, i*2+1, self.socket, self.opponent_socket)
+            generateRound(self.game_id, i*2+1, (self.socket, True), (self.opponent_socket, True))
         #svolgo l'ultimo turno
-        generateRound(self.game_id, numberOfRounds, self.opponent_socket, self.socket)
+        generateRound(self.game_id, numberOfRounds, (self.opponent_socket, True), (self.socket, True))
         #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
         response = init_round(self.socket, self.game_id, numberOfRounds+1)
         assert response.json.get("ended")
@@ -157,6 +156,38 @@ class GameSocketTestCase(TPAuthTestCase):
             score_inc = p.get("score_increment")
             print "User %s got score increment: %d" % (p.get("user_id"), score_inc)
             assert score_inc != 0
+        print "#12.1 draw: no winner"
+        assert response.json.get("winner") == None
+
+        print "#12.2 user win"
+        #creo una nuova partita
+        self.game = new_game(self, self.opponent_id).json.get("game")
+        self.game_id = self.game.get("id")
+        #entrambi i giocatori entrano nella room
+        join_room(self.opponent_socket, self.game_id, RoomType.game.value)
+        join_room(self.socket, self.game_id, RoomType.game.value)
+        #consumo l'evento user_joined provocato dal join room di self.socket
+        self.opponent_socket.get_received()
+        #accetto la partita con opponent_socket
+        init_round(self.opponent_socket, self.game_id, 1)
+        #svolgo i turni con risposte diverse per i giocatori
+        for i in range(0, numberOfRounds/2):
+            #svolgo il turno con dealer user
+            generateRound(self.game_id, i*2+1, (self.socket, True), (self.opponent_socket, False))
+            #svolgo il turno con dealer opponent
+            generateRound(self.game_id, i*2+2, (self.opponent_socket, False), (self.socket, True))
+        #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
+        response = init_round(self.socket, self.game_id, numberOfRounds+1)
+        assert response.json.get("ended")
+        partecipations = response.json.get("partecipations")
+        assert partecipations
+        # controllo che tutti i giocatori abbiano avuto un cambiamento nel punteggio
+        for p in partecipations:
+            score_inc = p.get("score_increment")
+            print "User %s got score increment: %d" % (p.get("user_id"), score_inc)
+            assert score_inc != 0
+        # controllo che abbia vinto user
+        assert response.json.get("winner").get("id") == self.user.get("id")
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
