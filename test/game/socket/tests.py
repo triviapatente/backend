@@ -366,9 +366,13 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("status_code") == 403
 
         print "#3: rispondo alla domanda senza nessun errore del server"
+        #rispondo con true per verificare poi la correttezza
         response = answer(self.socket, True, self.game_id, round_id, question_id)
         assert response.json.get("success") == True
-        assert response.json.get("correct_answer") is not None
+        correct_answer = response.json.get("correct_answer")
+        assert correct_answer is not None
+        print "#3.1 la risposta è corretta"
+        assert correct_answer
 
         print "#4 Event Test: arriva l'evento corretto all'avversario"
         answer_response = self.opponent_socket.get_received()
