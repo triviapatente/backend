@@ -10,7 +10,8 @@ def dumb_crawler():
         db.session.add(c)
         db.session.commit()
         for n in range(0, 40):
-            q = Quiz(category_id = c.id, question = "Quiz %d della categoria %d" % (n, i), answer = (n % 2 == 0))
+            # risposta corretta è sempre quella vera per semplificare il test delle vittorie
+            q = Quiz(category_id = c.id, question = "Quiz %d della categoria %d" % (n, i), answer = True)
             db.session.add(q)
         db.session.commit()
 
@@ -29,12 +30,13 @@ def generate_random_question(category_id):
     return q
 
 #funzione che svolge un turno. I sockets devono essere forniti con quest'ordine: dealer, altri
+#i sockets sono una coppia: socket, socket_answer
 def generateRound(game_id, round_number, *sockets):
-    round_id = init_round(sockets[0], game_id, round_number).json.get("round").get("id")
-    chosen_category_id = get_categories(sockets[0], game_id, round_id).json.get("categories")[0].get("id")
-    choose_category(sockets[0], chosen_category_id, game_id, round_id)
-    questions = get_questions(sockets[0], round_id, game_id).json.get("questions")
+    round_id = init_round(sockets[0][0], game_id, round_number).json.get("round").get("id")
+    chosen_category_id = get_categories(sockets[0][0], game_id, round_id).json.get("categories")[0].get("id")
+    choose_category(sockets[0][0], chosen_category_id, game_id, round_id)
+    questions = get_questions(sockets[0][0], round_id, game_id).json.get("questions")
     for question in questions:
         question_id = question.get("id")
-        for socket in sockets:
-            answer(socket, True, game_id, round_id, question_id)
+        for (socket, socket_answer) in sockets:
+            answer(socket, socket_answer, game_id, round_id, question_id)
