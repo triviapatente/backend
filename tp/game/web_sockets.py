@@ -34,7 +34,7 @@ def init_round(data):
             db.session.commit()
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
-            print "User's score updated.", updatedUsers
+            print "User's score updated."
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         winner = None
         if game.winner:
