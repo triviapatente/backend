@@ -187,7 +187,7 @@ class GameSocketTestCase(TPAuthTestCase):
             print "User %s got score increment: %d" % (p.get("user_id"), score_inc)
             assert score_inc != 0
         # controllo che abbia vinto user
-        assert response.json.get("winner").get("id") == self.user.get("id")
+        assert response.json.get("winner") == self.user.get("id")
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, 1).json.get("round").get("id")
