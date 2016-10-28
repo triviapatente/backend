@@ -3,7 +3,7 @@ from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
-from tp.game.utils import get_dealer, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame
+from tp.game.utils import get_dealer, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner
 from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
 from tp.decorators import needs_values, fetch_models
@@ -29,13 +29,14 @@ def init_round(data):
         #evito di fare l'update più volte
         if not game.ended:
             game.ended = True
+            game.winner = setWinner(game)
             db.session.add(game)
             db.session.commit()
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
             print "User's score updated.", updatedUsers
         partecipations = [p.json for p in getPartecipationFromGame(game)]
-        return emit("init_round", {"partecipations": partecipations, "ended": True})
+        return emit("init_round", {"partecipations": partecipations, "ended": True, "winner": game.winner})
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     if number > 2:
         #ottengo gli utenti del match
