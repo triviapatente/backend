@@ -104,7 +104,7 @@ def updateScore(game):
             # assegno ad ogni utente il suo nuovo punteggio
             score_inc = score_increment(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"])
             print "Saving user %s score increment (%d).." % (user.username, score_inc)
-            entry = Partecipation.query.filter(Partecipation.user_id == user.id and Partecipation.game_id == game_id).first()
+            entry = Partecipation.query.filter(and_(Partecipation.user_id == user.id, Partecipation.game_id == game_id)).first()
             entry.score_increment = score_inc
             db.session.add(entry)
             user.score = user.score + score_inc
