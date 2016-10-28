@@ -5,8 +5,10 @@ from tp.auth.models import User
 from tp.game.models import *
 from tp.utils import doTransaction
 from tp.decorators import auth_required, fetch_models, needs_values
+from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
 from tp.game.utils import updateScore, searchInRange, createGame
+from tp.base.utils import RoomType
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -35,6 +37,25 @@ def newGame():
         return jsonify(success = True, game = output, user = opponent)
     else:
         raise ChangeFailed()
+
+@game.route("/game/leave")
+@fetch_models(id = Game)
+@check_in_room(RoomType.game, "game")
+def leave_game():
+    game = g.models["id"]
+    opponents = Partecipation.query.with_entities(Partecipation.user_id).filter(Partecipation.game_id == game.id).filter(Partecipation.user_id != g.user.id).all()
+    if len(opponents) > 1:
+        #TODO: gestire la multiutenza nel gioco (versione 2.0)
+        #il game non finisce, e si flagga la partecipation dell'utente, in modo che si capisce che non gioca più
+        pass
+    else:
+        game.ended = True
+        game.winner_id = opponent
+        db.session.add(game)
+        db.session.save()
+    #TODO: gestire cambiamento punteggi utenti
+    events.game_left(g.roomName, game)
+
 
 # ricerca aleatoria di un avversario
 @game.route("/new/random", methods = ["POST"])

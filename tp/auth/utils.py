@@ -3,6 +3,8 @@
 from flask import request, session, g
 from tp.auth.models import Keychain
 from tp.exceptions import Forbidden
+from tp.game.utils import getInvitesCountFor
+from tp.auth.queries import getUserPosition
 #chiave associata al token negli header http di ogni richiesta (il valore è deciso qui)
 TOKEN_KEY = 'tp-session-token'
 #chiamata che a partire da una richiesta ritorna il token.
@@ -27,3 +29,12 @@ def authenticate(socket = False):
     print "User %s associated with token." % user.username
     #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente
     g.user = user
+
+def get_connection_values(user):
+    if not user:
+        return {}
+    output = {}
+    output["invites"] = getInvitesCountFor(user)
+    output["global_rank_position"] = getUserPosition(user)
+    #TODO: add rank on friends
+    return output
