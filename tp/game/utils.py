@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db
-from tp.game.models import Game, Round, Invite, Partecipation, Question
+from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func
 from random import randint
@@ -250,3 +250,24 @@ def gameEnded(game):
             return False
     #la partita è finita
     return True
+
+# metodo che setta il winner del ##game
+def setWinner(game):
+    #prendo per ogni utente il numero di risposte corrette per gli utenti nella partita
+    correctAnswers = getCorrectAnswers(game)
+    #trovo il vincitore
+    if len(correctAnswers) == 0:
+        #nessuno ha risposto ad almeno una domanda correttamente --> pareggio
+        return None
+    if len(correctAnswers) == 1:
+        #solo il primo ha risposto ad almeno una domanda correttamente --> vittoria
+        return User.query.filter_by(id = correctAnswers[0][0]).first()
+    if correctAnswers[0][1] == correctAnswers[1][1]:
+        #si tratta di un pareggio
+       return None
+    else:
+       return User.query.filter_by(id = correctAnswers[0][0]).first()
+
+# metodo che calcola il numero di risposte corrette per ogni giocatore in un ##game
+def getCorrectAnswers(game):
+    return User.query.with_entities(User.id.label("user_id"), func.count(Question.answer).label("number_of_correct_answer")).join(Question).join(Quiz, Question.quiz_id == Quiz.id).join(Round, Question.round_id == Round.id).filter(and_(Quiz.answer == Question.answer, Round.game_id == game.id)).group_by(User.id).all()
