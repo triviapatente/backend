@@ -36,7 +36,10 @@ def init_round(data):
             updatedUsers = updateScore(game)
             print "User's score updated.", updatedUsers
         partecipations = [p.json for p in getPartecipationFromGame(game)]
-        return emit("init_round", {"partecipations": partecipations, "ended": True, "winner": game.winner})
+        winner = None
+        if game.winner:
+            winner = game.winner.id
+        return emit("init_round", {"partecipations": partecipations, "ended": True, "winner": winner})
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     if number > 2:
         #ottengo gli utenti del match
