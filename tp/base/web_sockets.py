@@ -38,7 +38,3 @@ def leave_room_request(data):
 @socketio.on("connect")
 def connect():
     print "Anonymous user just connected."
-
-@socketio.on("disconnect")
-def disconnect():
-    print "User %s just disconnected." % g.user.username

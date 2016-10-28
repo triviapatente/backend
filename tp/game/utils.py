@@ -271,3 +271,7 @@ def setWinner(game):
 # metodo che calcola il numero di risposte corrette per ogni giocatore in un ##game
 def getCorrectAnswers(game):
     return User.query.with_entities(User.id.label("user_id"), func.count(Question.answer).label("number_of_correct_answer")).join(Question).join(Quiz, Question.quiz_id == Quiz.id).join(Round, Question.round_id == Round.id).filter(and_(Quiz.answer == Question.answer, Round.game_id == game.id)).group_by(User.id).all()
+
+# metodo che ritorna gli inviti per ##user
+def getInvitesCountFor(user):
+    return Invite.query.filter(Invite.receiver_id == user.id, Invite.accepted == None).count()
