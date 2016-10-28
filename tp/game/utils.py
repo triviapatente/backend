@@ -250,3 +250,6 @@ def gameEnded(game):
             return False
     #la partita è finita
     return True
+
+def getInvitesCountFor(user):
+    return Invite.query.filter(Invite.receiver_id == user.id, Invite.accepted == None).count()

@@ -80,15 +80,6 @@ def getPendingInvites():
     print "User %s got pending invites." % g.user.username
     return jsonify(success = True, invites = invites)
 
-#considerare di dare questa info alla creazione del websocket
-@game.route("/invites/badge", methods = ["GET"])
-@auth_required
-def getPendingInvitesBadge():
-    badge = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).count()
-    print "User %s got pending invites badges." % g.user.username
-    return jsonify(success = True, badge = badge)
-
-#considerare di dare questa info alla creazione del websocket
 @game.route("/invites/<int:game_id>", methods = ["POST"])
 @needs_values("POST", "accepted")
 @fetch_models(game_id = Game)
