@@ -26,10 +26,15 @@ def question_answered(room, quiz, correct):
 def score_updated(room, user, score):
     data = {"user": user.json, "score": score}
     return (room, data)
-#TODO: implementare questo evento, e la chiamata http associata
+#TODO: implementare questo evento
+@event("game_finished", action = EventActions.destroy)
+def score_updated(room, game, winner, partecipations):
+    data = {"user": user.json, "score": score}
+    return (room, data)
+
 @event("game_left", action = EventActions.game_left)
-def game_left(room, game):
-    data = {"game": game.json, "user": g.user.json}
+def game_left(room, game, winner, partecipations):
+    data = {"game": game.json, "user": g.user.json, "winner": winner.json, "partecipations": partecipations}
     return (room, data)
 
 @event("new_game", action = EventActions.create, preferences_key = "notification_new_game")

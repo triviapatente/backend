@@ -5,6 +5,8 @@ from test.shared import TPAuthTestCase, get_socket_client
 from tp.game.models import Invite, Game, Partecipation
 from test.auth.http.api import register
 from test.auth.socket.api import login
+from test.base.socket.api import leave_room, join_room
+
 from tp import db
 class GameHTTPTestCase(TPAuthTestCase):
     first_opponent = None
@@ -13,7 +15,7 @@ class GameHTTPTestCase(TPAuthTestCase):
 
     first_opponent_socket = None
     def setUp(self):
-        super(GameHTTPTestCase, self).setUp()
+        super(GameHTTPTestCase, self).setUp(socket = True)
         self.first_opponent = register(self, "test1", "test1@gmail.com", "test").json
         self.first_opponent_socket = get_socket_client()
         login(self, self.first_opponent_socket, self.first_opponent.get("token"))
@@ -43,6 +45,49 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = new_game(self, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
+
+    def test_leave_game(self):
+        opponent_id = self.first_opponent.get("user").get("id")
+        other_opponent_token = self.second_opponent.get("token")
+
+        game_id = new_game(self, opponent_id).json.get("game").get("id")
+        #per intercettare e rendere 'innocuo' l'evento di creazione del game
+        self.first_opponent_socket.get_received()
+
+        print "#1: Il game non esiste"
+        response = leave_game(self, 200)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#2: Non appartengo alla game"
+        other_game_id = new_game(self, opponent_id, token = other_opponent_token).json.get("game").get("id")
+        #per intercettare e rendere 'innocuo' l'evento di creazione del game
+        self.first_opponent_socket.get_received()
+
+        response = leave_game(self, other_game_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#3: Parametri mancanti"
+        print "#3: game_id"
+        response = leave_game(self, None)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#4: Mi tolgo dal gioco correttamente"
+        response = leave_game(self, game_id)
+        assert response.json.get("success") == True
+        assert response.json.get("partecipations")
+        assert response.json.get("game")
+        assert response.json.get("ended") == True
+        assert response.json.get("winner")
+
+        print "#5 Event Test: l'avversario ha ricevuto l'evento"
+        response = self.first_opponent_socket.get_received()
+        assert response.json.get("action") == "game_left"
+        assert response.json.get("partecipations")
+        assert response.json.get("game")
+        assert response.json.get("winner")
 
     def test_random_search(self):
 

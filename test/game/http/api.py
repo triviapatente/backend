@@ -13,6 +13,11 @@ def get_pending_invites(self, token = None):
         token = self.token
     return self.app.get("/game/invites", token = token)
 
+def leave_game(self, game_id, token = None):
+    if not token:
+        token = self.token
+    return self.app.post("/game/leave", token = token, data = {"game_id": game_id})
+
 def process_invite(self, game_id, accepted, token = None):
     if not token:
         token = self.token

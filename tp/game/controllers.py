@@ -7,7 +7,7 @@ from tp.utils import doTransaction
 from tp.decorators import auth_required, fetch_models, needs_values
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
-from tp.game.utils import updateScore, searchInRange, createGame
+from tp.game.utils import updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame
 from tp.base.utils import RoomType
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
@@ -38,24 +38,38 @@ def newGame():
     else:
         raise ChangeFailed()
 
-@game.route("/game/leave")
-@fetch_models(id = Game)
-@check_in_room(RoomType.game, "game")
+@game.route("/leave", methods = ["POST"])
+@auth_required
+@fetch_models(game_id = Game)
 def leave_game():
-    game = g.models["id"]
-    opponents = Partecipation.query.with_entities(Partecipation.user_id).filter(Partecipation.game_id == game.id).filter(Partecipation.user_id != g.user.id).all()
-    if len(opponents) > 1:
+    game = g.models["game_id"]
+    users = getUsersFromGame(game)
+    user_ids = [u.id for u in users]
+    #se non appartengo al gioco
+    if g.user.id not in user_ids:
+        raise NotAllowed()
+    #se ci sono più di due giocatori
+    if len(users) > 2:
         #TODO: gestire la multiutenza nel gioco (versione 2.0)
         #il game non finisce, e si flagga la partecipation dell'utente, in modo che si capisce che non gioca più
-        pass
-    else:
+        return jsonify(success = False, reason = "Version 2.0")
+    #se il numero di giocatori è corretto
+    elif len(users) == 2:
+        opponent = [u for u in users if u.id != g.user.id][0]
+        #modifico il game settandogli tra l'altro lo winner
         game.ended = True
-        game.winner_id = opponent
+        game.winner_id = opponent.id
         db.session.add(game)
-        db.session.save()
-    #TODO: gestire cambiamento punteggi utenti
-    events.game_left(g.roomName, game)
-
+        db.session.commit()
+        #modifico i punteggi degli utenti
+        updateScore(game)
+        #ritorno le varie risposte
+        partecipations = [p.json for p in getPartecipationFromGame(game)]
+        events.game_left(users, game, opponent, partecipations)
+        return jsonify(success = True, ended = True, game = game, winner = opponent, partecipations = partecipations)
+    #nessun avversario.. solo io nel gioco
+    #NOTE: non dovrebbe succedere mai, in new_game l'opponent è obbligatorio
+    return jsonify(success = False, message = "Nessun avversario in questo match!")
 
 # ricerca aleatoria di un avversario
 @game.route("/new/random", methods = ["POST"])
