@@ -12,12 +12,6 @@ from tp.base.utils import RoomType
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
 
-@game.route("/test", methods = ["POST"])
-@needs_values("POST", "game_id", "scoreRange")
-def test():
-    game = Game.query.filter_by(id = g.post.get("game_id")).first()
-    return jsonify(updatedScores = updateScore(game, int(g.post.get("scoreRange"))))
-
 @game.route("/", methods = ["GET"])
 def welcome():
     output = app.config["PUBLIC_INFOS"]
