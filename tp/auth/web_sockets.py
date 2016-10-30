@@ -14,17 +14,17 @@ from utils import get_connection_values
 @needs_values("SOCKET", "token")
 def authenticate(data):
     token = g.params["token"]
-    user = Keychain.verify_auth_token(token)
+    g.user = Keychain.verify_auth_token(token)
     output = {}
-    if user:
+    if g.user:
         #assegno il token alla sessione
         session["token"] = token
-        s = Socket(user_id = user.id, socket_id = request.sid)
+        s = Socket(user_id = g.user.id, socket_id = request.sid)
         db.session.add(s)
         db.session.commit()
-        print "User %s just connected to socketio server." % user.username
-        output = get_connection_values(user)
-    output["success"] = user != None
+        print "User %s just connected to socketio server." % g.user.username
+        output = get_connection_values(g.user)
+    output["success"] = g.user != None
     emit("auth", output)
 
 @socketio.on("logout")

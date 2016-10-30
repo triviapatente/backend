@@ -38,7 +38,6 @@ class Base(db.Model):
         output = {}
         #ottengo le colonne/proprietà per l'export (tranne json)
         values = self.export_values()
-        print values
         #per ognuna
         for value in values:
             output[value] = getattr(self, value)

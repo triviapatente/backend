@@ -5,6 +5,7 @@ from tp.auth.models import Keychain
 from tp.exceptions import Forbidden
 from tp.game.utils import getInvitesCountFor
 from tp.rank.queries import getUserPosition
+from tp.stats.queries import getCategoryPercentages
 #chiave associata al token negli header http di ogni richiesta (il valore è deciso qui)
 TOKEN_KEY = 'tp-session-token'
 #chiamata che a partire da una richiesta ritorna il token.
@@ -36,5 +37,6 @@ def get_connection_values(user):
     output = {}
     output["invites"] = getInvitesCountFor(user)
     output["global_rank_position"] = getUserPosition(user)
+    output["stats"] = getCategoryPercentages()
     #TODO: add rank on friends
     return output
