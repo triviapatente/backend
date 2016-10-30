@@ -4,7 +4,7 @@ from flask import request, session, g
 from tp.auth.models import Keychain
 from tp.exceptions import Forbidden
 from tp.game.utils import getInvitesCountFor
-from tp.auth.queries import getUserPosition
+from tp.rank.queries import getUserPosition
 #chiave associata al token negli header http di ogni richiesta (il valore è deciso qui)
 TOKEN_KEY = 'tp-session-token'
 #chiamata che a partire da una richiesta ritorna il token.

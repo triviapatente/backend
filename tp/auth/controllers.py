@@ -142,22 +142,3 @@ def changeImage():
 @auth_required
 def getCurrentUser():
     return jsonify(user = g.user)
-
-#api per la richiesta della classifica italiana (globale)
-@info.route("/rank/italy", methods = ["GET"])
-@auth_required
-def getItalianRank():
-    #chiedo la classifica (elenco utenti ordinato in base al punteggio) dei primi n utenti
-    rank = getRank()
-    # calcolo le posizioni per gli utenti nella top 10
-    lastScore, position, italianRank = rank[0].score, 1, []
-    for player in rank:
-        if lastScore != player.score:
-            position, lastScore = position + 1, player.score
-        italianRank.append({"user": player, "position": position})
-    # prendo la posizione dell'utente e verifico che sia presente
-    user = {"user": g.user, "position": getUserPosition(g.user)}
-    if user not in italianRank:
-        italianRank[-1] = user
-    print "User %s got italian rank." % g.user.username
-    return jsonify(rank = italianRank)

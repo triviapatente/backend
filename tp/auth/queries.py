@@ -16,10 +16,3 @@ def getKeychain(id):
 # ritorna l'utente a partire dallo ##username o dalla ##email
 def getUserFromUsernameOrEmail(username, email):
     return User.query.filter(or_(User.username == username, User.email == email)).first()
-
-# ritorna la classifica
-def getRank():
-    return User.query.order_by(User.score).limit(app.config["RESULTS_LIMIT_RANK_ITALY"])
-
-def getUserPosition(user):
-    return db.session.query(func.count(distinct(User.score))).filter(User.score > user.score).scalar() + 1

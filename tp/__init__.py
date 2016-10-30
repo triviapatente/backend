@@ -90,6 +90,8 @@ def init(testing = False, ci = False):
     from tp.message.controllers import message
     from tp.preferences.controllers import preferences
     from tp.purchases.controllers import shop
+    from tp.rank.controllers import rank
+    from tp.stats.controllers import stats
 
 
     # Register blueprint(s)
@@ -101,6 +103,8 @@ def init(testing = False, ci = False):
     app.register_blueprint(account)
     app.register_blueprint(info)
     app.register_blueprint(shop)
+    app.register_blueprint(rank)
+    app.register_blueprint(stats)
 
 
     # Add websockets

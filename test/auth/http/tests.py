@@ -142,35 +142,4 @@ class AuthHTTPTestCase(TPTestCase):
         response = getCurrentUser(self, "INVALID_TOKEN")
         assert response.status_code == 403
 
-    def test_getItalianRank(self):
-        number_of_results = app.config["RESULTS_LIMIT_RANK_ITALY"]
-        MAX = number_of_results + 3
-        for i in range (0, MAX):
-            register(self, "user%s" % i, "user%s@gmail.com" % i, "user%s" % i)
-        token = login(self, "user%s" % (MAX-1), "user%s" % (MAX-1)).json.get("token")
-
-        print "#1: Classifica ricevuta correttamente"
-        response = getItalianRank(self, token)
-        assert response.status_code == 200
-
-        rank = response.json.get("rank")
-        print "#2: Classifica di %s elementi come predefinito" % number_of_results
-        assert len(rank) == number_of_results
-
-        # essendo il token dell'ultimo utente inserito, se è in classifica il metodo getRank funziona
-        print "#3: User in classifica"
-        exist = False
-        for user_position in rank:
-            if user_position["user"].get("username") == "user%s" % (MAX-1):
-                exist = True
-                break
-        assert exist
-
-        print "#4: La classifica è descrescente"
-        last = None
-        for user_position in rank:
-            if last and last < user_position["user"].get("score"):
-                assert False
-            last = user_position["user"].get("score")
-
-        # altri test non vale la pena farli perchè implicherebbero l'implementazione del metodo stesso
+    

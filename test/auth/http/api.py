@@ -25,11 +25,6 @@ def changeSurname(self, surname, token):
         token = self.token
     return self.app.post("account/surname/edit", data = {"surname": surname}, token = token)
 
-def getItalianRank(self, token = None):
-    if not token:
-        token = self.token
-    return self.app.get("/info/rank/italy", token = token)
-
 def changeImage(self, image, token = None):
     if not token:
         token = self.token
