@@ -13,10 +13,13 @@ class Base(db.Model):
     __abstract__ = True
 
     def __getitem__(self, key):
-        return getattr(self, key)
+        if isinstance(key, basestring):
+            return getattr(self, key)
+        return None
 
     def __setitem__(self, key, value):
-        setattr(self, key, value)
+        if isinstance(key, basestring):
+            setattr(self, key, value)
 
   	#ora non servirà più dichiarare __tablename__ in ogni classe
     @declared_attr
@@ -33,12 +36,27 @@ class Base(db.Model):
     @property
     def json(self):
         output = {}
-        #ottengo le colonne generiche
-        columns = self.columns()
+        #ottengo le colonne/proprietà per l'export (tranne json)
+        values = self.export_values()
+        print values
         #per ognuna
-        for column in columns:
-            output[column] = getattr(self, column)
+        for value in values:
+            output[value] = getattr(self, value)
+        return output
 
+    #metodo che ottiene i nomi di tutti i valori dell'oggetto che devono essere esportati all'esterno
+    @classmethod
+    def export_values(self):
+        return self.properties(include_json = False) + self.columns()
+    #metodo che ottiene i nomi di tutte le proprietà dell'oggetto
+    @classmethod
+    def properties(self, include_json = True):
+        output = []
+        for name in dir(self):
+            attr = getattr(self, name)
+            if isinstance(attr, property):
+                if include_json or name != "json":
+                    output.append(name)
         return output
 
     #metodo che ottiene il tipo di una proprietà a partire dalla stessa

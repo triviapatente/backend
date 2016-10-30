@@ -5,6 +5,7 @@ from tp import db
 def getDBModels():
     return db.metadata.tables.items()
 
+#TODO: insert export properties
 #metodo che ritorna un dictionary che contiene un oggetto per ogni modello presente in db, popolato con valori arbitrari
 def getJSONModels():
     models = getDBModels()

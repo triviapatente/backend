@@ -57,6 +57,9 @@ class Keychain(Base, CommonPK):
   #facebookToken dell'utente
   facebookToken = Column(String)
 
+  #TODO: put token inside Installation
+  #TODO: il token tiene conto del tempo, e gli serve per calcolare l'expiration
+
   #proprietà che contiene un auth token, utile per l'autenticazione
   #l'expiration time è settato di default a un mese
   @property
@@ -64,7 +67,7 @@ class Keychain(Base, CommonPK):
       #ottengo il serializer
       s = self.getSerializer(expiration)
       #critto l'id dell'utente proprietario del keychain e il nonce e ne ottengo un token
-      return s.dumps({ 'id': self.user_id, 'nonce': self.nonce })
+      return s.dumps({ 'id': self.user_id, 'nonce': self.nonce})
 
   #metodo centrale che contiene l'istanza del serializer per generazione e verifica di token
   #muovendolo in un metodo centrale siamo sicuri che la chiave usata per generare/verificare è sempre la stessa
