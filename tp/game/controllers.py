@@ -9,6 +9,9 @@ from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
 from tp.game.utils import updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame
 from tp.base.utils import RoomType
+from sqlalchemy.orm import aliased
+from sqlalchemy import func
+
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -114,7 +117,6 @@ def getPendingInvites():
 @fetch_models(game_id = Game)
 @auth_required
 def processInvite(game_id):
-    print Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id, Invite.accepted == None)
     invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id, Invite.accepted == None).first()
     if not invite:
         print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
@@ -125,3 +127,12 @@ def processInvite(game_id):
     db.session.commit()
     print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
     return jsonify(success = True, invite = invite)
+
+@game.route("/recents", methods = ["GET"])
+@auth_required
+def recent_games():
+    a = aliased(Round, name = "a")
+    questions = Question.query.with_entities(func.count(Question.round_id)).filter(Question.round_id == a.id).filter(Question.user_id == g.user.id).as_scalar()
+    my_turn = db.session.query(a).with_entities(func.count(a.id)).filter(a.game_id == Game.id).filter(a.cat_id != None).filter(questions != 0).label("my_turn")
+    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == g.user.id).with_entities(Game, my_turn).order_by(my_turn.desc())
+    return jsonify(recent_games = recent_games.all())
