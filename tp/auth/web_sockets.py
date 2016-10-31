@@ -19,9 +19,11 @@ def authenticate(data):
     if g.user:
         #assegno il token alla sessione
         session["token"] = token
-        s = Socket(user_id = g.user.id, socket_id = request.sid)
-        db.session.add(s)
-        db.session.commit()
+        s = Socket.query.filter(Socket.user_id == g.user.id).filter(Socket.socket_id == request.sid).first()
+        if not s:
+            s = Socket(user_id = g.user.id, socket_id = request.sid)
+            db.session.add(s)
+            db.session.commit()
         print "User %s just connected to socketio server." % g.user.username
         output = get_connection_values(g.user)
     output["success"] = g.user != None

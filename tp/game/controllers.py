@@ -135,4 +135,4 @@ def recent_games():
     questions = Question.query.with_entities(func.count(Question.round_id)).filter(Question.round_id == a.id).filter(Question.user_id == g.user.id).as_scalar()
     my_turn = db.session.query(a).with_entities(func.count(a.id)).filter(a.game_id == Game.id).filter(a.cat_id != None).filter(questions != 0).label("my_turn")
     recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == g.user.id).with_entities(Game, my_turn).order_by(my_turn.desc())
-    return jsonify(recent_games = recent_games.all())
+    return jsonify(success = True, recent_games = recent_games.all())
