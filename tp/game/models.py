@@ -82,7 +82,10 @@ class Image(Base, CommonPK):
 
 class Category(Base, CommonPK):
   #nome della categoria
-  name = Column(String(250), nullable = False)
+  name = Column(String, nullable = False)
+  #hint della categoria
+  hint = Column(String)
+
 #categoria proposta al giocatore, che deve sceglierla
 class ProposedCategory(Base):
   #categoria proposta

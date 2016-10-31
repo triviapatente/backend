@@ -71,13 +71,13 @@ def getCategoryPercentages():
     total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz).filter(Quiz.category_id == Category.id)
     #count(createdAt)
     correct_questions = func.count(a.createdAt)
-    #SELECT category.id AS category_id, category.name AS category_name, (correct_questions * 100) / total_questions FROM category
+    #SELECT category.id AS category_id, category.hint AS category_hint, (correct_questions * 100) / total_questions FROM category
     #JOIN quiz ON quiz.category_id = category.id
     #JOIN question ON quiz.id = question.quiz_id
     #WHERE question.user_id = g.user_id
     #AND question."createdAt" = max_created
     #AND quiz.answer = question.answer
-    #GROUP BY category.id, category.name
-    query = db.session.query(a).join(Quiz).join(Category).with_entities(Category.id, Category.name, (correct_questions * 100 / total_questions).label("percentage")).filter(a.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer).group_by(Category.id, Category.name)
+    #GROUP BY category.id, category.hint
+    query = db.session.query(a).join(Quiz).join(Category).with_entities(Category.id, Category.hint, (correct_questions * 100 / total_questions).label("percentage")).filter(a.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer).group_by(Category.id, Category.hint)
     output = query.all()
     return output
