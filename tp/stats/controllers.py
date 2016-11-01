@@ -13,7 +13,7 @@ stats = Blueprint("stats", __name__, url_prefix = "/stats")
 @fetch_models(category_id = Category)
 def get_wrong_answers(category_id):
     answers = getWrongLastQuestions(category_id)
-    return jsonify(answers = answers)
+    return jsonify(success = True, answers = answers)
 
 #percentuale riferita a una data
 @stats.route("/progresses/<int:category_id>", methods = ["GET"])
@@ -24,9 +24,9 @@ def get_progresses(category_id):
     end = datetime.now()
     start = end + timedelta(days=-n)
     progress = getProgressChart(category_id, n, start, end)
-    return jsonify(progress = progress)
+    return jsonify(success = True, progress = progress)
 
 @stats.route("/categories", methods = ["GET"])
 def get_categories():
     categories = Category.query.all()
-    return jsonify(categories = categories)
+    return jsonify(success = True, categories = categories)

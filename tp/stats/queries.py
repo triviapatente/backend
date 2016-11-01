@@ -55,7 +55,7 @@ def getPercentageIn(category_id, start, end):
     #JOIN quiz ON quiz.id = a.quiz_id
     #JOIN category ON category.id = quiz.category_id
     #WHERE a.user_id = g.user_id AND a."createdAt" = max_created
-    query = db.session.query(a).join(Quiz).join(Category).with_entities((correct_questions * 100 / total_questions).label("percentage")).filter(a.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer)
+    query = db.session.query(a).join(Quiz).join(Category).with_entities((correct_questions * 100 / total_questions).label("percentage")).filter(Quiz.category_id == category_id).filter(a.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer)
     print query
     output = query.first()
     return output
