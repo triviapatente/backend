@@ -45,6 +45,14 @@ class AuthHTTPTestCase(TPTestCase):
         response = register(self, "", "", "")
         assert response.status_code == 400
 
+        print "#6: Email non valida"
+        response = register(self, "123", "123.it", "123123")
+        assert response.status_code == 400
+        response = register(self, "123", "123@.it", "123123")
+        assert response.status_code == 400
+        response = register(self, "123", "@df.it", "123123")
+        assert response.status_code == 400
+
     def test_login(self):
         #chiamata propedeutica
         register(self, "user", "user@gmail.com", "user")

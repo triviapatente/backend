@@ -11,12 +11,21 @@ from itsdangerous import (JSONWebSignatureSerializer
 from tp.base.models import Base, CommonPK
 from tp.game.models import Partecipation
 from werkzeug.utils import secure_filename
+from validate_email import validate_email
+from sqlalchemy.orm import validates
+
 import os
 
 class User(Base, CommonPK):
   #valori identificativi dell'utente, devono essere unici
   username = Column(String, nullable = False, unique = True)
   email = Column(String(250), nullable = False, unique = True)
+
+  @validates("email")
+  def validate_email(self, key, value):
+      assert validate_email(value)
+      return value
+
   #dati personali dell'utente
   name = Column(String)
   surname = Column(String)
