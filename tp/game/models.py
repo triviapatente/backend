@@ -2,8 +2,9 @@
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Table, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
-
+from flask import g
 from tp.base.models import Base, CommonPK
+from tp.auth.models import User
 
 class Partecipation(Base):
     user_id = Column('user_id', Integer, ForeignKey('user.id'), primary_key = True)
@@ -24,7 +25,19 @@ class Game(Base, CommonPK):
   #il gioco è finito?
   ended = Column(Boolean, default = False)
 
-  export_properties = ["my_turn"]
+  export_properties = ["my_turn", "opponent_id", "opponent_username", "opponent_image"]
+  #ottiene l'utente avversario all'utente userToExclude e lo inserisce nel modello per la serializzazione
+  def getOpponentForExport(self, userToExclude = None):
+      #ho fatto il controllo qui e non direttamente nell'intestazione del metodo perchè i valori di default vengono interpretati a livello di bootstrap, e quindi g sarebbe fuori dall'application/request context
+      if not userToExclude:
+          userToExclude = g.user
+      opponent = User.query.join(Partecipation).filter(Partecipation.game_id == self.id).filter(Partecipation.user_id != userToExclude.id).first()
+      #DEVE esserci, ma controllo lo stesso per sicurezza
+      if opponent:
+          self.opponent_id = opponent.id
+          self.opponent_image = opponent.image
+          self.opponent_username = opponent.username
+
 
 #rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte
 class Round(Base, CommonPK):

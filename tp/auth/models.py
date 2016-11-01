@@ -9,7 +9,6 @@ from itsdangerous import (JSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
 from tp.base.models import Base, CommonPK
-from tp.game.models import Partecipation
 from werkzeug.utils import secure_filename
 from validate_email import validate_email
 from sqlalchemy.orm import validates

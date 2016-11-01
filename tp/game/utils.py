@@ -3,7 +3,7 @@
 from tp import app, db
 from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz
 from tp.auth.models import User
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
 from sqlalchemy import func, desc
 from random import randint
@@ -297,6 +297,8 @@ def getRecentGames(user):
     recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(desc("my_turn")).limit(10).all()
     output = []
     for g in recent_games:
-        g[0].my_turn = g[1]
-        output.append(g[0])
+        game = g[0]
+        game.my_turn = g[1]
+        game.getOpponentForExport()
+        output.append(game)
     return output
