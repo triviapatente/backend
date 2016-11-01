@@ -41,7 +41,8 @@ class Base(db.Model):
         values = self.export_values()
         #per ognuna
         for value in values:
-            output[value] = getattr(self, value)
+            if hasattr(self, value):
+                output[value] = getattr(self, value)
         return output
 
     #metodo che ottiene i nomi di tutti i valori dell'oggetto che devono essere esportati all'esterno
