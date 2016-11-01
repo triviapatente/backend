@@ -37,6 +37,6 @@ def get_connection_values(user):
     output = {}
     output["invites"] = getInvitesCountFor(user)
     output["global_rank_position"] = getUserPosition(user)
-    output["stats"] = getCategoryPercentages()
+    output["stats"] = getCategoryPercentages(user)
     #TODO: add rank on friends
     return output

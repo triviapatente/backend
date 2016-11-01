@@ -61,7 +61,7 @@ def getPercentageIn(category_id, start, end):
     return output
 
 
-def getCategoryPercentages():
+def getCategoryPercentages(user):
     a = aliased(Question, name = "a")
     b = aliased(Question, name = "b")
     c = aliased(Question, name = "c")
@@ -74,10 +74,10 @@ def getCategoryPercentages():
     #SELECT category.id AS category_id, category.hint AS category_hint, (correct_questions * 100) / total_questions FROM category
     #JOIN quiz ON quiz.category_id = category.id
     #JOIN question ON quiz.id = question.quiz_id
-    #WHERE question.user_id = g.user_id
+    #WHERE question.user_id = user_id
     #AND question."createdAt" = max_created
     #AND quiz.answer = question.answer
     #GROUP BY category.id, category.hint
-    query = db.session.query(a).join(Quiz).join(Category).with_entities(Category.id, Category.hint, (correct_questions * 100 / total_questions).label("percentage")).filter(a.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer).group_by(Category.id, Category.hint)
+    query = db.session.query(a).join(Quiz).join(Category).with_entities(Category.id, Category.hint, (correct_questions * 100 / total_questions).label("percentage")).filter(a.user_id == user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer).group_by(Category.id, Category.hint)
     output = query.all()
     return output
