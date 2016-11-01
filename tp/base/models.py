@@ -21,6 +21,7 @@ class Base(db.Model):
         if isinstance(key, basestring):
             setattr(self, key, value)
 
+    export_properties = []
   	#ora non servirà più dichiarare __tablename__ in ogni classe
     @declared_attr
     def __tablename__(cls):
@@ -46,7 +47,7 @@ class Base(db.Model):
     #metodo che ottiene i nomi di tutti i valori dell'oggetto che devono essere esportati all'esterno
     @classmethod
     def export_values(self):
-        return self.properties(include_json = False) + self.columns()
+        return self.properties(include_json = False) + self.columns() + self.export_properties
     #metodo che ottiene i nomi di tutte le proprietà dell'oggetto
     @classmethod
     def properties(self, include_json = True):
