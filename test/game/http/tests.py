@@ -6,7 +6,8 @@ from tp.game.models import Invite, Game, Partecipation
 from test.auth.http.api import register
 from test.auth.socket.api import login
 from test.base.socket.api import leave_room, join_room
-
+from test.game.socket.api import *
+from test.game.socket.utils import dumb_crawler
 from tp import db
 class GameHTTPTestCase(TPAuthTestCase):
     first_opponent = None
@@ -190,3 +191,101 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("success") == False
         print response.json.get("status_code")
         assert response.json.get("status_code") == 400
+
+    def prepare_round(self, socket, game, number):
+        print "preparing round for game", game, "number:", number
+        round_id = init_round(socket, game, number).json.get("round").get("id")
+        category = get_categories(socket, game, round_id).json.get("categories")[0].get("id")
+        choose_category(socket, category, game, round_id)
+        return round_id
+    def process_round(self, socket, game, number, round_id = None):
+        if not round_id:
+            round_id = self.prepare_round(socket, game, number)
+        print "processing round for game", game, "number:", number, "id:", round_id
+        questions = get_questions(socket, round_id, game).json.get("questions")
+        for question in questions:
+            answer(socket, True, game, round_id, question.get("id"))
+        return round_id
+    def create_bulk_game(self):
+        opponent_id = self.first_opponent.get("user").get("id")
+        id = new_game(self, opponent_id).json.get("game").get("id")
+        join_room(self.socket, id, "game")
+        join_room(self.first_opponent_socket, id, "game")
+        self.socket.get_received()
+        return id
+    def test_recent_games(self):
+
+        dumb_crawler()
+
+        #il primo game lo creo, inizializzo il round e non rispondo: è il mio turno
+        #Risultato sperato : my_turn = true
+        first_game = self.create_bulk_game()
+        init_round(self.socket, first_game, 1)
+        #il secondo game lo creo e faccio scorrere 1 turno fino ad arrivare al secondo turno dell'avversario
+        #Risultato sperato : my_turn = true (il prossimo turno il dealer sarò io!)
+        second_game = self.create_bulk_game()
+        round_id = self.process_round(self.socket, second_game, 1)
+        self.first_opponent_socket.get_received()
+        self.process_round(self.first_opponent_socket, second_game, 1, round_id)
+        self.socket.get_received()
+        round_id = self.prepare_round(self.first_opponent_socket, second_game, 2)
+        self.socket.get_received()
+        self.process_round(self.socket, second_game, 2, round_id)
+        self.first_opponent_socket.get_received()
+        init_round(self.socket, second_game, 3)
+        #il terzo game lo creo, rispondo al primo round con l'avversario e ritorno al mio turno, scegliendo la categoria
+        #Risultato sperato : my_turn = true (categoria settata, posso agire!)
+        third_game = self.create_bulk_game()
+        round_id = self.process_round(self.socket, third_game, 1)
+        self.first_opponent_socket.get_received()
+        self.process_round(self.first_opponent_socket, third_game, 1, round_id)
+        self.socket.get_received()
+        self.prepare_round(self.first_opponent_socket, third_game, 2)
+        self.socket.get_received()
+        #il quarto game lo creo, rispondo al primo round con l'avversario e ritorno al mio turno
+        #Risultato sperato : my_turn = false (devo aspettare che l'avversario setti la categoria)
+        fourth_game = self.create_bulk_game()
+        round_id = self.process_round(self.socket, fourth_game, 1)
+        self.first_opponent_socket.get_received()
+        self.process_round(self.first_opponent_socket, fourth_game, 1, round_id)
+        init_round(self.first_opponent_socket, fourth_game, 2)
+        #il quinto game lo creo e rispondo a tutte le domande fino ad arrivare al turno dell'avversario
+        #Risultato sperato : my_turn = false (il prossimo turno è dell'avversario!)
+        fifth_game = self.create_bulk_game()
+        round_id = self.process_round(self.socket, fifth_game, 1)
+        self.first_opponent_socket.get_received()
+        #il sesto game lo creo e mi tolgo subito, quindi viene settato ended = true
+        sixth_game = self.create_bulk_game()
+        leave_game(self, sixth_game)
+
+        print "#1: Risposta successful"
+        response = recent_games(self)
+        assert response.json.get("success") == True
+
+        games = response.json.get("recent_games")
+        assert games is not None
+        assert len(games) == 6
+
+        print "#2.1: Il primo game è quello con il mio turno"
+        assert games[0].get("id") == first_game
+        assert games[0].get("my_turn") == True
+
+        print "#2.2: Il secondo game è il secondo con il mio turno"
+        assert games[1].get("id") == second_game
+        assert games[1].get("my_turn") == True
+
+        print "#2.3: Il terzo game è il terzo con il mio turno"
+        assert games[2].get("id") == third_game
+        assert games[2].get("my_turn") == True
+
+        print "#2.4: Il quarto game è quello con il turno dell'avversario"
+        assert games[3].get("id") == fourth_game
+        assert games[3].get("my_turn") == False
+
+        print "#2.5: Il quinto game è il secondo con il turno dell'avversario"
+        assert games[4].get("id") == fifth_game
+        assert games[4].get("my_turn") == False
+
+        print "#2.6: Il sesto game è quello finito"
+        assert games[5].get("id") == sixth_game
+        assert games[5].get("ended") == True

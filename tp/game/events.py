@@ -28,8 +28,8 @@ def score_updated(room, user, score):
     return (room, data)
 #TODO: implementare questo evento
 @event("game_finished", action = EventActions.destroy)
-def score_updated(room, game, winner, partecipations):
-    data = {"user": user.json, "score": score}
+def game_finished(room, game, winner, partecipations):
+    data = {"score": score, "winner": winner.json, "partecipations": partecipations}
     return (room, data)
 
 @event("game_left", action = EventActions.game_left)

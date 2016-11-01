@@ -285,16 +285,18 @@ def getRecentGames(user):
     #FROM question, round AS a
     #WHERE question.round_id = a.id AND question.user_id = user.id)
     questions = Question.query.with_entities(func.count(Question.round_id)).filter(Question.round_id == a.id).filter(Question.user_id == user.id).as_scalar()
-    #(SELECT count(a.id) AS count_1
+    #(SELECT count(a.id) = 0 AS count_1
     #FROM round AS a, game
     #WHERE game.id = a.game_id AND a.cat_id IS NOT NULL AND (SELECT count(question.round_id) AS count_2
     #FROM question
     #WHERE question.round_id = a.id AND question.user_id = user.id) != 0)
-    my_turn = db.session.query(a).with_entities(func.count(a.id)).filter(a.game_id == Game.id).filter(a.cat_id != None).filter(questions != 0).label("my_turn")
+    question_number = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
+    my_turn = db.session.query(a).with_entities(func.count(a.id) != 0).filter(a.game_id == Game.id).filter(or_(Game.ended == True, and_(or_(a.cat_id != None, a.dealer_id == user.id), questions < question_number))).label("my_turn")
     #SELECT game.*, my_turn AS my_turn
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
-    #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC LIMIT 10
-    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(desc("my_turn")).limit(10).all()
+    #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
+    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(desc("my_turn"), Game.ended.asc(), Game.createdAt.asc()).limit(10)
+    print recent_games
     output = []
     for g in recent_games:
         game = g[0]
