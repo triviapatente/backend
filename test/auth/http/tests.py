@@ -77,8 +77,13 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#5: Token valido"
         response = login(self, "user", "user")
-        response = getCurrentUser(self, response.json.get("token"))
-        assert response.status_code == 200
+        user_response = getCurrentUser(self, response.json.get("token"))
+        assert user_response.status_code == 200
+
+        print "#6 In due chiamate differenti, i token coincidono"
+        response2 = login(self, "user", "user")
+        assert response2.status_code == 200
+        assert response.json.get("token") == response2.json.get("token")
 
     def test_logout(self):
         register(self, "user", "user@gmail.com", "user")
@@ -141,5 +146,3 @@ class AuthHTTPTestCase(TPTestCase):
         print "#2: Accesso negato con token non valido"
         response = getCurrentUser(self, "INVALID_TOKEN")
         assert response.status_code == 403
-
-    

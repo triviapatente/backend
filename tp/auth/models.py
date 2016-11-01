@@ -5,7 +5,7 @@ from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum
 from sqlalchemy.orm import relationship
 from passlib.apps import custom_app_context as pwd_context
 
-from itsdangerous import (TimedJSONWebSignatureSerializer
+from itsdangerous import (JSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
 from tp.base.models import Base, CommonPK
@@ -63,17 +63,17 @@ class Keychain(Base, CommonPK):
   #proprietà che contiene un auth token, utile per l'autenticazione
   #l'expiration time è settato di default a un mese
   @property
-  def auth_token(self, expiration = 60 * 60 * 24 * 30):
+  def auth_token(self):
       #ottengo il serializer
-      s = self.getSerializer(expiration)
+      s = self.getSerializer()
       #critto l'id dell'utente proprietario del keychain e il nonce e ne ottengo un token
       return s.dumps({ 'id': self.user_id, 'nonce': self.nonce})
 
   #metodo centrale che contiene l'istanza del serializer per generazione e verifica di token
   #muovendolo in un metodo centrale siamo sicuri che la chiave usata per generare/verificare è sempre la stessa
   @staticmethod
-  def getSerializer(expiration = None):
-      return Serializer(app.config['SECRET_KEY'], expires_in = expiration)
+  def getSerializer():
+      return Serializer(app.config['SECRET_KEY'])
 
   #metodo statico che analizza e verifica un token, indicando se la sessione è ancora attiva
   @classmethod
