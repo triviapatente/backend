@@ -24,6 +24,8 @@ class Game(Base, CommonPK):
   #il gioco è finito?
   ended = Column(Boolean, default = False)
 
+  export_properties = ["my_turn"]
+
 #rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte
 class Round(Base, CommonPK):
   #numero del round, TODO: trovare il modo di farlo diventare autoincrement rispetto a diversi parametri

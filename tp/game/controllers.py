@@ -7,10 +7,8 @@ from tp.utils import doTransaction
 from tp.decorators import auth_required, fetch_models, needs_values
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
-from tp.game.utils import updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame
+from tp.game.utils import updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames
 from tp.base.utils import RoomType
-from sqlalchemy.orm import aliased
-from sqlalchemy import func
 
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
@@ -131,8 +129,5 @@ def processInvite(game_id):
 @game.route("/recents", methods = ["GET"])
 @auth_required
 def recent_games():
-    a = aliased(Round, name = "a")
-    questions = Question.query.with_entities(func.count(Question.round_id)).filter(Question.round_id == a.id).filter(Question.user_id == g.user.id).as_scalar()
-    my_turn = db.session.query(a).with_entities(func.count(a.id)).filter(a.game_id == Game.id).filter(a.cat_id != None).filter(questions != 0).label("my_turn")
-    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == g.user.id).with_entities(Game, my_turn).order_by(my_turn.desc())
-    return jsonify(success = True, recent_games = recent_games.all())
+    recent_games = getRecentGames(g.user)
+    return jsonify(success = True, recent_games = recent_games)

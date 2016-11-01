@@ -4,6 +4,8 @@ from tp import app, db
 from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func
+from sqlalchemy.orm import aliased
+from sqlalchemy import func, desc
 from random import randint
 from flask import g
 from tp.utils import doTransaction
@@ -275,3 +277,26 @@ def getCorrectAnswers(game):
 # metodo che ritorna gli inviti per ##user
 def getInvitesCountFor(user):
     return Invite.query.filter(Invite.receiver_id == user.id, Invite.accepted == None).count()
+#obtain recent games
+#TODO: add time range
+def getRecentGames(user):
+    a = aliased(Round, name = "a")
+    #(SELECT count(question.round_id) AS count_1
+    #FROM question, round AS a
+    #WHERE question.round_id = a.id AND question.user_id = user.id)
+    questions = Question.query.with_entities(func.count(Question.round_id)).filter(Question.round_id == a.id).filter(Question.user_id == user.id).as_scalar()
+    #(SELECT count(a.id) AS count_1
+    #FROM round AS a, game
+    #WHERE game.id = a.game_id AND a.cat_id IS NOT NULL AND (SELECT count(question.round_id) AS count_2
+    #FROM question
+    #WHERE question.round_id = a.id AND question.user_id = user.id) != 0)
+    my_turn = db.session.query(a).with_entities(func.count(a.id)).filter(a.game_id == Game.id).filter(a.cat_id != None).filter(questions != 0).label("my_turn")
+    #SELECT game.*, my_turn AS my_turn
+    #FROM game JOIN partecipation ON game.id = partecipation.game_id
+    #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC LIMIT 10
+    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(desc("my_turn")).limit(10).all()
+    output = []
+    for g in recent_games:
+        g[0].my_turn = g[1]
+        output.append(g[0])
+    return output
