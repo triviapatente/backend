@@ -81,8 +81,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         keys = sorted(progress_1.keys())
         last_key = keys[-1]
         last_progress = progress_1[last_key]
-        assert last_progress
-        assert last_progress.get("percentage") == 50
+        assert last_progress == 50
         print "#2.2 Categoria 2"
         progress_2 = response_cat_2.json.get("progress")
         length = len(progress_2)
@@ -90,8 +89,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         keys = sorted(progress_2.keys())
         last_key = keys[-1]
         last_progress = progress_2[last_key]
-        assert last_progress
-        assert last_progress.get("percentage") == 50
+        assert last_progress == 50
 
     def test_get_wrong_answers(self):
         print "#1 Risposta successful"
