@@ -12,9 +12,8 @@ from tp.utils import doTransaction
 from tp.exceptions import NotAllowed
 
 #metodo transazionale per la creazione di una partita
-def createGame(**params):
+def createGame(opponents):
     new_game = Game(creator = g.user)
-    opponents = params["opponents"]
     #aggiungo tutti gli avversari alla partita
     for opponent in opponents:
         partecipation = Partecipation()

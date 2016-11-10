@@ -95,7 +95,7 @@ def randomSearch():
         print "No opponent found."
         return jsonify(success = False)
     #eseguo la transazione con l'utente trovato
-    output = doTransaction(createGame, **({"opponents":[opponent]}))
+    output = doTransaction(createGame, opponents = [opponent])
     #gestisco l'output
     if output:
         print "Game %d created." % output.id, output
