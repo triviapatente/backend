@@ -20,12 +20,10 @@ def search(query):
     #WHERE username LIKE '%query%'
     a = aliased(User, name = "a")
     position = db.session.query(func.count(distinct(a.score)) + 1).filter(a.score > User.score)
-    output = User.query.with_entities(User, position.label("position")).filter(User.username.like(query)).all()
+    output = User.query.with_entities(User, position.label("position")).filter(User.username.ilike(query)).all()
     matches = []
     for item in output:
         match = item[0]
         match.position = item[1]
         matches.append(match)
-    print matches
     return matches
-    return query.all()
