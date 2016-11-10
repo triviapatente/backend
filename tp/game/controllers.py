@@ -7,7 +7,7 @@ from tp.utils import doTransaction
 from tp.decorators import auth_required, fetch_models, needs_values
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
-from tp.game.utils import updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames
+from tp.game.utils import updateScore, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames
 from tp.base.utils import RoomType
 
 import events
@@ -120,11 +120,13 @@ def processInvite(game_id):
         print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
         raise NotAllowed()
     #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
-    invite.accepted = g.post["accepted"]
-    db.session.add(invite)
-    db.session.commit()
-    print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
-    return jsonify(success = True, invite = invite)
+    output = doTransaction(handleInvite, invite = invite)
+    if output:
+        #TODO: aggiungere event handling
+        print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
+        return jsonify(success = True, invite = invite)
+    else:
+        raise ChangeFailed()
 
 @game.route("/recents", methods = ["GET"])
 @auth_required

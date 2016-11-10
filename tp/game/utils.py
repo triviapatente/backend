@@ -10,6 +10,7 @@ from random import randint
 from flask import g
 from tp.utils import doTransaction
 from tp.exceptions import NotAllowed
+from distutils.util import strtobool
 
 #metodo transazionale per la creazione di una partita
 def createGame(opponents):
@@ -28,6 +29,13 @@ def createGame(opponents):
     invite = Invite(sender = g.user, receiver = opponent, game = new_game)
     db.session.add(invite)
     return new_game
+
+def handleInvite(invite):
+    invite.accepted = g.post["accepted"]
+    if strtobool(invite.accepted) == False:
+        partecipation = Partecipation.query.filter(Partecipation.game_id == invite.game_id).filter(Partecipation.user_id == invite.receiver_id).first()
+        db.session.delete(partecipation)
+    db.session.add(invite)
 
 # utils per il calcolo del punteggio
 # enumeration of possible results for match

@@ -157,36 +157,49 @@ class GameHTTPTestCase(TPAuthTestCase):
         opponent_token = self.first_opponent.get("token")
         #game in cui partecipo
         game_id = new_game(self, opponent_id).json.get("game").get("id")
+        second_game_id = new_game(self, opponent_id).json.get("game").get("id")
         #ottengo l'id di un altro utente
         other_opponent_id = self.second_opponent.get("user").get("id")
         #game in cui NON partecipo (ho passato il token di un altro utente come terzo parametro, e quindi la chiamata viene fatta come se fossi quell'utente)
         foreign_game = new_game(self, other_opponent_id, opponent_token).json.get("game")
 
         print "#1: accetto un invito di un game valido"
-        #Accetto
         response = process_invite(self, game_id, True, opponent_token)
         assert response.json.get("success") == True
         assert response.json.get("invite")
 
-        print "#2: accetto/ rifiuto un invito già accettato (o rifiutato eventualmente)"
+        print "#1.1: la mia partecipation rimane"
+        partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == game_id).first()
+        assert partecipation
+
+        print "#2: rifiuto l'invito ad un game valido"
+        response = process_invite(self, second_game_id, False, opponent_token)
+        assert response.json.get("success") == True
+        assert response.json.get("invite")
+
+        print "#2.1: la mia partecipation scompare"
+        partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == second_game_id).first()
+        assert partecipation is None
+
+        print "#3: accetto/ rifiuto un invito già accettato (o rifiutato eventualmente)"
         response = process_invite(self, game_id, False, opponent_token)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#3: accetto/rifiuto un invito di un game inesistente"
+        print "#4: accetto/rifiuto un invito di un game inesistente"
         #Accetto
         response = process_invite(self, 32423, True, opponent_token, )
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#4: accetto/rifiuto un invito di un game a cui non partecipo"
+        print "#5: accetto/rifiuto un invito di un game a cui non partecipo"
         #Accetto
         response = process_invite(self, foreign_game.get("id"), True, opponent_token)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#5: Parametri mancanti"
-        print "#5.1: accept"
+        print "#6: Parametri mancanti"
+        print "#6.1: accept"
         response = process_invite(self, game_id, None, opponent_token)
         assert response.json.get("success") == False
         print response.json.get("status_code")
