@@ -36,6 +36,7 @@ def handleInvite(invite):
         partecipation = Partecipation.query.filter(Partecipation.game_id == invite.game_id).filter(Partecipation.user_id == invite.receiver_id).first()
         db.session.delete(partecipation)
     db.session.add(invite)
+    return invite
 
 # utils per il calcolo del punteggio
 # enumeration of possible results for match

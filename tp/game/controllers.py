@@ -9,7 +9,6 @@ from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
 from tp.game.utils import updateScore, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames
 from tp.base.utils import RoomType
-
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
 
@@ -116,15 +115,19 @@ def getPendingInvites():
 @auth_required
 def processInvite(game_id):
     invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id, Invite.accepted == None).first()
+    game = g.models["game_id"]
     if not invite:
         print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
         raise NotAllowed()
     #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
     output = doTransaction(handleInvite, invite = invite)
     if output:
-        #TODO: aggiungere event handling
-        print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
-        return jsonify(success = True, invite = invite)
+        if output.accepted:
+            events.accept_invite([invite.sender], game)
+        else:
+            events.refuse_invite([invite.sender], game)
+        print "User %s processed invite for game %d:" % (g.user.username, game_id), output
+        return jsonify(success = True, invite = output)
     else:
         raise ChangeFailed()
 

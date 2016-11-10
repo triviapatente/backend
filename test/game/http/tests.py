@@ -172,6 +172,13 @@ class GameHTTPTestCase(TPAuthTestCase):
         partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == game_id).first()
         assert partecipation
 
+        print "#1.2: il sender dell'invito riceve l'evento invite_accepted"
+        response = self.socket.get_received()
+        assert response.json.get("action") == "update"
+        assert response.json.get("user")
+        assert response.json.get("game")
+        assert response.json.get("name") == "invite_accepted"
+
         print "#2: rifiuto l'invito ad un game valido"
         response = process_invite(self, second_game_id, False, opponent_token)
         assert response.json.get("success") == True
@@ -180,6 +187,13 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#2.1: la mia partecipation scompare"
         partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == second_game_id).first()
         assert partecipation is None
+
+        print "#2.2: il sender dell'invito riceve l'evento invite_refused"
+        response = self.socket.get_received()
+        assert response.json.get("action") == "update"
+        assert response.json.get("user")
+        assert response.json.get("game")
+        assert response.json.get("name") == "invite_refused"
 
         print "#3: accetto/ rifiuto un invito già accettato (o rifiutato eventualmente)"
         response = process_invite(self, game_id, False, opponent_token)

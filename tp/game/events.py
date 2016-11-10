@@ -41,3 +41,13 @@ def game_left(room, game, winner, partecipations):
 def new_game(users, game):
     data = {"game": game.json}
     return (users, data)
+
+@event("invite_accepted", action = EventActions.update)
+def accept_invite(users, game):
+    data = {"game": game.json, "user": g.user}
+    return (users, data)
+
+@event("invite_refused", action = EventActions.update)
+def refuse_invite(users, game):
+    data = {"game": game.json, "user": g.user}
+    return (users, data)
