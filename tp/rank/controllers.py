@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, g, jsonify
-from tp.decorators import auth_required
+from tp.decorators import auth_required, needs_values
 from tp.rank.queries import *
 
 rank = Blueprint("rank", __name__, url_prefix = "/rank")
@@ -18,3 +18,11 @@ def getItalianRank():
 @auth_required
 def getFriendsRank():
     pass
+
+@rank.route("/search", methods = ["GET"])
+@auth_required
+@needs_values("GET", "query")
+def searchInRank():
+    query = g.query["query"]
+    matches = search("%" + query + "%")
+    return jsonify(matches = matches)
