@@ -28,7 +28,7 @@ def getProgressChart(category_id, n, start, end = datetime.now()):
     output = {}
     cursor = start + delta
     while cursor <= end:
-        output[str(cursor)] = getPercentageIn(category_id, start, cursor)
+        output[cursor.isoformat()] = getPercentageIn(category_id, start, cursor)
         start += delta
         cursor += delta
 
