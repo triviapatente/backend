@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 stats = Blueprint("stats", __name__, url_prefix = "/stats")
 
-@stats.route("/info/<int:category_id>", methods = ["GET"])
+@stats.route("/detail/<int:category_id>", methods = ["GET"])
 @auth_required
 @fetch_models(category_id = Category)
 def get_info(category_id):
