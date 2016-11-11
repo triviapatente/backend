@@ -69,11 +69,11 @@ class StatsHTTPTestCase(TPAuthTestCase):
 
     def test_get_progresses(self):
         print "#1 Risposta successful"
-        response_cat_1 = get_progresses(self, 1)
+        response_cat_1 = get_info(self, 1)
         assert response_cat_1.json.get("success") == True
 
         print "#2 risposta coerente con le domande a cui ho risposto"
-        response_cat_2 = get_progresses(self, 2)
+        response_cat_2 = get_info(self, 2)
         print "#2.1 Categoria 1"
         progress_1 = response_cat_1.json.get("progress")
         length = len(progress_1)
@@ -93,12 +93,12 @@ class StatsHTTPTestCase(TPAuthTestCase):
 
     def test_get_wrong_answers(self):
         print "#1 Risposta successful"
-        response_cat_1 = get_wrong_answers(self, 1)
+        response_cat_1 = get_info(self, 1)
         assert response_cat_1.json.get("success") == True
         assert response_cat_1.json.get("answers") != None
 
         print "#2 risposta coerente con le domande a cui ho risposto"
-        response_cat_2 = get_wrong_answers(self, 2)
+        response_cat_2 = get_info(self, 2)
         print "#2.1 Categoria 1"
         answers_1 = response_cat_1.json.get("answers")
         assert len(answers_1) == 1

@@ -8,23 +8,16 @@ from datetime import datetime, timedelta
 
 stats = Blueprint("stats", __name__, url_prefix = "/stats")
 
-@stats.route("/wrong_answers/<int:category_id>", methods = ["GET"])
+@stats.route("/info/<int:category_id>", methods = ["GET"])
 @auth_required
 @fetch_models(category_id = Category)
-def get_wrong_answers(category_id):
-    answers = getWrongLastQuestions(category_id)
-    return jsonify(success = True, answers = answers)
-
-#percentuale riferita a una data
-@stats.route("/progresses/<int:category_id>", methods = ["GET"])
-@auth_required
-@fetch_models(category_id = Category)
-def get_progresses(category_id):
+def get_info(category_id):
     n = 15
     end = datetime.now()
-    start = end + timedelta(days=-n)
+    start = end + timedelta(days = -n)
     progress = getProgressChart(category_id, n, start, end)
-    return jsonify(success = True, progress = progress)
+    answers = getWrongLastQuestions(category_id)
+    return jsonify(success = True, progress = progress, answers = answers)
 
 @stats.route("/categories", methods = ["GET"])
 def get_categories():
