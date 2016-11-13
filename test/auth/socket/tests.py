@@ -13,7 +13,12 @@ class AuthSocketTestCase(TPAuthTestCase):
         assert response.json.get("invites") is not None
         assert response.json.get("global_rank_position") is not None
         #TODO: assert response.json.get("friends_rank_position") is not None
-        assert response.json.get("stats") is not None
+        stats = response.json.get("stats")
+        assert stats is not None
+        first = stats[0]
+        assert first
+        assert first.get("id") is None
+        assert first.get("hint") == "Complessivo"
 
         print "#2: Le statistiche sono su tutte le categorie"
         stats = response.json.get("stats")

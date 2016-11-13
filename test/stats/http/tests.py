@@ -62,6 +62,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         print "#1 Risposta successful"
         response = get_categories(self)
         assert response.json.get("success") == True
+
         print "#2 Le categorie ci sono e sono tutte"
         categories = response.json.get("categories")
         assert categories != None
@@ -82,6 +83,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         last_key = keys[-1]
         last_progress = progress_1[last_key]
         assert last_progress == 50
+
         print "#2.2 Categoria 2"
         progress_2 = response_cat_2.json.get("progress")
         length = len(progress_2)
@@ -90,6 +92,18 @@ class StatsHTTPTestCase(TPAuthTestCase):
         last_key = keys[-1]
         last_progress = progress_2[last_key]
         assert last_progress == 50
+
+        print "#2.2 Categoria complessiva"
+        response = get_info(self, None)
+        progress = response.json.get("progress")
+        assert progress
+        length = len(progress)
+        assert length
+        keys = sorted(progress.keys())
+        last_key = keys[-1]
+        last_progress = progress[last_key]
+        assert last_progress == 50
+
 
     def test_get_wrong_answers(self):
         print "#1 Risposta successful"
@@ -103,7 +117,13 @@ class StatsHTTPTestCase(TPAuthTestCase):
         answers_1 = response_cat_1.json.get("wrong_answers")
         assert len(answers_1) == 1
         assert answers_1[0].get("id") == self.quiz_1.id
+
         print "#2.2 Categoria 2"
         answers_2 = response_cat_2.json.get("wrong_answers")
         assert len(answers_2) == 1
         assert answers_2[0].get("id") == self.quiz_4.id
+
+        print "#3. Parametri mancanti"
+        response = get_info(self, None)
+        wrong_answers = response.json.get("wrong_answers")
+        assert wrong_answers is None

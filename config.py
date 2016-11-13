@@ -35,7 +35,7 @@ SECRET_KEY = "dvkljmdklvmvdkjVSDLjmvlfsnv.kmvsdvsdlvn"
 
 PUBLIC_INFOS = {
     "name": "TriviaPatente Webservice",
-    "version": 0.1,
+    "version": 0.9,
     "webservice type": "REST",
     "last_run": datetime.now(pytz.utc)
 }
@@ -73,3 +73,5 @@ RANGE_INCREMENT = 50
 INITIAL_RANGE = 200
 #numero di messaggi nuovi mostrati ad ogni scroll
 MESSAGE_PER_SCROLL = 50
+#numero di divisioni dati nel chart delle statistiche
+NUMBER_OF_CHART_DIVISORS = 15

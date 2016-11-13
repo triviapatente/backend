@@ -8,16 +8,18 @@ from datetime import datetime, timedelta
 
 stats = Blueprint("stats", __name__, url_prefix = "/stats")
 
+@stats.route("/detail/", methods = ["GET"])
+@auth_required
+def get_general_info():
+    output = getCategoryInfo(None)
+    return jsonify(output)
+
 @stats.route("/detail/<int:category_id>", methods = ["GET"])
 @auth_required
 @fetch_models(category_id = Category)
 def get_info(category_id):
-    n = 15
-    end = datetime.now()
-    start = end + timedelta(days = -n)
-    progress = getProgressChart(category_id, n, start, end)
-    wrong_answers = getWrongLastQuestions(category_id)
-    return jsonify(success = True, progress = progress, wrong_answers = wrong_answers)
+    output = getCategoryInfo(category_id)
+    return jsonify(output)
 
 @stats.route("/categories", methods = ["GET"])
 def get_categories():
