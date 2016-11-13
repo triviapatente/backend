@@ -23,7 +23,8 @@ class AuthSocketTestCase(TPAuthTestCase):
         print "#2: Le statistiche sono su tutte le categorie"
         stats = response.json.get("stats")
         count = Category.query.count()
-        assert len(stats) == count
+        #il +1 sta ad indicare 'complessivo'
+        assert len(stats) == count + 1
 
     def test_logout(self):
         response = login(self)

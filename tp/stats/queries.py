@@ -51,7 +51,7 @@ def getPercentageIn(category_id, start, end):
     (correct, total) = getProgressValuesIn(category_id, start, end)
     if total == 0:
         return 0
-        return correct * 100 / total
+    return correct * 100 / total
 
 def getProgressValuesIn(category_id, start, end):
     a = aliased(Question, name = "a")
@@ -108,7 +108,7 @@ def getCategoryPercentages(user):
     #JOIN category ON category.id = quiz.category_id
     #GROUP BY category.id, category.hint
     #ORDER BY category.hint
-    query = db.session.query(Quiz).join(a, and_(a.quiz_id == Quiz.id, a.answer == Quiz.answer, a.createdAt == max_created, a.user_id == user.id)).join(Category).with_entities(Category.id, Category.hint, correct_questions, total_questions).order_by(Category.hint).group_by(Category.id, Category.hint)
+    query = db.session.query(Quiz).outerjoin(a, and_(a.quiz_id == Quiz.id, a.answer == Quiz.answer, a.createdAt == max_created, a.user_id == user.id)).join(Category).with_entities(Category.id, Category.hint, correct_questions, total_questions).order_by(Category.hint).group_by(Category.id, Category.hint)
     output = query.all()
     general = getGeneralInfos()
     output.insert(0, general)
