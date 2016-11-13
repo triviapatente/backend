@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint, g
+from flask import request, jsonify, Blueprint, g, send_file
 from tp import app, db
 from tp.auth.models import User
 from tp.game.models import *
@@ -11,6 +11,7 @@ from tp.game.utils import updateScore, searchInRange, createGame, handleInvite, 
 from tp.base.utils import RoomType
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
+quiz = Blueprint("quiz", __name__, url_prefix = "/quiz")
 
 @game.route("/", methods = ["GET"])
 def welcome():
@@ -136,3 +137,11 @@ def processInvite(game_id):
 def recent_games():
     recent_games = getRecentGames(g.user)
     return jsonify(success = True, recent_games = recent_games)
+
+@quiz.route("/image/<int:id>", methods = ["GET"])
+def getQuizImage(id):
+    folder = app.config["QUIZ_IMAGE_FOLDER"]
+    quiz = Quiz.query.filter(Quiz.image_id == id).first()
+    if quiz:
+        return send_file(quiz.imagePath)
+    raise NotAllowed()

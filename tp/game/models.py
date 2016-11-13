@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from flask import g
 from tp.base.models import Base, CommonPK
 from tp.auth.models import User
+from tp import app
 
 class Partecipation(Base):
     user_id = Column('user_id', Integer, ForeignKey('user.id'), primary_key = True)
@@ -66,6 +67,12 @@ class Quiz(Base, CommonPK):
 	#la categoria di riferimento (si punta sul fatto che ogni quiz sia categorizzato)
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   category = relationship("Category")
+
+  @property
+  def imagePath(self):
+    folder = app.config["QUIZ_IMAGE_FOLDER"]
+    return "../%s%d.jpg" % (folder, self.image_id)
+
 
 
 class Question(Base):
