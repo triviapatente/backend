@@ -102,8 +102,8 @@ class StatsHTTPTestCase(TPAuthTestCase):
         print "#2.1 Categoria 1"
         answers_1 = response_cat_1.json.get("wrong_answers")
         assert len(answers_1) == 1
-        assert answers_1[0].get("quiz_id") == self.quiz_1.id
+        assert answers_1[0].get("id") == self.quiz_1.id
         print "#2.2 Categoria 2"
         answers_2 = response_cat_2.json.get("wrong_answers")
         assert len(answers_2) == 1
-        assert answers_2[0].get("quiz_id") == self.quiz_4.id
+        assert answers_2[0].get("id") == self.quiz_4.id
