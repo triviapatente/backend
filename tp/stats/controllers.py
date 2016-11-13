@@ -16,8 +16,8 @@ def get_info(category_id):
     end = datetime.now()
     start = end + timedelta(days = -n)
     progress = getProgressChart(category_id, n, start, end)
-    answers = getWrongLastQuestions(category_id)
-    return jsonify(success = True, progress = progress, answers = answers)
+    wrong_answers = getWrongLastQuestions(category_id)
+    return jsonify(success = True, progress = progress, wrong_answers = wrong_answers)
 
 @stats.route("/categories", methods = ["GET"])
 def get_categories():

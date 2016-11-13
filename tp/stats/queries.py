@@ -18,7 +18,7 @@ def getWrongLastQuestions(category_id):
     #AND quiz.category_id = category_id
     #AND question."createdAt" = max_created
     #AND quiz.answer != question.answer
-    query = Question.query.join(Quiz).filter(Question.user_id == g.user.id).filter(Quiz.category_id == category_id).filter(Question.createdAt == max_created).filter(Quiz.answer != Question.answer)
+    query = Question.query.join(Quiz).with_entities(Quiz).filter(Question.user_id == g.user.id).filter(Quiz.category_id == category_id).filter(Question.createdAt == max_created).filter(Quiz.answer != Question.answer)
     output = query.all()
     return output
 

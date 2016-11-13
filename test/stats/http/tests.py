@@ -95,15 +95,15 @@ class StatsHTTPTestCase(TPAuthTestCase):
         print "#1 Risposta successful"
         response_cat_1 = get_info(self, 1)
         assert response_cat_1.json.get("success") == True
-        assert response_cat_1.json.get("answers") != None
+        assert response_cat_1.json.get("wrong_answers") != None
 
         print "#2 risposta coerente con le domande a cui ho risposto"
         response_cat_2 = get_info(self, 2)
         print "#2.1 Categoria 1"
-        answers_1 = response_cat_1.json.get("answers")
+        answers_1 = response_cat_1.json.get("wrong_answers")
         assert len(answers_1) == 1
         assert answers_1[0].get("quiz_id") == self.quiz_1.id
         print "#2.2 Categoria 2"
-        answers_2 = response_cat_2.json.get("answers")
+        answers_2 = response_cat_2.json.get("wrong_answers")
         assert len(answers_2) == 1
         assert answers_2[0].get("quiz_id") == self.quiz_4.id
