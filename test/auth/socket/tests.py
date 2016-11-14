@@ -12,6 +12,7 @@ class AuthSocketTestCase(TPAuthTestCase):
         response = login(self)
         assert response.json.get("invites") is not None
         assert response.json.get("global_rank_position") is not None
+        assert response.json.get("preferences") is not None
         #TODO: assert response.json.get("friends_rank_position") is not None
         stats = response.json.get("stats")
         assert stats is not None
