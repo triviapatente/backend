@@ -94,8 +94,7 @@ class AuthHTTPTestCase(TPTestCase):
         assert response.json.get("token") == response2.json.get("token")
 
     def test_logout(self):
-        register(self, "user", "user@gmail.com", "user")
-        token = login(self, "user", "user").json.get("token")
+        token = register(self, "user", "user@gmail.com", "user").json.get("token")
 
         print "#1: Logout corretto"
         response = logout(self, token)
@@ -106,24 +105,21 @@ class AuthHTTPTestCase(TPTestCase):
         assert response.status_code == 403
 
     def test_changeName(self):
-        register(self, "user", "user@gmail.com", "user")
-        token = login(self, "user", "user").json.get("token")
+        token = register(self, "user", "user@gmail.com", "user").json.get("token")
 
         print "#1: Cambio di nome effettuato"
         response = changeName(self, "name", token)
         assert response.status_code == 200 and response.json.get("user").get("name") == "name"
 
     def test_changeSurname(self):
-        register(self, "user", "user@gmail.com", "user")
-        token = login(self, "user", "user").json.get("token")
+        token = register(self, "user", "user@gmail.com", "user").json.get("token")
 
         print "#1: Cambio di cognome effettuato"
         response = changeSurname(self, "surname", token)
         assert response.status_code == 200 and response.json.get("user").get("surname") == "surname"
 
     def test_changeImage(self):
-        register(self, "user", "user@gmail.com", "user")
-        token = login(self, "user", "user").json.get("token")
+        token = register(self, "user", "user@gmail.com", "user").json.get("token")
 
         validImage = (io.BytesIO(b'my file contents'), "image.jpg")
         invalidImage = (io.BytesIO(b'my file contents'), "image.exe")
@@ -144,8 +140,7 @@ class AuthHTTPTestCase(TPTestCase):
         assert os.path.isfile(imagePath)
 
     def test_getCurrentUser(self):
-        register(self, "user", "user@gmail.com", "user")
-        token = login(self, "user", "user").json.get("token")
+        token = register(self, "user", "user@gmail.com", "user").json.get("token")
 
         print "#1: Accesso possibile con token valido"
         response = getCurrentUser(self, token)
@@ -154,3 +149,34 @@ class AuthHTTPTestCase(TPTestCase):
         print "#2: Accesso negato con token non valido"
         response = getCurrentUser(self, "INVALID_TOKEN")
         assert response.status_code == 403
+
+    def test_change_password(self):
+        password = "user"
+        token = register(self, "user", "user@gmail.com", password).json.get("token")
+
+        print "#1: Password precedente non combaciante"
+        response = changePassword(self, "dfsf", "sdfs", token)
+        assert response.status_code == 403
+
+        print "#2: Password cambiata con successo"
+        response = changePassword(self, password, "sdfs", token)
+        assert response.status_code == 200
+        new_token = response.json.get("token")
+        assert new_token
+
+        print "#2.1: Accesso non consentito con vecchio token"
+        response = getCurrentUser(self, token)
+        assert response.status_code == 403
+
+        print "#2.2: Accesso consentito con nuovo token"
+        response = getCurrentUser(self, new_token)
+        assert response.status_code == 200
+
+        print "#3: Parametri mancanti"
+        print "#3.1 old_password"
+        response = changePassword(self, None, "sdfs", new_token)
+        assert response.status_code == 400
+
+        print "#3.2 new_password"
+        response = changePassword(self, "dfsf", None, new_token)
+        assert response.status_code == 400

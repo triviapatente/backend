@@ -29,3 +29,8 @@ def changeImage(self, image, token = None):
     if not token:
         token = self.token
     return self.app.post("account/image/edit", content_type='multipart/form-data', data = {"image": image}, token = token)
+
+def changePassword(self, old, new, token = None):
+    if not token:
+        token = self.token
+    return self.app.post("auth/password/edit", data = {"old_value": old, "new_value": new}, token = token)

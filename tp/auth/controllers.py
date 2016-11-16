@@ -86,6 +86,23 @@ def logout():
     print "%s just disconnected." % g.user.username
     return jsonify(user = g.user)
 
+#api per il cambio della password
+@auth.route("/password/edit", methods = ["POST"])
+@auth_required
+@needs_values("POST", "old_value", "new_value")
+def changePassword():
+    old_password = g.post["old_value"]
+    new_password = g.post["new_value"]
+    keychain = Keychain.query.filter(Keychain.user_id == g.user.id).first()
+    print old_password, new_password, keychain
+    if keychain and keychain.check_password(old_password):
+        keychain.hash_password(new_password)
+        keychain.renew_nonce()
+        db.session.add(keychain)
+        db.session.commit()
+        return jsonify(token = keychain.auth_token, success = True)
+    raise NotAllowed()
+
 #api(s) per le modifiche
 
 #api per il cambio del nome (##name)
@@ -137,6 +154,7 @@ def changeImage():
     else:
         print "User image not allowed."
         raise FormatNotAllowed()
+
 
 @account.route("/user", methods = ["GET"])
 @auth_required
