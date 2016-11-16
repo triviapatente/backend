@@ -94,14 +94,13 @@ def changePassword():
     old_password = g.post["old_value"]
     new_password = g.post["new_value"]
     keychain = Keychain.query.filter(Keychain.user_id == g.user.id).first()
-    print old_password, new_password, keychain
     if keychain and keychain.check_password(old_password):
         keychain.hash_password(new_password)
         keychain.renew_nonce()
         db.session.add(keychain)
         db.session.commit()
         return jsonify(token = keychain.auth_token, success = True)
-    raise NotAllowed()
+    raise OldPasswordNotMatching()
 
 #api(s) per le modifiche
 

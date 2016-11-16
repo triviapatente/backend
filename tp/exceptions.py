@@ -46,7 +46,7 @@ class AlreadyRegisteredUser(TPException):
 
 #eccezione chiamata quando il login dell'utente fallisce
 class LoginFailed(TPException):
-    status_code = 401 #auth required or failed
+    status_code = 400
 
     def __init__(self):
         TPException.__init__(self)
@@ -54,7 +54,7 @@ class LoginFailed(TPException):
 
 #eccezione chiamata quando il login dell'utente fallisce
 class Forbidden(TPException):
-    status_code = 403 #forbidden
+    status_code = 401
 
     def __init__(self):
         TPException.__init__(self)
@@ -79,3 +79,10 @@ class NotAllowed(TPException):
     def __init__(self):
         TPException.__init__(self)
         self.message = "Non hai i permessi di accesso su questa risorsa"
+
+class OldPasswordNotMatching(TPException):
+    status_code = 403
+
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "Modifica non consentita: la password attualmente impostata non combacia con quella fornita"

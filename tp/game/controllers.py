@@ -6,7 +6,7 @@ from tp.game.models import *
 from tp.utils import doTransaction
 from tp.decorators import auth_required, fetch_models, needs_values
 from tp.ws_decorators import check_in_room
-from tp.exceptions import ChangeFailed, Forbidden, NotAllowed
+from tp.exceptions import ChangeFailed, NotAllowed
 from tp.game.utils import updateScore, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames
 from tp.base.utils import RoomType
 import events
