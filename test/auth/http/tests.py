@@ -16,11 +16,11 @@ class AuthHTTPTestCase(TPTestCase):
         print "#2: Utente già esistente"
         print "#2.1: per username"
         response = register(self, "user", "12@gmail.com", "dfsdvsv")
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         print "#2.2: per email"
         response = register(self, "123", "user@gmail.com", "dfsdvsv")
-        assert response.status_code == 401
+        assert response.status_code == 403
 
         print "#3: Parametri mancanti"
 
@@ -64,15 +64,15 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#2: Username/email errata"
         response = login(self, "a", "user")
-        assert response.status_code == 401
+        assert response.status_code == 400
 
         print "#3: Password errata"
         response = login(self, "user", "a")
-        assert response.status_code == 401
+        assert response.status_code == 400
 
         print "#4: Coppia errata"
         response = login(self, "a", "a")
-        assert response.status_code == 401
+        assert response.status_code == 400
 
         print "#4: Parametri mancanti"
         print "#4.1: username"
@@ -102,7 +102,7 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#2: Impossibile accedere con lo stesso token"
         response = getCurrentUser(self, token)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_changeName(self):
         token = register(self, "user", "user@gmail.com", "user").json.get("token")
@@ -148,7 +148,7 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#2: Accesso negato con token non valido"
         response = getCurrentUser(self, "INVALID_TOKEN")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     def test_change_password(self):
         password = "user"
@@ -166,7 +166,7 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#2.1: Accesso non consentito con vecchio token"
         response = getCurrentUser(self, token)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
         print "#2.2: Accesso consentito con nuovo token"
         response = getCurrentUser(self, new_token)
