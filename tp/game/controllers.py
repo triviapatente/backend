@@ -146,3 +146,20 @@ def getQuizImage(id):
     if quiz:
         return send_file(quiz.imagePath)
     raise NotAllowed()
+
+@game.route("/users/suggested", methods = ["GET"])
+@auth_required
+def get_suggested_users():
+    n = 5
+    left_users = User.query.filter(User.score >= g.user.score).filter(User.id != g.user.id).order_by(User.score.asc()).limit(n).all()
+    right_users = User.query.filter(User.score <= g.user.score).filter(User.id != g.user.id).order_by(User.score.asc()).limit(n).all()
+    users = left_users + right_users
+    return jsonify(success = True, users = users)
+
+@game.route("/users/search", methods = ["GET"])
+@needs_values("GET", "query")
+@auth_required
+def search_user():
+    query = "%" + g.query.get("query") + "%"
+    matches = User.query.filter(User.username.ilike(query)).all()
+    return jsonify(success = True, matches = matches)

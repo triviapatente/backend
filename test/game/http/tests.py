@@ -240,6 +240,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         join_room(self.first_opponent_socket, id, "game")
         self.socket.get_received()
         return id
+
     def test_recent_games(self):
 
         dumb_crawler()
@@ -316,3 +317,36 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#2.6: Il sesto game è quello finito"
         assert games[5].get("id") == sixth_game
         assert games[5].get("ended") == True
+
+    def test_suggested_users(self):
+        register(self, "a", "a@gmail.com", "c")
+        register(self, "b", "b@gmail.com", "c")
+        register(self, "c", "c@gmail.com", "c")
+        register(self, "d", "d@gmail.com", "c")
+        register(self, "e", "e@gmail.com", "c")
+        register(self, "f", "f@gmail.com", "c")
+        register(self, "g", "g@gmail.com", "c")
+        register(self, "h", "h@gmail.com", "c")
+        register(self, "i", "i@gmail.com", "c")
+        register(self, "l", "l@gmail.com", "c")
+        register(self, "m", "m@gmail.com", "c")
+
+        print "#1. Chiamata successful"
+        response = suggested_users(self)
+        assert response.json.get("success") == True
+        users = response.json.get("users")
+        assert users is not None
+        print "#2. Lunghezza output = 10"
+        assert len(users) == 10
+
+    def test_search_user(self):
+        print "#1: Risposta successful"
+        response = search_user(self, "a")
+        assert response.status_code == 200
+        matches = response.json.get("matches")
+        assert matches is not None
+
+        print "#3: Parametri mancanti"
+        print "#3.1: query"
+        response = search_user(self, None)
+        assert response.status_code == 400

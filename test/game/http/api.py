@@ -29,3 +29,16 @@ def recent_games(self, token = None):
     if not token:
         token = self.token
     return self.app.get("/game/recents", token = token)
+
+def suggested_users(self, token = None):
+    if not token:
+        token = self.token
+    return self.app.get("/game/users/suggested", token = token)
+
+def search_user(self, query, token = None):
+    if not token:
+        token = self.token
+    url = "/game/users/search"
+    if query:
+        url += "?query=%s" % query
+    return self.app.get(url, token = token)
