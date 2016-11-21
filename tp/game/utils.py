@@ -304,7 +304,6 @@ def getRecentGames(user):
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
     recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(desc("my_turn"), Game.ended.asc(), Game.createdAt.asc()).limit(10)
-    print recent_games
     output = []
     for g in recent_games:
         game = g[0]
