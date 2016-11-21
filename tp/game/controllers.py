@@ -106,7 +106,8 @@ def randomSearch():
 @game.route("/invites", methods = ["GET"])
 @auth_required
 def getPendingInvites():
-    invites = Invite.query.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).all()
+    invites = Invite.query.with_entities(Invite.game_id, Invite.sender_id, User.name.label("sender_name"), User.surname.label("sender_surname"), User.username.label("sender_username"), User.image.label("sender_image"))
+    invites = invites.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).join(User, Invite.sender_id == User.id).all()
     print "User %s got pending invites." % g.user.username
     return jsonify(success = True, invites = invites)
 
