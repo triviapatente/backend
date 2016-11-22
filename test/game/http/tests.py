@@ -29,8 +29,14 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#1: Creazione game"
         response = new_game(self, opponent_id)
         assert response.json.get("success") == True
-        assert response.json.get("game")
+        game = response.json.get("game")
+        assert game
         assert response.json.get("user")
+
+        print "#1.1: Nessuna partecipation è stata creata (vengono aggiunte con l'invito accettato):"
+        game_id = game.get("id")
+        partecipations = Partecipation.query.filter(Partecipation.game_id == game_id).all()
+        assert len(partecipations) == 0
 
         print "#2 Event Test: l'avversario ha ricevuto l'evento"
         response = self.first_opponent_socket.get_received()
@@ -49,9 +55,14 @@ class GameHTTPTestCase(TPAuthTestCase):
 
     def test_leave_game(self):
         opponent_id = self.first_opponent.get("user").get("id")
+        opponent_token = self.first_opponent.get("token")
         other_opponent_token = self.second_opponent.get("token")
 
         game_id = new_game(self, opponent_id).json.get("game").get("id")
+        #l'avversario accetta l'invito
+        process_invite(self, game_id, True, opponent_token)
+        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
+        self.socket.get_received()
         #per intercettare e rendere 'innocuo' l'evento di creazione del game
         self.first_opponent_socket.get_received()
 
@@ -60,7 +71,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#2: Non appartengo alla game"
+        print "#2: Non appartengo al game"
         other_game_id = new_game(self, opponent_id, token = other_opponent_token).json.get("game").get("id")
         #per intercettare e rendere 'innocuo' l'evento di creazione del game
         self.first_opponent_socket.get_received()
@@ -168,8 +179,12 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("invite")
 
-        print "#1.1: la mia partecipation rimane"
+        print "#1.1: la mia partecipation viene creata"
         partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == game_id).first()
+        assert partecipation
+
+        print "#1.1.1: la partecipation del sender viene creata"
+        partecipation = Partecipation.query.filter(Partecipation.user_id == self.user.get("id")).filter(Partecipation.game_id == game_id).first()
         assert partecipation
 
         print "#1.2: il sender dell'invito riceve l'evento invite_accepted"
@@ -184,7 +199,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("invite")
 
-        print "#2.1: la mia partecipation scompare"
+        print "#2.1: la mia partecipation non viene creata"
         partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == second_game_id).first()
         assert partecipation is None
 
@@ -235,7 +250,11 @@ class GameHTTPTestCase(TPAuthTestCase):
         return round_id
     def create_bulk_game(self):
         opponent_id = self.first_opponent.get("user").get("id")
+        opponent_token = self.first_opponent.get("token")
         id = new_game(self, opponent_id).json.get("game").get("id")
+        process_invite(self, id, True, opponent_token)
+        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
+        self.socket.get_received()
         join_room(self.socket, id, "game")
         join_room(self.first_opponent_socket, id, "game")
         self.socket.get_received()

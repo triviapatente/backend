@@ -15,27 +15,24 @@ from distutils.util import strtobool
 #metodo transazionale per la creazione di una partita
 def createGame(opponents):
     new_game = Game(creator = g.user)
-    #aggiungo tutti gli avversari alla partita
+    #spedisco tutti gli inviti
     for opponent in opponents:
-        partecipation = Partecipation()
-        partecipation.user = opponent
-        new_game.users.append(partecipation)
-    #aggiungo l'utente alla partita
-    partecipation = Partecipation()
-    partecipation.user = g.user
-    new_game.users.append(partecipation)
+        #TODO: gestire la logica per mandare le notifiche push a chi di dovere
+        invite = Invite(sender = g.user, receiver = opponent, game = new_game)
+        db.session.add(invite)
     db.session.add(new_game)
-    #TODO: gestire la logica per mandare le notifiche push a chi di dovere
-    invite = Invite(sender = g.user, receiver = opponent, game = new_game)
-    db.session.add(invite)
     return new_game
 
 def handleInvite(invite):
     invite.accepted = g.post["accepted"]
-    if strtobool(invite.accepted) == False:
-        partecipation = Partecipation.query.filter(Partecipation.game_id == invite.game_id).filter(Partecipation.user_id == invite.receiver_id).first()
-        if partecipation:
-            db.session.delete(partecipation)
+    if strtobool(invite.accepted) == True:
+        ownerPartecipation = Partecipation.query.filter(Partecipation.game_id == invite.game_id).filter(Partecipation.user_id == invite.sender_id).first()
+        #se non è gia stato aggiunto, aggiungo l'owner
+        if not ownerPartecipation:
+            ownerPartecipation = Partecipation(game_id = invite.game_id, user_id = invite.sender_id)
+            db.session.add(ownerPartecipation)
+        myPartecipation = Partecipation(game_id = invite.game_id, user_id = g.user.id)
+        db.session.add(myPartecipation)
     db.session.add(invite)
     return invite
 
