@@ -34,7 +34,8 @@ def handleInvite(invite):
     invite.accepted = g.post["accepted"]
     if strtobool(invite.accepted) == False:
         partecipation = Partecipation.query.filter(Partecipation.game_id == invite.game_id).filter(Partecipation.user_id == invite.receiver_id).first()
-        db.session.delete(partecipation)
+        if partecipation:
+            db.session.delete(partecipation)
     db.session.add(invite)
     return invite
 
