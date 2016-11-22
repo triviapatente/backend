@@ -4,10 +4,11 @@ from tp import app, db
 from tp.auth.models import User
 from tp.game.models import *
 from tp.utils import doTransaction
+from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
-from tp.game.utils import updateScore, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames
+from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames
 from tp.base.utils import RoomType
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
@@ -150,16 +151,29 @@ def getQuizImage(id):
 @game.route("/users/suggested", methods = ["GET"])
 @auth_required
 def get_suggested_users():
+    a = aliased(Partecipation, "a")
     n = 5
-    left_users = User.query.filter(User.score >= g.user.score).filter(User.id != g.user.id).order_by(User.score.asc()).limit(n).all()
-    right_users = User.query.filter(User.score <= g.user.score).filter(User.id != g.user.id).order_by(User.score.asc()).limit(n).all()
+    left_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score >= g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
+    right_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score <= g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
     users = left_users + right_users
-    return jsonify(success = True, users = users)
+    output = sanitize_last_game_result(users)
+    return jsonify(success = True, users = output)
+
+def sanitize_last_game_result(users):
+    output = []
+    for user in users:
+        item = user[0]
+        last_winner = user[1]
+        if last_winner is not None:
+            item.last_game_won = (last_winner == g.user.id)
+        output.append(item)
+    return output
 
 @game.route("/users/search", methods = ["GET"])
 @needs_values("GET", "query")
 @auth_required
 def search_user():
     query = "%" + g.query.get("query") + "%"
-    matches = User.query.filter(User.username.ilike(query)).all()
-    return jsonify(success = True, matches = matches)
+    matches = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.username.ilike(query)).all()
+    output = sanitize_last_game_result(matches)
+    return jsonify(success = True, matches = output)

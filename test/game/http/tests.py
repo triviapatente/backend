@@ -338,7 +338,8 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[5].get("ended") == True
 
     def test_suggested_users(self):
-        register(self, "a", "a@gmail.com", "c")
+        user_id = self.user.get("id")
+        a_id = register(self, "a", "a@gmail.com", "c").json.get("user").get("id")
         register(self, "b", "b@gmail.com", "c")
         register(self, "c", "c@gmail.com", "c")
         register(self, "d", "d@gmail.com", "c")
@@ -350,13 +351,46 @@ class GameHTTPTestCase(TPAuthTestCase):
         register(self, "l", "l@gmail.com", "c")
         register(self, "m", "m@gmail.com", "c")
 
+        #Aggiunta di un game già finito con vincitore me stesso per testare last won
+        game = Game(creator_id = user_id, ended = True, winner_id = user_id)
+        db.session.add(game)
+        db.session.commit()
+        
+        part_1 = Partecipation(user_id = user_id, game_id = game.id)
+        part_2 = Partecipation(user_id = a_id, game_id = game.id)
+        db.session.add_all([part_1, part_2])
+        db.session.commit()
+
         print "#1. Chiamata successful"
         response = suggested_users(self)
         assert response.json.get("success") == True
         users = response.json.get("users")
         assert users is not None
+
+        print "#1.1 Controllo che sia indicato che l'ultima partita con a la ho vinta io"
+        for user in users:
+            last_game_won = user.get("last_game_won")
+            if user.get("id") == a_id:
+                assert last_game_won == True
+            else:
+                assert last_game_won is None
+
+        print "#1.1 Controllo che sia indicato che l'ultima partita con a la ho persa io"
+        #cambio il vincitore dell'ultimo game con a, e lo setto ad a stesso
+        game.winner_id = a_id
+        db.session.add(game)
+        db.session.commit()
+
+        for user in users:
+            last_game_won = user.get("last_game_won")
+            if user.get("id") == a_id:
+                assert last_game_won == True
+            else:
+                assert last_game_won is None
+
         print "#2. Lunghezza output = 10"
         assert len(users) == 10
+
 
     def test_search_user(self):
         print "#1: Risposta successful"

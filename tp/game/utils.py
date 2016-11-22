@@ -36,6 +36,9 @@ def handleInvite(invite):
     db.session.add(invite)
     return invite
 
+def last_game_result_query(user_id):
+    user_games = Partecipation.query.with_entities(Partecipation.game_id).filter(Partecipation.user_id == g.user.id)
+    return Partecipation.query.filter(Partecipation.user_id == user_id).filter(Partecipation.game_id.in_(user_games)).join(Game).with_entities(Game.winner_id).filter(Game.ended == True).order_by(Game.createdAt.desc()).limit(1).label("last_game_winner_id")
 # utils per il calcolo del punteggio
 # enumeration of possible results for match
 from enum import Enum

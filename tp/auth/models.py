@@ -34,7 +34,7 @@ class User(Base, CommonPK):
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])
   #partite giocate dal giocatore
   games = relationship("Partecipation", back_populates = "user")
-  export_properties = ["position"]
+  export_properties = ["position", "last_game_won"]
   #metodo che permette di modificare il nome dell'immagine adattandolo al nome utente in modo sicuro
   def getFileName(self, filename):
       #se il file è permesso
