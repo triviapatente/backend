@@ -2,7 +2,7 @@
 
 from test.shared import TPAuthTestCase
 from api import *
-from test.game.http.api import new_game
+from test.game.http.api import new_game, process_invite
 from test.auth.http.api import register
 from test.auth.socket.api import login
 from test.shared import get_socket_client
@@ -24,6 +24,9 @@ class BaseSocketTestCase(TPAuthTestCase):
         #viene eseguito prima di ogni singolo metodo
         response = new_game(self, self.opponent.get("id"))
         self.game = response.json.get("game")
+        process_invite(self, self.game.get("id"), True, self.opponent_token)
+        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
+        self.socket.get_received()
 
     def test_join_room(self):
         game_id = self.game.get("id")

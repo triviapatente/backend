@@ -4,7 +4,7 @@ from test.shared import TPAuthTestCase, get_socket_client
 from test.base.socket.api import join_room
 from test.auth.http.api import register
 from test.auth.socket.api import login
-from test.game.http.api import new_game
+from test.game.http.api import new_game, process_invite
 from api import *
 
 class MessageSocketTestCase(TPAuthTestCase):
@@ -23,6 +23,9 @@ class MessageSocketTestCase(TPAuthTestCase):
         login(self, self.opponent_socket, opponent_token)
         # creo una nuova partita tra l'utente e opponent
         self.game_id = new_game(self, opponent_id).json.get("game")["id"]
+        process_invite(self, self.game_id, True, opponent_token)
+        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
+        self.socket.get_received()
         # entrambi gli utenti joinano la loro room
         join_room(self.opponent_socket, self.game_id, "game")
         join_room(self.socket, self.game_id, "game")

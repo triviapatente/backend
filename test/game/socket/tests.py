@@ -2,7 +2,7 @@
 
 from test.auth.http.api import register
 from test.auth.socket.api import login
-from test.game.http.api import new_game
+from test.game.http.api import new_game, process_invite
 from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_room
 from api import *
@@ -30,6 +30,9 @@ class GameSocketTestCase(TPAuthTestCase):
         #creo la partita
         self.game = new_game(self, self.opponent_id).json.get("game")
         self.game_id = self.game.get("id")
+        process_invite(self, self.game_id, True, self.opponent_token)
+        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
+        self.socket.get_received()
         #entrambi i giocatori entrano nella room
         join_room(self.opponent_socket, self.game_id, RoomType.game.value)
         join_room(self.socket, self.game_id, RoomType.game.value)
@@ -163,6 +166,9 @@ class GameSocketTestCase(TPAuthTestCase):
         #creo una nuova partita
         self.game = new_game(self, self.opponent_id).json.get("game")
         self.game_id = self.game.get("id")
+        process_invite(self, self.game_id, True, self.opponent_token)
+        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
+        self.socket.get_received()
         #entrambi i giocatori entrano nella room
         join_room(self.opponent_socket, self.game_id, RoomType.game.value)
         join_room(self.socket, self.game_id, RoomType.game.value)
