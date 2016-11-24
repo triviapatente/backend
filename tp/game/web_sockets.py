@@ -98,7 +98,6 @@ def init_round(data):
 def get_random_categories(data):
     #ottengo i modelli dalla richiesta
     round = g.models["round_id"]
-    game = g.models["game"]
     #controllo: solo il dealer può ottenere la lista delle categorie disponibili
     if round.dealer_id != g.user.id:
         raise NotAllowed()
