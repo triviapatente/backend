@@ -13,6 +13,7 @@ from tp.base.utils import RoomType
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
 quiz = Blueprint("quiz", __name__, url_prefix = "/quiz")
+category = Blueprint("category", __name__, url_prefix = "/category")
 
 @game.route("/", methods = ["GET"])
 def welcome():
@@ -148,6 +149,13 @@ def getQuizImage(id):
         return send_file(quiz.imagePath)
     raise NotAllowed()
 
+@category.route("/image/<int:id>", methods = ["GET"])
+def getQuizImage(id):
+    folder = app.config["QUIZ_IMAGE_FOLDER"]
+    category = Category.query.filter(Category.id == id).first()
+    if category:
+        return send_file(category.imagePath)
+    raise NotAllowed()
 @game.route("/users/suggested", methods = ["GET"])
 @auth_required
 def get_suggested_users():

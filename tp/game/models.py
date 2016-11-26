@@ -107,6 +107,13 @@ class Category(Base, CommonPK):
   name = Column(String, nullable = False)
   #hint della categoria
   hint = Column(String)
+  #colore della categoria
+  color = Column(String)
+
+  @property
+  def imagePath(self):
+    folder = app.config["CATEGORY_IMAGE_FOLDER"]
+    return "../%s%d.png" % (folder, self.id)
 
 #categoria proposta al giocatore, che deve sceglierla
 class ProposedCategory(Base):
