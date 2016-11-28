@@ -68,10 +68,6 @@ class Quiz(Base, CommonPK):
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   category = relationship("Category")
 
-  @property
-  def imagePath(self):
-    folder = app.config["QUIZ_IMAGE_FOLDER"]
-    return "../%s%d.jpg" % (folder, self.image_id)
 
 
 
@@ -101,6 +97,10 @@ class Invite(Base):
 class Image(Base, CommonPK):
   #path dell'immagine, in alternativa: blob
   image = Column(String)
+
+  @property
+  def imagePath(self):
+      return "../" + self.image
 
 class Category(Base, CommonPK):
   #nome della categoria

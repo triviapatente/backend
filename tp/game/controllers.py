@@ -143,14 +143,14 @@ def recent_games():
 
 @quiz.route("/image/<int:id>", methods = ["GET"])
 def getQuizImage(id):
-    folder = app.config["QUIZ_IMAGE_FOLDER"]
-    quiz = Quiz.query.filter(Quiz.image_id == id).first()
-    if quiz:
-        return send_file(quiz.imagePath)
+    image = Image.query.filter(Image.id == id).first()
+    print id, image.id, image.imagePath
+    if image:
+        return send_file(image.imagePath)
     raise NotAllowed()
 
 @category.route("/image/<int:id>", methods = ["GET"])
-def getQuizImage(id):
+def getCategoryImage(id):
     folder = app.config["QUIZ_IMAGE_FOLDER"]
     category = Category.query.filter(Category.id == id).first()
     if category:
