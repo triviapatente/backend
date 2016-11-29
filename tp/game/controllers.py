@@ -160,10 +160,32 @@ def getCategoryImage(id):
 @auth_required
 def get_suggested_users():
     a = aliased(Partecipation, "a")
-    n = 5
+    n = 10
     left_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score >= g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
     right_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score < g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
-    users = left_users + right_users
+
+    left_min = len(left_users) < (n / 2)
+    right_min = len(right_users) < (n / 2)
+    #entrambi hanno meno di 5 elementi a testa
+    if left_min and right_min:
+        #ritorno un risultato con lunghezza < 10
+        users = left_users + right_users
+    #l'array di sinistra ha meno di 5 elementi
+    elif left_min:
+        #dall'array di destra prendo (10 - gli elementi di sinistra) elementi
+        upper_bound = n - len(left_users)
+        #prendo tutti quelli da sinistra
+        users = left_users + right_users[:upper_bound]
+    #l'array di destra ha meno di 5 elementi
+    elif right_min:
+        #dall'array di sinistra prendo (10 - gli elementi di destra) elementi
+        lower_bound = len(left_users) - (n - len(right_users))
+        #prendo tutti quelli da destra
+        users = left_users[lower_bound:] + right_users
+    #entrambi gli array hanno un numero di elementi >= a 5
+    else:
+        #prendo gli ultimi 5 elementi da quello di sinistra, e i primi 5 da destra
+        users = left_users[(n/2):] + right_users[:(n/2)]
     output = sanitize_last_game_result(users)
     return jsonify(success = True, users = output)
 
