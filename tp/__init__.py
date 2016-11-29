@@ -86,7 +86,7 @@ def init(testing = False, ci = False):
 
     from tp.auth.controllers import auth, account, info
     from tp.base.controllers import base
-    from tp.game.controllers import game, quiz
+    from tp.game.controllers import game, quiz, category
     from tp.message.controllers import message
     from tp.preferences.controllers import preferences
     from tp.purchases.controllers import shop
@@ -99,6 +99,7 @@ def init(testing = False, ci = False):
     app.register_blueprint(base)
     app.register_blueprint(game)
     app.register_blueprint(quiz)
+    app.register_blueprint(category)
     app.register_blueprint(message)
     app.register_blueprint(preferences)
     app.register_blueprint(account)
