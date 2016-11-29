@@ -11,7 +11,7 @@ from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 from tp.base.utils import RoomType
 from tp.exceptions import NotAllowed, ChangeFailed
-from sqlalchemy import func
+from sqlalchemy import func, and_
 import events
 
 @socketio.on("init_round")
@@ -164,8 +164,14 @@ def get_questions(data):
     if not round.cat_id:
         raise NotAllowed()
     #ottengo le domande proposte precedentemente per lo stesso turno, se ci sono
-    proposed = Quiz.query.join(ProposedQuestion).filter(ProposedQuestion.round_id == round.id).all()
-    proposed = sorted([p.json for p in proposed], key = lambda q: q.get("id"))
+    proposed = Quiz.query.join(ProposedQuestion).outerjoin(Question, and_(Question.quiz_id == Quiz.id, Question.user_id == g.user.id, Question.round_id == round.id)).with_entities(Quiz, Question.answer).filter(ProposedQuestion.round_id == round.id).all()
+    output = []
+    for item in proposed:
+        quiz = item[0]
+        quiz.my_answer = item[1]
+        output.append(quiz)
+
+    proposed = sorted([p.json for p in output], key = lambda q: q.get("id"))
     #dopodichè, rispondo
     print "User %s got questions." % g.user.username, proposed
     emit("get_questions", {"questions": proposed, "success": True})
