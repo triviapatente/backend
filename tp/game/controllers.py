@@ -162,7 +162,7 @@ def get_suggested_users():
     a = aliased(Partecipation, "a")
     n = 5
     left_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score >= g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
-    right_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score <= g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
+    right_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score < g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
     users = left_users + right_users
     output = sanitize_last_game_result(users)
     return jsonify(success = True, users = output)
