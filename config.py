@@ -60,6 +60,7 @@ NUMBER_OF_QUESTIONS_PER_ROUND = 4
 NUMBER_OF_ROUNDS = 10
 #percorso dove vengono salvate le immagini dei quiz
 QUIZ_IMAGE_FOLDER = "images/"
+CATEGORY_IMAGE_FOLDER = "images/categories/"
 #numero di risultati mostrati nella classifica italiana
 RESULTS_LIMIT_RANK_ITALY = 10
 #fattore moltiplicativo massimo e minimo
