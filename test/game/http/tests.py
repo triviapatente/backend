@@ -234,16 +234,16 @@ class GameHTTPTestCase(TPAuthTestCase):
         print response.json.get("status_code")
         assert response.json.get("status_code") == 400
 
-    def prepare_round(self, socket, game, number):
-        print "preparing round for game", game, "number:", number
-        round_id = init_round(socket, game, number).json.get("round").get("id")
+    def prepare_round(self, socket, game):
+        print "preparing round for game", game
+        round_id = init_round(socket, game).json.get("round").get("id")
         category = get_categories(socket, game, round_id).json.get("categories")[0].get("id")
         choose_category(socket, category, game, round_id)
         return round_id
-    def process_round(self, socket, game, number, round_id = None):
+    def process_round(self, socket, game, round_id = None):
         if not round_id:
-            round_id = self.prepare_round(socket, game, number)
-        print "processing round for game", game, "number:", number, "id:", round_id
+            round_id = self.prepare_round(socket, game)
+        print "processing round for game", game, "id:", round_id
         questions = get_questions(socket, round_id, game).json.get("questions")
         for question in questions:
             answer(socket, True, game, round_id, question.get("id"))
@@ -267,39 +267,39 @@ class GameHTTPTestCase(TPAuthTestCase):
         #il primo game lo creo, inizializzo il round e non rispondo: è il mio turno
         #Risultato sperato : my_turn = true
         first_game = self.create_bulk_game()
-        init_round(self.socket, first_game, 1)
+        init_round(self.socket, first_game)
         #il secondo game lo creo e faccio scorrere 1 turno fino ad arrivare al secondo turno dell'avversario
         #Risultato sperato : my_turn = true (il prossimo turno il dealer sarò io!)
         second_game = self.create_bulk_game()
-        round_id = self.process_round(self.socket, second_game, 1)
+        round_id = self.process_round(self.socket, second_game)
         self.first_opponent_socket.get_received()
-        self.process_round(self.first_opponent_socket, second_game, 1, round_id)
+        self.process_round(self.first_opponent_socket, second_game, round_id)
         self.socket.get_received()
-        round_id = self.prepare_round(self.first_opponent_socket, second_game, 2)
+        round_id = self.prepare_round(self.first_opponent_socket, second_game)
         self.socket.get_received()
-        self.process_round(self.socket, second_game, 2, round_id)
+        self.process_round(self.socket, second_game, round_id)
         self.first_opponent_socket.get_received()
-        init_round(self.socket, second_game, 3)
+        init_round(self.socket, second_game)
         #il terzo game lo creo, rispondo al primo round con l'avversario e ritorno al mio turno, scegliendo la categoria
         #Risultato sperato : my_turn = true (categoria settata, posso agire!)
         third_game = self.create_bulk_game()
-        round_id = self.process_round(self.socket, third_game, 1)
+        round_id = self.process_round(self.socket, third_game)
         self.first_opponent_socket.get_received()
-        self.process_round(self.first_opponent_socket, third_game, 1, round_id)
+        self.process_round(self.first_opponent_socket, third_game, round_id)
         self.socket.get_received()
-        self.prepare_round(self.first_opponent_socket, third_game, 2)
+        self.prepare_round(self.first_opponent_socket, third_game)
         self.socket.get_received()
         #il quarto game lo creo, rispondo al primo round con l'avversario e ritorno al mio turno
         #Risultato sperato : my_turn = false (devo aspettare che l'avversario setti la categoria)
         fourth_game = self.create_bulk_game()
-        round_id = self.process_round(self.socket, fourth_game, 1)
+        round_id = self.process_round(self.socket, fourth_game)
         self.first_opponent_socket.get_received()
-        self.process_round(self.first_opponent_socket, fourth_game, 1, round_id)
-        init_round(self.first_opponent_socket, fourth_game, 2)
+        self.process_round(self.first_opponent_socket, fourth_game, round_id)
+        init_round(self.first_opponent_socket, fourth_game)
         #il quinto game lo creo e rispondo a tutte le domande fino ad arrivare al turno dell'avversario
         #Risultato sperato : my_turn = false (il prossimo turno è dell'avversario!)
         fifth_game = self.create_bulk_game()
-        round_id = self.process_round(self.socket, fifth_game, 1)
+        round_id = self.process_round(self.socket, fifth_game)
         self.first_opponent_socket.get_received()
         #il sesto game lo creo e mi tolgo subito, quindi viene settato ended = true
         sixth_game = self.create_bulk_game()
@@ -355,7 +355,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         game = Game(creator_id = user_id, ended = True, winner_id = user_id)
         db.session.add(game)
         db.session.commit()
-        
+
         part_1 = Partecipation(user_id = user_id, game_id = game.id)
         part_2 = Partecipation(user_id = a_id, game_id = game.id)
         db.session.add_all([part_1, part_2])
