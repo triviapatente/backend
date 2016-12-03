@@ -13,6 +13,7 @@ from tp.exceptions import NotAllowed
 from distutils.util import strtobool
 from tp.base.utils import roomName
 from tp.events.utils import getUsersFromRoomID
+from tp.events.models import Socket
 
 #metodo transazionale per la creazione di una partita
 def createGame(opponents):
@@ -332,8 +333,7 @@ def getNextRoundNumber(game):
             return prev_round.number
     return 1
 
+#TODO: change to verify that i'm in the room of the game
 def isOpponentOnline(game):
-    opponent = User.query.filter(User.id != g.user.id).join(Partecipation).filter(Partecipation.game_id == game.id).first()
-    room = roomName(game.id, "game")
-    users = [user for user in getUsersFromRoomID(room) if user.id == opponent.id]
-    return len(users) != 0
+    opponent = User.query.join(Partecipation).filter(Partecipation.game_id == game.id, Partecipation.user_id != g.user.id).first()
+    return Socket.query.filter(Socket.user_id == opponent.id).first() is not None

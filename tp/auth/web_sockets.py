@@ -19,6 +19,7 @@ def authenticate(data):
     if g.user:
         #assegno il token alla sessione
         session["token"] = token
+        Socket.query.filter(Socket.user_id == g.user.id).filter(Socket.socket_id != request.sid).delete()
         s = Socket.query.filter(Socket.user_id == g.user.id).filter(Socket.socket_id == request.sid).first()
         if not s:
             s = Socket(user_id = g.user.id, socket_id = request.sid)
@@ -28,6 +29,8 @@ def authenticate(data):
         output = get_connection_values(g.user)
     output["success"] = g.user != None
     emit("auth", output)
+
+#TODO: rimuovere socket entry in logout e anche in disconnessione 
 
 @socketio.on("logout")
 @ws_auth_required
