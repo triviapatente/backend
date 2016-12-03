@@ -3,7 +3,7 @@ from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
-from tp.game.utils import get_dealer, getNextRoundNumber, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner, numberOfAnswersFor
+from tp.game.utils import get_dealer, getNextRoundNumber, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner, numberOfAnswersFor, isOpponentOnline
 from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
 from tp.decorators import needs_values, fetch_models
@@ -75,7 +75,7 @@ def init_round(data):
         db.session.add(round)
         db.session.commit()
     #risposta standard
-    output = {"round": round.json, "success": True}
+    output = {"round": round.json, "success": True, "opponent_online": isOpponentOnline(game)}
     #ottengo il dealer per usarlo successivamente
     dealer = User.query.filter(User.id == round.dealer_id).first()
     #Il dealer del turno a cui mi riferisco deve ancora giocare il precedente turno

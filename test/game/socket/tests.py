@@ -62,6 +62,7 @@ class GameSocketTestCase(TPAuthTestCase):
         response = init_round(self.opponent_socket, self.game_id)
         assert response.json.get("success") == True
         assert response.json.get("round")
+        assert response.json.get("opponent_online")
         #essendo il primo round, il dealer dev'essere chi ha creato la partita
         assert response.json.get("round").get("dealer_id") == self.game.get("creator_id")
 
