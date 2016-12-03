@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-def init_round(socket, game, number):
-    socket.emit("init_round", {"number": number, "game": game})
+def init_round(socket, game):
+    socket.emit("init_round", {"game": game})
     return socket.get_received()
 
 def get_questions(socket, round_id, game):

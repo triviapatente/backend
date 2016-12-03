@@ -256,7 +256,8 @@ def gameEnded(game):
     #per ognuno di essi
     for user in users:
         #se non hanno finito l'ultimo round
-        if Question.query.filter(Question.user_id == user.id).join(Round).filter(Round.number == app.config["NUMBER_OF_ROUNDS"]).count() < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
+        last_round_answers = Question.query.filter(Question.user_id == user.id).join(Round).filter(Round.game_id == game.id).filter(Round.number == app.config["NUMBER_OF_ROUNDS"]).count()
+        if last_round_answers < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
             #la partita non è finita
             return False
     #la partita è finita
@@ -278,6 +279,9 @@ def setWinner(game):
        return None
     else:
        return User.query.filter_by(id = correctAnswers[0][0]).first()
+
+def numberOfAnswersFor(user_id, round_id):
+    return Question.query.filter(Question.user_id == user_id).join(Round).filter(Round.id == round_id).count()
 
 # metodo che calcola il numero di risposte corrette per ogni giocatore in un ##game
 def getCorrectAnswers(game):
@@ -312,3 +316,16 @@ def getRecentGames(user):
         game.getOpponentForExport()
         output.append(game)
     return output
+
+#ottiene il numero del round corrente se non è stato ancora completato, altrimenti il successivo
+def getNextRoundNumber(game):
+    NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
+    #ottengo l'ultimo round a cui ho giocato
+    prev_round = Round.query.filter(Round.game_id == game.id).join(Question).filter(Question.user_id == g.user.id).order_by(Round.number.desc()).first()
+    if prev_round:
+        number_of_answers = Question.query.filter(Question.round_id == prev_round.id).filter(Question.user_id == g.user.id).count()
+        if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
+            return prev_round.number + 1
+        else:
+            return prev_round.number
+    return 1

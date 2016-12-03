@@ -5,7 +5,12 @@ from flask import g
 
 @event("round_started", action = EventActions.create, preferences_key = "notification_round")
 def round_started(room, round):
-    data = {"round": round.json}
+    data = {"round": round.json, "user": g.user.json}
+    return (room, data)
+
+@event("round_ended", action = EventActions.destroy, needs_push = False)
+def round_ended(room, round):
+    data = {"round": round.json, "user": g.user.json}
     return (room, data)
 
 @event("category_chosen", action = EventActions.create, needs_push = False)

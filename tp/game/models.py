@@ -68,7 +68,7 @@ class Quiz(Base, CommonPK):
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   category = relationship("Category")
 
-  export_properties = ["my_answer"]
+  export_properties = ["answered_correctly", "my_answer"]
 
 
 
