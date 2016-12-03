@@ -212,13 +212,13 @@ def answer(data):
     db.session.add(question)
     db.session.commit()
 
-    NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
-    number_of_answers = Question.query.filter(Question.round_id == round.id).filter(Question.user_id == g.user.id).count()
-    if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
-        events.round_ended(g.roomName, round)
-
     #rispondo anche dicendo se ho dato la risposta giusta o sbagliata
     print "User %s answered to proposed question." % g.user.username, question, answer
     correct = (quiz.answer == question.answer)
     emit("answer", {"success": True, "correct_answer": correct})
     events.question_answered(g.roomName, quiz, correct)
+
+    NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
+    number_of_answers = Question.query.filter(Question.round_id == round.id).filter(Question.user_id == g.user.id).count()
+    if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
+        events.round_ended(g.roomName, round)

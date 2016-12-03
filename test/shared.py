@@ -73,12 +73,12 @@ def fake_request(test_client, fn):
 
 def fake_socket_request(socket):
     oldmethod = socket.get_received
-    def get_received():
+    def get_received(index = 0):
         #chiamo il metodo che si chiamava fn in app, ripassando gli argomenti misti contenuti in args come argomenti della funzione
         response = oldmethod()
         assert response, "Null response"
-        event = response[0].get("name")
-        args = response[0].get("args")
+        event = response[index].get("name")
+        args = response[index].get("args")
         if isinstance(args, list):
             json = args[0]
         else:

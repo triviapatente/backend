@@ -377,8 +377,8 @@ class GameSocketTestCase(TPAuthTestCase):
         chosen_category_id = categories[0].get("id")
         choose_category(self.socket, chosen_category_id, self.game_id, round_id)
         self.opponent_socket.get_received() #consumo l'evento category_chosen, innescato dalla precedente chiamata a choose_category
-        question_id = get_questions(self.opponent_socket, self.game_id, round_id).json.get("questions")[0].get("id")
-
+        questions = get_questions(self.opponent_socket, self.game_id, round_id).json.get("questions")
+        question_id = questions[0].get("id")
         print "#1: Rispondo a una domanda che non mi è stata posta"
         not_proposed_question = generate_random_question(chosen_category_id)
         response = answer(self.socket, False, self.game_id, round_id, not_proposed_question.id)
@@ -400,56 +400,68 @@ class GameSocketTestCase(TPAuthTestCase):
         print "#3.1 la risposta è corretta"
         assert correct_answer
 
-        print "#4 Event Test: arriva l'evento corretto all'avversario"
+        print "#4 Event Test: arriva l'evento question_answered corretto all'avversario"
         answer_response = self.opponent_socket.get_received()
         assert answer_response.json.get("action") == "answer"
         assert answer_response.json.get("correct") is not None
         assert answer_response.json.get("quiz")
         assert answer_response.json.get("user")
 
-        print "#5: Rispondo a una domanda a cui ho già risposto"
+        print "#5 Event Test: arriva l'evento round_ended corretto all'avversario, quando rispondo a tutte le domande"
+        answer(self.socket, True, self.game_id, round_id, questions[1].get("id"))
+        print "###", self.opponent_socket.get_received() #consumo l'evento user_answered
+        answer(self.socket, True, self.game_id, round_id, questions[2].get("id"))
+        print "###", self.opponent_socket.get_received() #consumo l'evento user_answered
+        answer(self.socket, True, self.game_id, round_id, questions[3].get("id"))
+        #in questo ultimo caso, l'evento round_ended arriva assieme a question_answered, quindi consumando uno consumo anche l'altro
+        round_ended_response = self.opponent_socket.get_received(1)
+        assert round_ended_response.json.get("action") == "destroy"
+        assert round_ended_response.json.get("round").get("id") == round_id
+        assert round_ended_response.json.get("user").get("id") == self.user.get("id")
+
+        print "#6: Rispondo a una domanda a cui ho già risposto"
         response = answer(self.socket, False, self.game_id, round_id, question_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#6 Parametri mancanti"
-        print "#6.1: answer"
+        print "#7 Parametri mancanti"
+        print "#7.1: answer"
         response = answer(self.socket, None, self.game_id, round_id, question_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#6.2: game"
+        print "#7.2: game"
         response = answer(self.socket, True, None, round_id, question_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#6.3: round"
+        print "#7.3: round"
         response = answer(self.socket, False, self.game_id, None, question_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#6.4: quiz"
+        print "#7.4: quiz"
         response = answer(self.socket, True, self.game_id, round_id, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#7: Parametri inesistenti"
-        print "#7.1: game"
+        print "#8: Parametri inesistenti"
+        print "#8.1: game"
         response = answer(self.socket, True, 234234, round_id, question_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#7.2: round"
+        print "#8.2: round"
         response = answer(self.socket, False, self.game_id, 3434, question_id)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#7.3: quiz"
+        print "#8.3: quiz"
         response = answer(self.socket, True, self.game_id, round_id, 45454)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#8: Non sono iscritto alla room"
+        print "#9: Non sono iscritto alla room"
         leave_room(self.socket, self.game_id, RoomType.game.value)
         response = answer(self.socket, True, self.game_id, round_id, question_id)
         assert response.json.get("success") == False
