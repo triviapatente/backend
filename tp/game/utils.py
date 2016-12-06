@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db
-from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz
+from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz, Category
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
@@ -352,12 +352,19 @@ def get_closed_round_details(game):
     #query che ottiene i round completati
     grouped_rounds = Question.query.join(Round).filter(Round.game_id == game.id).with_entities(Round.number, Round.id, func.count(Question.round_id).label("count")).group_by(Round.number, Round.id).all()
     #query che estrapola solo gli id
-    rounds = [id for (id, number, count) in grouped_rounds if count == max_questions_per_round]
+    rounds = [id for (number, id, count) in grouped_rounds if count == max_questions_per_round]
+    if len(rounds) == 0:
+        return([], [], [], users)
     #ottiene le domande dei round finiti
-    answers = Question.query.filter(Question.round_id.in_(rounds)).order_by(Question.round_id.asc(), Question.createdAt).all()
+    answers = Question.query.join(Round).with_entities(Question, Round.number).filter(Question.round_id.in_(rounds)).order_by(Question.round_id.asc(), Question.createdAt).all()
+    answers = [setRoundNumber(item, number) for (item, number) in answers]
+    #TODO: remove this info, and add round.cat_id instead. Categories should be cached on device
+    categories = Round.query.filter(Round.id.in_(rounds)).join(Category).with_entities(Category).all()
     quizzes = Quiz.query.join(Question).filter(Question.round_id.in_(rounds)).group_by(Quiz.id).all()
-    return (quizzes, answers, users)
-
+    return (quizzes, answers, categories, users)
+def setRoundNumber(question, number):
+    question.round_number = number
+    return question
 def isRoundEnded(round):
     max_number_of_answers = getMaxQuestionNumberFrom(round.game_id)
     return Question.query.filter(Question.round_id == round.id).count() == max_number_of_answers

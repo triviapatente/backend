@@ -485,9 +485,11 @@ class GameSocketTestCase(TPAuthTestCase):
         users = response.json.get("users")
         quizzes = response.json.get("quizzes")
         answers = response.json.get("answers")
+        categories = response.json.get("categories")
         assert len(users) == 2
         assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 2)
         assert len(answers) == len(quizzes) * len(users)
+        assert len(categories) == (len(quizzes) / NUMBER_OF_QUESTIONS_PER_ROUND)
 
         print "#3: Dopo 3 round in cui un utente ha risposto a tutto, l'altro ha risposto a n domande su 4 del 3 (con n < 4), mi vengono ritornate NUMBER_OF_QUESTIONS_PER_ROUND * 2 risposte * 2 utenti"
         round_id = init_round(self.socket, self.game_id).json.get("round").get("id")
@@ -508,9 +510,11 @@ class GameSocketTestCase(TPAuthTestCase):
         users = response.json.get("users")
         quizzes = response.json.get("quizzes")
         answers = response.json.get("answers")
+        categories = response.json.get("categories")
         assert len(users) == 2
         assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 2)
         assert len(answers) == len(quizzes) * len(users)
+        assert len(categories) == (len(quizzes) / NUMBER_OF_QUESTIONS_PER_ROUND)
 
         print "#4: Event test: round_ended con globally_ended = true"
         answer(self.opponent_socket, True, self.game_id, round_id, question_id)
