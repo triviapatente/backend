@@ -396,8 +396,8 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#1: Risposta successful"
         response = search_user(self, "a")
         assert response.status_code == 200
-        matches = response.json.get("matches")
-        assert matches is not None
+        users = response.json.get("users")
+        assert users is not None
 
         print "#3: Parametri mancanti"
         print "#3.1: query"
