@@ -2,6 +2,7 @@
 from tp.events.utils import EventActions
 from tp.events.decorators import event
 from flask import g
+from tp.game.utils import isRoundEnded
 
 @event("round_started", action = EventActions.create, preferences_key = "notification_round")
 def round_started(room, round):
@@ -10,7 +11,9 @@ def round_started(room, round):
 
 @event("round_ended", action = EventActions.destroy, needs_push = False)
 def round_ended(room, round):
-    data = {"round": round.json, "user": g.user.json}
+    #check if round is ended for everyone
+    globally_ended = isRoundEnded(round)
+    data = {"round": round.json, "user": g.user.json, "globally": globally_ended}
     return (room, data)
 
 @event("category_chosen", action = EventActions.create, needs_push = False)

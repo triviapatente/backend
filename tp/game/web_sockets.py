@@ -3,7 +3,7 @@ from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
-from tp.game.utils import get_dealer, getNextRoundNumber, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner, numberOfAnswersFor, isOpponentOnline
+from tp.game.utils import get_closed_round_details, get_dealer, getNextRoundNumber, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner, numberOfAnswersFor, isOpponentOnline
 from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
 from tp.decorators import needs_values, fetch_models
@@ -202,10 +202,10 @@ def answer(data):
     round = g.models["round_id"]
     quiz = g.models["quiz_id"]
     question = Question.query.filter(Question.round_id == round.id, Question.user_id == g.user.id, Question.quiz_id == quiz.id).first()
-    #se ho già risposto, non posso più farlo
     proposedQuestion = ProposedQuestion.query.filter(ProposedQuestion.round_id == round.id).filter(ProposedQuestion.quiz_id == quiz.id).first()
     if not proposedQuestion:
         raise NotAllowed()
+    #se ho già risposto, non posso più farlo
     if question:
         raise NotAllowed()
     question = Question(round_id = round.id, user_id = g.user.id, quiz_id = quiz.id, answer = answer)
@@ -222,3 +222,13 @@ def answer(data):
     number_of_answers = Question.query.filter(Question.round_id == round.id).filter(Question.user_id == g.user.id).count()
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
         events.round_ended(g.roomName, round)
+
+@socketio.on("round_details")
+@ws_auth_required
+@needs_values("SOCKET", "game")
+@fetch_models(game = Game)
+@check_in_room(RoomType.game, "game")
+def round_details(data):
+    game = g.models["game"]
+    output = get_closed_round_details(game)
+    return emit("round_details", {"answers": output[0], "users": output[1]})

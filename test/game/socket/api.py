@@ -4,7 +4,7 @@ def init_round(socket, game):
     socket.emit("init_round", {"game": game})
     return socket.get_received()
 
-def get_questions(socket, round_id, game):
+def get_questions(socket, game, round_id):
     socket.emit("get_questions", {"round_id": round_id, "game": game})
     return socket.get_received()
 
@@ -18,4 +18,7 @@ def answer(socket, answer, game, round, quiz):
 
 def choose_category(socket, category, game, round):
     socket.emit("choose_category", {"category": category, "game": game, "round_id": round})
+    return socket.get_received()
+def round_details(socket, game):
+    socket.emit("round_details", {"game": game})
     return socket.get_received()

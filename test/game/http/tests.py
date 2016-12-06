@@ -244,7 +244,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         if not round_id:
             round_id = self.prepare_round(socket, game)
         print "processing round for game", game, "id:", round_id
-        questions = get_questions(socket, round_id, game).json.get("questions")
+        questions = get_questions(socket, game, round_id).json.get("questions")
         for question in questions:
             answer(socket, True, game, round_id, question.get("id"))
         return round_id

@@ -26,7 +26,7 @@ class Game(Base, CommonPK):
   #il gioco è finito?
   ended = Column(Boolean, default = False)
 
-  export_properties = ["my_turn", "opponent_id", "opponent_username", "opponent_image"]
+  export_properties = ["my_turn", "opponent_id", "opponent_username", "opponent_image", "question"]
   #ottiene l'utente avversario all'utente userToExclude e lo inserisce nel modello per la serializzazione
   def getOpponentForExport(self, userToExclude = None):
       #ho fatto il controllo qui e non direttamente nell'intestazione del metodo perchè i valori di default vengono interpretati a livello di bootstrap, e quindi g sarebbe fuori dall'application/request context
@@ -68,7 +68,7 @@ class Quiz(Base, CommonPK):
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   category = relationship("Category")
 
-  export_properties = ["answered_correctly", "my_answer"]
+  export_properties = ["answered_correctly", "my_answer", "opponent_answer"]
 
 
 

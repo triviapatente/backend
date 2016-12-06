@@ -132,11 +132,19 @@ def getPartecipationFromGame(game):
 
 # funzione che ritorna gli utenti di una partita (##game)
 def getUsersFromGame(game, *columns):
+    game_id = game
+    if isinstance(game, Game):
+        game_id = game.id
     query = User.query
     if columns:
         query = query.with_entities(*columns)
-    return query.join(Partecipation).filter(Partecipation.game_id == game.id).all()
-
+    return query.join(Partecipation).filter(Partecipation.game_id == game_id).all()
+#TODO: modificare, per il momento è qui per ottimizzare
+def getUserCountFrom(game):
+    return 2
+def getMaxQuestionNumberFrom(game):
+    NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
+    return getUserCountFrom(game) * NUMBER_OF_QUESTIONS_PER_ROUND
 # funzione che ritorna l'utente vincitore di una partita (##game)
 def getWinner(game):
     return User.query.filter_by(id = game.winner_id).first()
@@ -337,3 +345,18 @@ def getNextRoundNumber(game):
 def isOpponentOnline(game):
     opponent = User.query.join(Partecipation).filter(Partecipation.game_id == game.id, Partecipation.user_id != g.user.id).first()
     return Socket.query.filter(Socket.user_id == opponent.id).first() is not None
+
+def get_closed_round_details(game):
+    users = getUsersFromGame(game)
+    max_questions_per_round = getMaxQuestionNumberFrom(game)
+    #query che ottiene i round completati
+    grouped_rounds = Question.query.join(Round).filter(Round.game_id == game.id).with_entities(Round.number, Round.id, func.count(Question.round_id).label("count")).group_by(Round.number, Round.id).all()
+    #query che estrapola solo gli id
+    rounds = [id for (id, number, count) in grouped_rounds if count == max_questions_per_round]
+    #ottiene le domande dei round finiti
+    output = Quiz.query.join(Question).filter(Question.round_id.in_(rounds)).with_entities(Quiz, Question.answer, Question.user_id).order_by(Question.round_id.asc(), Question.createdAt).all()
+    return (output, users)
+
+def isRoundEnded(round):
+    max_number_of_answers = getMaxQuestionNumberFrom(round.game_id)
+    return Question.query.filter(Question.round_id == round.id).count() == max_number_of_answers
