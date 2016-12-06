@@ -111,6 +111,7 @@ def init_round(data):
 def get_random_categories(data):
     #ottengo i modelli dalla richiesta
     round = g.models["round_id"]
+    game = g.models["game"]
     #controllo: solo il dealer può ottenere la lista delle categorie disponibili
     if round.dealer_id != g.user.id:
         raise NotAllowed()
@@ -118,8 +119,9 @@ def get_random_categories(data):
     proposed = Category.query.with_entities(Category).join(ProposedCategory).filter(ProposedCategory.round_id == round.id).all()
     #se non ci sono
     if len(proposed) == 0:
+        ids = Round.query.filter(Round.game_id == game.id).join(Category).with_entities(Category.id).all()
         #le genero random
-        proposed = Category.query.order_by(func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"]).all()
+        proposed = Category.query.filter(~Category.id.in_(ids)).order_by(func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"]).all()
         #e le aggiungo come proposed in db
         for candidate in proposed:
             c = ProposedCategory(round_id = round.id, category_id = candidate.id)

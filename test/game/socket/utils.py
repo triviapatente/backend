@@ -5,7 +5,7 @@ from tp import db
 from api import init_round, get_categories, choose_category, get_questions, answer
 #metodo che genera un set fittizio di categorie e quiz per non evocare il vero e proprio crawler a ogni test
 def dumb_crawler():
-    for i in range(0, 10):
+    for i in range(0, 25):
         c = Category(name= "category_%d" % i)
         db.session.add(c)
         db.session.commit()
