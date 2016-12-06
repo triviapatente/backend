@@ -230,5 +230,5 @@ def answer(data):
 @check_in_room(RoomType.game, "game")
 def round_details(data):
     game = g.models["game"]
-    output = get_closed_round_details(game)
-    return emit("round_details", {"answers": output[0], "users": output[1]})
+    (quizzes, answers, users) = get_closed_round_details(game)
+    return emit("round_details", {"answers": answers, "quizzes": quizzes, "users": users})

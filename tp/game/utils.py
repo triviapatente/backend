@@ -354,8 +354,9 @@ def get_closed_round_details(game):
     #query che estrapola solo gli id
     rounds = [id for (id, number, count) in grouped_rounds if count == max_questions_per_round]
     #ottiene le domande dei round finiti
-    output = Quiz.query.join(Question).filter(Question.round_id.in_(rounds)).with_entities(Quiz, Question.answer, Question.user_id).order_by(Question.round_id.asc(), Question.createdAt).all()
-    return (output, users)
+    answers = Question.query.filter(Question.round_id.in_(rounds)).order_by(Question.round_id.asc(), Question.createdAt).all()
+    quizzes = Quiz.query.join(Question).filter(Question.round_id.in_(rounds)).group_by(Quiz.id).all()
+    return (quizzes, answers, users)
 
 def isRoundEnded(round):
     max_number_of_answers = getMaxQuestionNumberFrom(round.game_id)

@@ -68,7 +68,7 @@ class Quiz(Base, CommonPK):
   category_id = Column(Integer, ForeignKey("category.id"), nullable = False)
   category = relationship("Category")
 
-  export_properties = ["answered_correctly", "my_answer", "opponent_answer"]
+  export_properties = ["answered_correctly", "my_answer"]
 
 
 
@@ -81,6 +81,7 @@ class Question(Base):
 
   round_id = Column(Integer, ForeignKey("round.id"), nullable = False, primary_key = True)
   user_id = Column(Integer, ForeignKey("user.id"), nullable = False, primary_key = True)
+  export_properties = ["round_number"]
 
 class Invite(Base):
     #il game a cui sei stato invitato
