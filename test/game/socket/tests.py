@@ -534,15 +534,14 @@ class GameSocketTestCase(TPAuthTestCase):
         answers = response.json.get("answers")
         categories = response.json.get("categories")
         partecipations = response.json.get("partecipations")
-        ended = response.json.get("ended")
         winner_id = response.json.get("winner_id")
         assert len(users) == 2
         assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 3)
         assert len(answers) == len(quizzes) * len(users)
         assert len(partecipations) == len(users)
         assert len(categories) == (len(quizzes) / NUMBER_OF_QUESTIONS_PER_ROUND)
-        assert ended == True
-        assert winner_id == self.opponent_id
+        assert response.json.get("game").get("ended") == True
+        assert response.json.get("game").get("winner_id") == self.opponent_id
 
         print "#6 Parametri mancanti"
         print "#6.1 game"
