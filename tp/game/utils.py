@@ -348,13 +348,17 @@ def isOpponentOnline(game):
 
 def get_closed_round_details(game):
     users = getUsersFromGame(game)
+    #ho bisogno del dato solo se il gioco è finito
+    partecipations = None
+    if game.ended:
+        partecipations = getPartecipationFromGame(game)
     max_questions_per_round = getMaxQuestionNumberFrom(game)
     #query che ottiene i round completati
     grouped_rounds = Question.query.join(Round).filter(Round.game_id == game.id).with_entities(Round.number, Round.id, func.count(Question.round_id).label("count")).group_by(Round.number, Round.id).all()
     #query che estrapola solo gli id
     rounds = [id for (number, id, count) in grouped_rounds if count == max_questions_per_round]
     (quizzes, answers, categories) =  get_info_for_multiple(rounds)
-    return (quizzes, answers, categories, users)
+    return (quizzes, answers, categories, users, partecipations)
 
 #ottiene quiz, risposte, e categorie dei round passati
 #come parametro accetta un array di id di round

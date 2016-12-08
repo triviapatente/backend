@@ -2,7 +2,7 @@
 
 from test.auth.http.api import register
 from test.auth.socket.api import login
-from test.game.http.api import new_game, process_invite
+from test.game.http.api import new_game, process_invite, leave_game
 from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_room
 from api import *
@@ -526,9 +526,22 @@ class GameSocketTestCase(TPAuthTestCase):
         assert len(answers) == len(quizzes) * len(users)
         assert response.json.get("category")
 
+        print "#5 L'opponent abbandona il gioco, ritorna ended = true, winner e partecipations"
+        leave_game(self, self.game_id)
+        response = round_details(self.socket, self.game_id)
+        users = response.json.get("users")
+        quizzes = response.json.get("quizzes")
+        answers = response.json.get("answers")
+        categories = response.json.get("categories")
+        partecipations = response.json.get("partecipations")
+        assert len(users) == 2
+        assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 3)
+        assert len(answers) == len(quizzes) * len(users)
+        assert len(partecipations) == len(users)
+        assert len(categories) == (len(quizzes) / NUMBER_OF_QUESTIONS_PER_ROUND)
 
-        print "#5 Parametri mancanti"
-        print "#5.1 game"
+        print "#6 Parametri mancanti"
+        print "#6.1 game"
         response = round_details(self.socket, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
