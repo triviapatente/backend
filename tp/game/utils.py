@@ -353,6 +353,12 @@ def get_closed_round_details(game):
     grouped_rounds = Question.query.join(Round).filter(Round.game_id == game.id).with_entities(Round.number, Round.id, func.count(Question.round_id).label("count")).group_by(Round.number, Round.id).all()
     #query che estrapola solo gli id
     rounds = [id for (number, id, count) in grouped_rounds if count == max_questions_per_round]
+    (quizzes, answers, categories) =  get_info_for_multiple(rounds)
+    return (quizzes, answers, categories, users)
+
+#ottiene quiz, risposte, e categorie dei round passati
+#come parametro accetta un array di id di round
+def get_info_for_multiple(rounds):
     if len(rounds) == 0:
         return([], [], [], users)
     #ottiene le domande dei round finiti
@@ -361,7 +367,14 @@ def get_closed_round_details(game):
     #TODO: remove this info, and add round.cat_id instead. Categories should be cached on device
     categories = Round.query.filter(Round.id.in_(rounds)).join(Category).with_entities(Category).all()
     quizzes = Quiz.query.join(Question).filter(Question.round_id.in_(rounds)).group_by(Quiz.id).all()
-    return (quizzes, answers, categories, users)
+    return (quizzes, answers, categories)
+#ottiene quiz, risposte, e categoria di un round passato
+#come parametro accetta un id di round
+def get_info_for_single(round_id):
+    (quizzes, answers, categories) = get_info_for_multiple([round_id])
+    if len(categories) == 0:
+        return (quizzes, answers)
+    return (quizzes, answers, categories[0])
 def setRoundNumber(question, number):
     question.round_number = number
     return question

@@ -2,7 +2,7 @@
 from tp.events.utils import EventActions
 from tp.events.decorators import event
 from flask import g
-from tp.game.utils import isRoundEnded
+from tp.game.utils import isRoundEnded, get_info_for_single
 
 @event("round_started", action = EventActions.create, preferences_key = "notification_round")
 def round_started(room, round):
@@ -14,6 +14,11 @@ def round_ended(room, round):
     #check if round is ended for everyone
     globally_ended = isRoundEnded(round)
     data = {"round": round.json, "user": g.user.json, "globally": globally_ended}
+    if globally_ended:
+        (quizzes, answers, category) = get_info_for_single(round.id)
+        data["quizzes"] = quizzes
+        data["answers"] = answers
+        data["category"] = category
     return (room, data)
 
 @event("category_chosen", action = EventActions.create, needs_push = False)
@@ -35,7 +40,7 @@ def score_updated(room, user, score):
     data = {"user": user.json, "score": score}
     return (room, data)
 #TODO: implementare questo evento
-@event("game_finished", action = EventActions.destroy)
+@event("game_ended", action = EventActions.destroy)
 def game_finished(room, game, winner, partecipations):
     data = {"score": score, "winner": winner.json, "partecipations": partecipations}
     return (room, data)

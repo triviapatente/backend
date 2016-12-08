@@ -519,7 +519,12 @@ class GameSocketTestCase(TPAuthTestCase):
         print "#4: Event test: round_ended con globally_ended = true"
         answer(self.opponent_socket, True, self.game_id, round_id, question_id)
         response = self.socket.get_received(1)
+        quizzes = response.json.get("quizzes")
+        answers = response.json.get("answers")
         assert response.json.get("globally") == True
+        assert len(quizzes) == NUMBER_OF_QUESTIONS_PER_ROUND
+        assert len(answers) == len(quizzes) * len(users)
+        assert response.json.get("category")
 
 
         print "#5 Parametri mancanti"
