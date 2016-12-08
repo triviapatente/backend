@@ -233,7 +233,7 @@ def answer(data):
 def round_details(data):
     game = g.models["game"]
     (quizzes, answers, categories, users, partecipations) = get_closed_round_details(game)
-    output = {"answers": answers, "quizzes": quizzes, "categories": categories, "users": users, "game": game}
+    output = {"answers": answers, "quizzes": quizzes, "categories": categories, "users": users, "game": game.json}
     if game.ended:
         output["partecipations"] = partecipations
     return emit("round_details", output)
