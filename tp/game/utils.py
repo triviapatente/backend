@@ -360,7 +360,7 @@ def get_closed_round_details(game):
 #come parametro accetta un array di id di round
 def get_info_for_multiple(rounds):
     if len(rounds) == 0:
-        return([], [], [], users)
+        return([], [], [])
     #ottiene le domande dei round finiti
     answers = Question.query.join(Round).with_entities(Question, Round.number).filter(Question.round_id.in_(rounds)).order_by(Question.round_id.asc(), Question.createdAt).all()
     answers = [setRoundNumber(item, number) for (item, number) in answers]
