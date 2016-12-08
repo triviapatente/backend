@@ -236,4 +236,6 @@ def round_details(data):
     output = {"answers": answers, "quizzes": quizzes, "categories": categories, "users": users}
     if game.ended:
         output["partecipations"] = partecipations
+        output["ended"] = True
+        output["winner_id"] = game.winner_id
     return emit("round_details", output)
