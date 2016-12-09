@@ -35,10 +35,6 @@ def question_answered(room, quiz, correct):
     return (room, data)
 
 #TODO: implementare questo evento
-@event("gamescore_updated", action = EventActions.update, needs_push = False)
-def score_updated(room, user, score):
-    data = {"user": user.json, "score": score}
-    return (room, data)
 #TODO: implementare questo evento
 @event("game_ended", action = EventActions.destroy)
 def game_finished(room, game, winner, partecipations):
