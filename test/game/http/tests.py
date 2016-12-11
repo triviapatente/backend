@@ -55,6 +55,44 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
+    def test_leave_score_decrement(self):
+        opponent_id = self.first_opponent.get("user").get("id")
+        opponent_token = self.first_opponent.get("token")
+        other_opponent_token = self.second_opponent.get("token")
+
+        game_id = new_game(self, opponent_id).json.get("game").get("id")
+        #l'avversario accetta l'invito
+        process_invite(self, game_id, True, opponent_token)
+        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
+        self.socket.get_received()
+        #per intercettare e rendere 'innocuo' l'evento di creazione del game
+        self.first_opponent_socket.get_received()
+
+        print "#1: Il game non esiste"
+        response = leave_score_decrement(self, 200)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#2: Non appartengo al game"
+        other_game_id = new_game(self, opponent_id, token = other_opponent_token).json.get("game").get("id")
+        #per intercettare e rendere 'innocuo' l'evento di creazione del game
+        self.first_opponent_socket.get_received()
+
+        response = leave_score_decrement(self, other_game_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
+
+        print "#3: Parametri mancanti"
+        print "#3: game_id"
+        response = leave_score_decrement(self, None)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
+
+        print "#4: Ottengo correttamente il mio score decrement"
+        response = leave_score_decrement(self, game_id)
+        assert response.json.get("success") == True
+        assert response.json.get("decrement") is not None
+
     def test_leave_game(self):
         opponent_id = self.first_opponent.get("user").get("id")
         opponent_token = self.first_opponent.get("token")

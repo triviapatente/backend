@@ -8,7 +8,7 @@ from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
-from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames
+from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
 from tp.base.utils import RoomType
 import events
 game = Blueprint("game", __name__, url_prefix = "/game")
@@ -23,7 +23,7 @@ def welcome():
 #creazione della partita
 @game.route("/new", methods = ["POST"])
 @auth_required
-# @need_values("POST", "number_of_players")
+# @needs_values("POST", "number_of_players")
 @fetch_models(opponent = User)
 def newGame():
     opponent = g.models["opponent"]
@@ -34,6 +34,18 @@ def newGame():
         return jsonify(success = True, game = game, user = opponent)
     else:
         raise ChangeFailed()
+@game.route("/leave/decrement", methods = ["GET"])
+@auth_required
+@needs_values("GET", "game_id")
+@fetch_models(game_id = Game)
+def get_leave_score_decrement():
+    game = g.models["game_id"]
+    user_ids = [u.id for u in getUsersFromGame(game)]
+    #se non appartengo al gioco
+    if g.user.id not in user_ids:
+        raise NotAllowed()
+    decrement = getScoreDecrementForLosing(game)
+    return jsonify(success = True, decrement = decrement)
 
 @game.route("/leave", methods = ["POST"])
 @auth_required

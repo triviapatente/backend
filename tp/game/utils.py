@@ -126,6 +126,18 @@ def updateScore(game):
         return users
     return doTransaction(newScores, **{"users": users, "updateParams": updateParams, "game_id": game.id})
 
+#funzione che ritorna lo score decrement che avrebbe un utente nel game, se lasciasse
+def getScoreDecrementForLosing(game):
+    users = getUsersFromGame(game)
+    opponents = [user for user in users if user.id != g.user.id]
+    #TODO: renderlo multiutente
+    winner = opponents[0]
+    scoreRange = calculateGameRange(game)
+    effectiveResult = getEffectiveResult(g.user, winner)
+    expectedScore = getExpectedScoreForUser(g.user, users, scoreRange)
+    k_factor = getMultiplierFactorForUser(g.user, users)
+    return score_increment(effectiveResult, expectedScore, k_factor)
+
 # funzione che ritorna i record di Partecipation inerenti ad un ##game
 def getPartecipationFromGame(game):
     return Partecipation.query.filter_by(game_id = game.id).all()

@@ -35,6 +35,14 @@ def suggested_users(self, token = None):
         token = self.token
     return self.app.get("/game/users/suggested", token = token)
 
+def leave_score_decrement(self, game_id, token = None):
+    if not token:
+        token = self.token
+    suffix = "?game_id="
+    if game_id:
+        suffix += "%s" % game_id
+    return self.app.get("/game/leave/decrement%s" % suffix, token = token)
+
 def search_user(self, query, token = None):
     if not token:
         token = self.token
