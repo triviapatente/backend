@@ -24,7 +24,7 @@ def createGame(opponents):
         invite = Invite(sender = g.user, receiver = opponent, game = new_game)
         db.session.add(invite)
     db.session.add(new_game)
-    return new_game
+    return (new_game, invite)
 
 def handleInvite(invite):
     invite.accepted = g.post["accepted"]

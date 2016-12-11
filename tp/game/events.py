@@ -34,29 +34,22 @@ def question_answered(room, quiz, correct):
     data = {"correct": correct, "quiz": quiz_json, "user": g.user.json}
     return (room, data)
 
-#TODO: implementare questo evento
-#TODO: implementare questo evento
 @event("game_ended", action = EventActions.destroy)
-def game_finished(room, game, winner, partecipations):
-    data = {"score": score, "winner": winner.json, "partecipations": partecipations}
+def game_ended(room, game, partecipations):
+    data = {"game": game.json, "winner_id": game.winner_id, "partecipations": partecipations}
     return (room, data)
 
 @event("game_left", action = EventActions.game_left)
-def game_left(room, game, winner, partecipations):
-    data = {"game": game.json, "user": g.user.json, "winner": winner.json, "partecipations": partecipations}
+def game_left(room, game, partecipations):
+    data = {"game": game.json, "user_id": g.user.id, "winner_id": game.winner_id, "partecipations": partecipations}
     return (room, data)
 
-@event("new_game", action = EventActions.create, preferences_key = "notification_new_game")
-def new_game(users, game):
-    data = {"game": game.json}
+@event("invite_created", action = EventActions.create, preferences_key = "notification_new_game")
+def invite_created(users, invite):
+    data = {"invite": invite.json}
     return (users, data)
 
-@event("invite_accepted", action = EventActions.update)
-def accept_invite(users, game):
-    data = {"game": game.json, "user": g.user}
-    return (users, data)
-
-@event("invite_refused", action = EventActions.update)
-def refuse_invite(users, game):
-    data = {"game": game.json, "user": g.user}
+@event("invite_processed", action = EventActions.update)
+def invite_processed(users, invite):
+    data = {"accepted": invite.accepted}
     return (users, data)

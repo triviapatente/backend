@@ -140,17 +140,18 @@ class GameSocketTestCase(TPAuthTestCase):
 
         #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
         response = init_round(self.socket, self.game_id)
-        print "Last response:", response.json
         assert response.json.get("ended")
         partecipations = response.json.get("partecipations")
         assert partecipations
+        socket_response = self.opponent_socket.get_received()
+        assert socket_response.json.get("winner_id") == response.json.get("winner_id")
         # controllo che tutti i giocatori abbiano avuto un cambiamento nel punteggio
         for p in partecipations:
             score_inc = p.get("score_increment")
             print "User %s got score increment: %d" % (p.get("user_id"), score_inc)
             assert score_inc != 0
         print "#9.1 draw: no winner"
-        assert response.json.get("winner") == None
+        assert response.json.get("winner_id") == None
 
         print "#9.2 user win"
         #creo una nuova partita
@@ -183,7 +184,7 @@ class GameSocketTestCase(TPAuthTestCase):
             print "User %s got score increment: %d" % (p.get("user_id"), score_inc)
             assert score_inc != 0
         # controllo che abbia vinto user
-        assert response.json.get("winner") == self.user.get("id")
+        assert response.json.get("winner_id") == self.user.get("id")
 
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id).json.get("round").get("id")

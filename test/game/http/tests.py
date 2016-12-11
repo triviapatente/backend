@@ -41,7 +41,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#2 Event Test: l'avversario ha ricevuto l'evento"
         response = self.first_opponent_socket.get_received()
         assert response.json.get("action") == "create"
-        assert response.json.get("game")
+        assert response.json.get("invite")
 
         print "#3: Creazione game con utente inesistente"
         response = new_game(self, 32)
@@ -98,8 +98,8 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = self.first_opponent_socket.get_received()
         assert response.json.get("action") == "game_left"
         assert response.json.get("partecipations")
-        assert response.json.get("game")
-        assert response.json.get("winner")
+        assert response.json.get("user_id")
+        assert response.json.get("winner_id")
 
     def test_random_search(self):
 
@@ -187,12 +187,11 @@ class GameHTTPTestCase(TPAuthTestCase):
         partecipation = Partecipation.query.filter(Partecipation.user_id == self.user.get("id")).filter(Partecipation.game_id == game_id).first()
         assert partecipation
 
-        print "#1.2: il sender dell'invito riceve l'evento invite_accepted"
+        print "#1.2: il sender dell'invito riceve l'evento invite_processed"
         response = self.socket.get_received()
         assert response.json.get("action") == "update"
-        assert response.json.get("user")
-        assert response.json.get("game")
-        assert response.json.get("name") == "invite_accepted"
+        assert response.json.get("accepted") == True
+        assert response.json.get("name") == "invite_processed"
 
         print "#2: rifiuto l'invito ad un game valido"
         response = process_invite(self, second_game_id, False, opponent_token)
@@ -203,12 +202,11 @@ class GameHTTPTestCase(TPAuthTestCase):
         partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == second_game_id).first()
         assert partecipation is None
 
-        print "#2.2: il sender dell'invito riceve l'evento invite_refused"
+        print "#2.2: il sender dell'invito riceve l'evento invite_processed"
         response = self.socket.get_received()
         assert response.json.get("action") == "update"
-        assert response.json.get("user")
-        assert response.json.get("game")
-        assert response.json.get("name") == "invite_refused"
+        assert response.json.get("accepted") == False
+        assert response.json.get("name") == "invite_processed"
 
         print "#3: accetto/ rifiuto un invito già accettato (o rifiutato eventualmente)"
         response = process_invite(self, game_id, False, opponent_token)

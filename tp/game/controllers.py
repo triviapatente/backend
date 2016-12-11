@@ -27,11 +27,11 @@ def welcome():
 @fetch_models(opponent = User)
 def newGame():
     opponent = g.models["opponent"]
-    output = doTransaction(createGame, **({"opponents": [opponent]}))
-    if output:
-        print "Game %d created." % output.id
-        events.new_game([opponent], output)
-        return jsonify(success = True, game = output, user = opponent)
+    (game, invite) = doTransaction(createGame, **({"opponents": [opponent]}))
+    if invite and game:
+        print "Game %d created." % game.id
+        events.invite_created([opponent], invite)
+        return jsonify(success = True, game = game, user = opponent)
     else:
         raise ChangeFailed()
 
@@ -62,7 +62,7 @@ def leave_game():
         updateScore(game)
         #ritorno le varie risposte
         partecipations = [p.json for p in getPartecipationFromGame(game)]
-        events.game_left(users, game, opponent, partecipations)
+        events.game_left(users, game, partecipations)
         return jsonify(success = True, ended = True, game = game, winner = opponent, partecipations = partecipations)
     #nessun avversario.. solo io nel gioco
     #NOTE: non dovrebbe succedere mai, in new_game l'opponent è obbligatorio
@@ -97,11 +97,12 @@ def randomSearch():
         print "No opponent found."
         return jsonify(success = False)
     #eseguo la transazione con l'utente trovato
-    output = doTransaction(createGame, opponents = [opponent])
+    (game, invite) = doTransaction(createGame, opponents = [opponent])
     #gestisco l'output
-    if output:
-        print "Game %d created." % output.id, output
-        return jsonify(success = True, game = output, user = opponent)
+    if game and invite:
+        print "Game %d created." % game.id
+        events.invite_created([opponent], invite)
+        return jsonify(success = True, game = game, user = opponent)
     else:
         raise ChangeFailed()
 
@@ -124,14 +125,11 @@ def processInvite(game_id):
         print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
         raise NotAllowed()
     #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
-    output = doTransaction(handleInvite, invite = invite)
-    if output:
-        if output.accepted:
-            events.accept_invite([invite.sender], game)
-        else:
-            events.refuse_invite([invite.sender], game)
-        print "User %s processed invite for game %d:" % (g.user.username, game_id), output
-        return jsonify(success = True, invite = output)
+    invite = doTransaction(handleInvite, invite = invite)
+    if invite:
+        events.invite_processed([invite.sender], invite)
+        print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
+        return jsonify(success = True, invite = invite)
     else:
         raise ChangeFailed()
 
