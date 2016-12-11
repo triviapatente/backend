@@ -3,7 +3,7 @@ from patentati import routines
 from utils import utils
 
 from tp.game.models import Quiz, Image, Category
-
+from shared import shared_map
 baseUrl = ''
 
 # get Categories and puts them into ##session, no commit, ##imgPath where to save images
@@ -20,8 +20,13 @@ def getCategories(session, seed, bUrl, imgPath = '/images'):
     # For each pair category - link
     for name, link in categories.items():
         # Create record
+        name = name.encode("utf-8")
         category = Category(name = name)
-        print 'Saving category: ' + name + '..'
+        infos = shared_map[name]
+        category.id = infos["id"]
+        category.hint = infos["hint"]
+        category.color = infos["color"]
+        print 'Saving category: ' + category.hint + '..'
         session.add(category)
         session.commit()
         #print 'Crawling the above category..'
