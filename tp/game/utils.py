@@ -53,7 +53,7 @@ class Score(Enum):
 # dato il risultato effettivo (##effective), quello previsto (##expected) e il coefficiente (##k)
 # ritorna l'incremento
 def score_increment(effective, expected, k):
-    return k * (effective - expected) + app.config["BONUS_SCORE"]
+    return int(k * (effective - expected) + app.config["BONUS_SCORE"])
 
 # calcola il fattore moltiplicativo per quella data partita, in funzione del numero di partite (##n_games) disputate tra i due giocatori
 # ##friendly_game definisce se la partita è un'amichevole ed influisce sul fattore moltiplicativo
