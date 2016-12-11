@@ -46,7 +46,7 @@ def game_left(room, game, partecipations):
 
 @event("invite_created", action = EventActions.create, preferences_key = "notification_new_game")
 def invite_created(users, invite):
-    data = {"invite": invite.json}
+    data = {"invite": invite.json, "user": g.user}
     return (users, data)
 
 @event("invite_processed", action = EventActions.update)
