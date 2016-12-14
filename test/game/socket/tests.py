@@ -82,7 +82,6 @@ class GameSocketTestCase(TPAuthTestCase):
             question_id = question.get("id")
             #risponde solo self.socket perchè self.opponent_socket è il dealer del round successivo e quindi sta ancora giocando
             answer(self.socket, True, self.game_id, round_id, question_id)
-            self.opponent_socket.get_received() #consumo l'evento question_answered, innescato dalla precedente chiamata a answer
         #quando ri-accedo alla room per continuare con il round successivo mi viene comunicato che l'altro sta ancora giocando
         response = init_round(self.socket, self.game_id)
         self.opponent_socket.get_received() #consumo l'evento round_started, innescato dalla precedente chiamata a init_round
@@ -100,7 +99,7 @@ class GameSocketTestCase(TPAuthTestCase):
         for question in questions:
             question_id = question.get("id")
             answer(self.opponent_socket, True, self.game_id, round_id, question_id)
-            self.socket.get_received() #consumo l'evento question_answered, innescato dalla precedente chiamata a answer
+        self.socket.get_received() #consumo l'evento round_ended
 
         #accedo nuovamente al round con lo stesso giocatore, ma ora è opponent a dover scegliere la categoria
         response = init_round(self.socket, self.game_id)
@@ -263,7 +262,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("category")
 
         print "#4: Event Test: controllo che all'avversario sia arrivato l'evento correttamente"
-        response = self.opponent_socket.get_received() #consumo l'evento question_answered, innescato dalla precedente chiamata a answer
+        response = self.opponent_socket.get_received() #consumo l'evento category_chosen, innescato dalla precedente chiamata a chosen_category
         assert response.json.get("action") == "create"
         assert response.json.get("user")
         assert response.json.get("category")
@@ -402,21 +401,12 @@ class GameSocketTestCase(TPAuthTestCase):
         print "#3.1 la risposta è corretta"
         assert correct_answer
 
-        print "#4 Event Test: arriva l'evento question_answered corretto all'avversario"
-        answer_response = self.opponent_socket.get_received()
-        assert answer_response.json.get("action") == "answer"
-        assert answer_response.json.get("correct") is not None
-        assert answer_response.json.get("quiz")
-        assert answer_response.json.get("user")
-
         print "#5 Event Test: arriva l'evento round_ended corretto all'avversario, quando rispondo a tutte le domande"
         answer(self.socket, True, self.game_id, round_id, questions[1].get("id"))
-        print "###", self.opponent_socket.get_received() #consumo l'evento user_answered
         answer(self.socket, True, self.game_id, round_id, questions[2].get("id"))
-        print "###", self.opponent_socket.get_received() #consumo l'evento user_answered
         answer(self.socket, True, self.game_id, round_id, questions[3].get("id"))
-        #in questo ultimo caso, l'evento round_ended arriva assieme a question_answered, quindi consumando uno consumo anche l'altro
-        round_ended_response = self.opponent_socket.get_received(1)
+        #consumo l'evento round_ended
+        round_ended_response = self.opponent_socket.get_received()
         assert round_ended_response.json.get("action") == "destroy"
         assert round_ended_response.json.get("round").get("id") == round_id
         assert round_ended_response.json.get("user").get("id") == self.user.get("id")
@@ -502,10 +492,8 @@ class GameSocketTestCase(TPAuthTestCase):
         for i in range(0, len(questions)):
             question_id = questions[i].get("id")
             answer(self.socket, True, self.game_id, round_id, question_id)
-            self.opponent_socket.get_received()
             if i != len(questions) - 1:
                 answer(self.opponent_socket, True, self.game_id, round_id, question_id)
-                self.socket.get_received()
 
         response = round_details(self.socket, self.game_id)
         users = response.json.get("users")
@@ -519,7 +507,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#4: Event test: round_ended con globally_ended = true"
         answer(self.opponent_socket, True, self.game_id, round_id, question_id)
-        response = self.socket.get_received(1)
+        response = self.socket.get_received()
         quizzes = response.json.get("quizzes")
         answers = response.json.get("answers")
         assert response.json.get("globally") == True

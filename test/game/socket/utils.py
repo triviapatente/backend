@@ -45,6 +45,3 @@ def generateRound(game_id, *sockets):
         question_id = question.get("id")
         for (socket, socket_answer) in sockets:
             answer(socket, socket_answer, game_id, round_id, question_id)
-            for (opponent, _) in sockets:
-                if opponent != socket:
-                    opponent.get_received() #consumo l'evento question_answered

@@ -221,7 +221,6 @@ def answer(data):
     print "User %s answered to proposed question." % g.user.username, question, answer
     correct = (quiz.answer == question.answer)
     emit("answer", {"success": True, "correct_answer": correct})
-    events.question_answered(g.roomName, quiz, correct)
 
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     number_of_answers = Question.query.filter(Question.round_id == round.id).filter(Question.user_id == g.user.id).count()

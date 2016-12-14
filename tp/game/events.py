@@ -26,14 +26,6 @@ def category_chosen(room, category):
     data = {"category": category.json, "user": g.user.json}
     return (room, data)
 
-@event("question_answered", action = EventActions.answer, needs_push = False)
-def question_answered(room, quiz, correct):
-    #non posso inviare la risposta all'utente!
-    quiz_json = quiz.json
-    del quiz_json["answer"]
-    data = {"correct": correct, "quiz": quiz_json, "user": g.user.json}
-    return (room, data)
-
 @event("game_ended", action = EventActions.destroy)
 def game_ended(room, game, partecipations):
     data = {"game": game.json, "winner_id": game.winner_id, "partecipations": partecipations}
