@@ -331,7 +331,8 @@ def getRecentGames(user):
     #SELECT game.*, my_turn AS my_turn
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
-    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(desc("my_turn"), Game.ended.asc(), Game.createdAt.asc()).limit(10)
+    RECENT_GAMES_PER_PAGE = app.config["RECENT_GAMES_PER_PAGE"]
+    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(Game.ended.asc(), desc("my_turn"), Game.createdAt.desc()).limit(RECENT_GAMES_PER_PAGE)
     output = []
     for g in recent_games:
         game = g[0]
