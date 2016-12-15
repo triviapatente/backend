@@ -214,6 +214,6 @@ def sanitize_last_game_result(users):
 @auth_required
 def search_user():
     query = "%" + g.query.get("query") + "%"
-    matches = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.id != g.user.id).filter(User.username.ilike(query)).all()
+    matches = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.id != g.user.id).filter(User.username.ilike(query)).order_by(User.score.desc()).all()
     output = sanitize_last_game_result(matches)
     return jsonify(success = True, users = output)
