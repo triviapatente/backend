@@ -44,11 +44,9 @@ def init_round(data):
             print "User's score updated."
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
+        winner = User.query.filter(User.id == game.winner_id).first()
         if endedNow:
             events.game_ended(g.roomName, game, partecipations)
-        winner = None
-        if game.winner:
-            winner = game.winner.id
         return emit("init_round", {"success": True, "partecipations": partecipations, "ended": True, "winner_id": winner})
     #controllo il caso in cui si è al round 10, con domande completate, e quindi si fa riferimento all'11, ma la partita non è finita:
     #vuol dire che gli altri utenti devono ancora giocare
