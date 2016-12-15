@@ -352,7 +352,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert len(games) == 6
 
         print "#2.1: Il primo game è quello con il mio turno"
-        assert games[0].get("id") == first_game
+        assert games[0].get("id") == third_game
         assert games[0].get("my_turn") == True
 
         print "#2.2: Il secondo game è il secondo con il mio turno"
@@ -360,15 +360,15 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[1].get("my_turn") == True
 
         print "#2.3: Il terzo game è il terzo con il mio turno"
-        assert games[2].get("id") == third_game
+        assert games[2].get("id") == first_game
         assert games[2].get("my_turn") == True
 
         print "#2.4: Il quarto game è quello con il turno dell'avversario"
-        assert games[3].get("id") == fourth_game
+        assert games[3].get("id") == fifth_game
         assert games[3].get("my_turn") == False
 
         print "#2.5: Il quinto game è il secondo con il turno dell'avversario"
-        assert games[4].get("id") == fifth_game
+        assert games[4].get("id") == fourth_game
         assert games[4].get("my_turn") == False
 
         print "#2.6: Il sesto game è quello finito"

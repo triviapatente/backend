@@ -45,9 +45,12 @@ def init_round(data):
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         winner = User.query.filter(User.id == game.winner_id).first()
+        winner_id = None
+        if winner:
+            winner_id = winner.id
         if endedNow:
             events.game_ended(g.roomName, game, partecipations)
-        return emit("init_round", {"success": True, "partecipations": partecipations, "ended": True, "winner_id": winner})
+        return emit("init_round", {"success": True, "partecipations": partecipations, "ended": True, "winner_id": winner_id})
     #controllo il caso in cui si è al round 10, con domande completate, e quindi si fa riferimento all'11, ma la partita non è finita:
     #vuol dire che gli altri utenti devono ancora giocare
     if next_number > NUMBER_OF_ROUNDS:
