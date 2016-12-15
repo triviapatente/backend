@@ -13,27 +13,31 @@ import events
 @needs_values("SOCKET", "id", "type")
 @filter_input_room
 def join_room_request(data):
+    type = data.get("type")
     join_room(g.roomName)
     print "User %s joined room %s." % (g.user.username, g.roomName)
     emit("join_room", {"success": True})
     events.user_joined(g.roomName)
+    leave_rooms_for(type, g.roomName)
 
 @socketio.on("leave_room")
 @ws_auth_required
-@needs_values("SOCKET", "id", "type")
+@needs_values("SOCKET", "type")
 @filter_input_room
 def leave_room_request(data):
-    #id della room (id del gioco, per esempio)
-    id = data.get("id")
     #tipo di room (room di gioco, per esempio)
     type = data.get("type")
-    #ottengo il nome della stanza
-    name = roomName(id, type)
-    if name in rooms():
-        leave_room(name)
-        events.user_left(name)
-        print "User %s leaved room %s." % (g.user.username, name)
+    leave_rooms_for(type)
     emit("leave_room", {"success": True})
+
+
+#elimina l'utente da tutte le room di un tipo (type), tranne la room di riferimento (actual_room)
+def leave_rooms_for(type, actual_room = None):
+    for name in rooms():
+        if name != actual_room and name.startswith(type):
+            leave_room(name)
+            events.user_left(name)
+            print "User %s left room %s." % (g.user.username, name)
 
 @socketio.on("connect")
 def connect():

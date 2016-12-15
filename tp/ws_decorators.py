@@ -17,7 +17,8 @@ def filter_input_room(f):
         id = params.get("id")
         type = params.get("type")
         output = getUsersFromRoom(type, id, True)
-        if output:
+        #se l'id non è settato, mi viene ritornato un valore diverso da none se la room ha un nome sensato, se l'id è settato invece, mi deve ritornare un array con length > 0
+        if (id is None and output is not None) or output:
             g.roomName = roomName(id, type)
             return f(*args, **kwargs)
         else:

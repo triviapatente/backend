@@ -70,39 +70,29 @@ class BaseSocketTestCase(TPAuthTestCase):
         assert response.json.get("user")
         assert response.json.get("user").get("id") == self.opponent_id
 
-    def test_leave_room(self):
+    def test_leave_rooms(self):
         game_id = self.game.get("id")
         join_room(self.socket, game_id, "game")
 
         print "#1: Mi tolgo da una room in cui sono presente"
-        response = leave_room(self.socket, game_id, "game")
+        response = leave_rooms(self.socket, "game")
         assert response.json.get("success") == True
-
-        print "#2: Mi tolgo da una room in cui non sono presente"
-        response = leave_room(self.socket, game_id, "game")
-        assert response.json.get("success") == True
-
-        print "#3: Mi tolgo da una room di tipo non conosciuto"
-        response = leave_room(self.socket, game_id, "iojererj")
+        print "#2: Mi tolgo da una room di tipo non conosciuto"
+        response = leave_rooms(self.socket, "iojererj")
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 403
 
-        print "#4: Parametri mancanti"
+        print "#3: Parametri mancanti"
 
-        print "#4.1: room type"
-        response = leave_room(self.socket, game_id, None)
+        print "#3.1: room type"
+        response = leave_rooms(self.socket, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
 
-        print "#4.2: room id"
-        response = leave_room(self.socket, None, "game")
-        assert response.json.get("success") == False
-        assert response.json.get("status_code") == 400
-
-        print "#5: Event Test: l'opponent si disiscrive dalla stessa room, mi arriva l'evento di leave"
+        print "#4: Event Test: l'opponent si disiscrive dalla stessa room, mi arriva l'evento di leave"
         join_room(self.opponent_socket, game_id, "game")
         join_room(self.socket, game_id, "game")
-        leave_room(self.opponent_socket, game_id, "game")
+        leave_rooms(self.opponent_socket, "game")
         #ottengo evento
         response = self.socket.get_received()
         assert response.json.get("action") == "left"
