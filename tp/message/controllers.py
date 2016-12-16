@@ -4,6 +4,7 @@ from tp import app, db
 from tp.message.models import *
 from tp.message.utils import *
 from tp.decorators import *
+from datetime import datetime
 
 message = Blueprint("message", __name__, url_prefix = "/message")
 
@@ -15,8 +16,9 @@ def welcome():
 
 @message.route("/list/<int:game_id>", methods = ["GET"])
 @auth_required
-@needs_values("GET", "datetime")
+@needs_values("GET", "timestamp")
 def list(game_id):
-    datetime = g.query.get("datetime")
-    print "User %s got messages from game %d from %s" % (g.user.username, game_id, datetime)
-    return jsonify(messages = getMessages(game_id, datetime))
+    timestamp = g.query.get("timestamp")
+    date = datetime.fromtimestamp(float(timestamp))
+    print "User %s got messages from game %d from %s" % (g.user.username, game_id, date)
+    return jsonify(messages = getMessages(game_id, date))
