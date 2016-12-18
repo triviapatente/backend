@@ -86,3 +86,10 @@ class OldPasswordNotMatching(TPException):
     def __init__(self):
         TPException.__init__(self)
         self.message = "Modifica non consentita: la password attualmente impostata non combacia con quella fornita"
+
+class FBTokenNotValidException(TPException):
+    status_code = 403
+
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "L'autorizzazione con Facebook non è andata a buon fine. Riprova!"

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from flask import request, session, g
-from tp.auth.models import Keychain
+from tp import db
+from tp.auth.social.facebook.utils import FBManager
+from tp.auth.models import *
+from tp.preferences.models import *
 from tp.exceptions import Forbidden
 from tp.game.utils import getInvitesCountFor
 from tp.rank.queries import getUserPosition
@@ -13,6 +16,32 @@ TOKEN_KEY = 'tp-session-token'
 #centralizzata, cosi la si può usare dappertutto
 def tokenFromRequest():
     return request.headers.get(TOKEN_KEY)
+
+def createUser(username, email, name = None, surname = None, birth = None, password = None, image = None):
+    user = User(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
+    db.session.add(user)
+    #creo le preferenze dell'utente (default) e le associo all'utente
+    preferences = Preferences(user = user)
+    db.session.add(preferences)
+    #posso creare il portachiavi dell'utente e associarlo all'utente stesso
+    keychain = Keychain(user = user, lifes = app.config["INITIAL_LIFES"])
+    if password:
+        keychain.hash_password(password)
+    keychain.renew_nonce()
+    db.session.add(keychain)
+    return (user, keychain)
+
+def obtainFacebookToken(user, token, tokenInfos):
+    tokenInstance = FacebookToken.query.filter(FacebookToken.user_id == user.id).first()
+    if tokenInstance:
+        return tokenInstance
+    else: return FacebookToken.getFrom(user, token, tokenInfos)
+def createFBUser(username, email, name, surname, birth, token, tokenInfos):
+    image = FBManager.profileImage(tokenInfos)
+    (user, keychain) = createUser(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
+    tokenInstance = obtainFacebookToken(user, token, tokenInfos)
+    db.session.add(tokenInstance)
+    return (user, keychain)
 
 def authenticate(socket = False):
     #ottengo il token, con la chiamata trovata in app.auth.utils se non parliamo di socket, nella sessione se invece ne parliamo

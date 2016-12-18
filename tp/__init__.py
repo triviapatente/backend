@@ -84,7 +84,7 @@ def init(testing = False, ci = False):
         emit(event, response)
 
 
-    from tp.auth.controllers import auth, account, info
+    from tp.auth.controllers import auth, account, info, fb
     from tp.base.controllers import base
     from tp.game.controllers import game, quiz, category
     from tp.message.controllers import message
@@ -104,6 +104,7 @@ def init(testing = False, ci = False):
     app.register_blueprint(preferences)
     app.register_blueprint(account)
     app.register_blueprint(info)
+    app.register_blueprint(fb)
     app.register_blueprint(shop)
     app.register_blueprint(rank)
     app.register_blueprint(stats)

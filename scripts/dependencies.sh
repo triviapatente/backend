@@ -6,3 +6,4 @@ pip install passlib
 pip install flask-httpauth
 pip install flask-socketio
 pip install validate_email
+pip install facebook-sdk

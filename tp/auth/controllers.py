@@ -7,9 +7,12 @@ from tp.exceptions import *
 from tp.decorators import auth_required, needs_values, needs_values
 from tp.preferences.models import *
 from tp.utils import *
+from tp.auth.utils import createUser, createFBUser, obtainFacebookToken
+from tp.auth.social.facebook.utils import FBManager
 import os
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
+fb = Blueprint("fb", __name__, url_prefix = "/fb")
 account = Blueprint("account", __name__, url_prefix = "/account")
 info = Blueprint("info", __name__, url_prefix = "/info")
 
@@ -54,25 +57,40 @@ def register():
     if u:
         raise AlreadyRegisteredUser(u, username, email)
     #i controlli son passati, posso creare l'utente e salvarlo
-    def createUser():
-        user = User(username = username, email = email)
-        db.session.add(user)
-        #creo le preferenze dell'utente (default) e le associo all'utente
-        preferences = Preferences(user = user)
-        db.session.add(preferences)
-        #posso creare il portachiavi dell'utente e associarlo all'utente stesso
-        keychain = Keychain(user = user, lifes = app.config["INITIAL_LIFES"])
-        keychain.hash_password(password)
-        keychain.renew_nonce()
-        db.session.add(keychain)
-        return (user, keychain)
-
-    output = doTransaction(createUser)
+    output = doTransaction(createUser, username = username, email = email, password = password)
     if output:
         user, keychain = output
         print "User %s has registered." % user.username, user
         return jsonify(user = user, token = keychain.auth_token)
     raise TPException() # trovare exception appropriata
+
+@fb.route("/auth", methods = ["POST"])
+@needs_values("POST", "token")
+def fb_auth():
+    token = g.post.get("token")
+    api = FBManager(token)
+    profile = api.getUserInfos()
+    tokenInfos = api.getTokenInfos()
+
+    email = profile.get("email")
+    first_name = profile.get("first_name")
+    last_name = profile.get("last_name")
+    birth = profile.get("birth_date")
+
+    user = User.query.filter(User.email == email).first()
+    if user:
+        tokenInstance = obtainFacebookToken(user, token, tokenInfos)
+        db.session.add(tokenInstance)
+        db.session.commit()
+        keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
+        return jsonify(user = user, token = keychain.auth_token)
+    else:
+        output = doTransaction(createFBUser, username = first_name + " " + last_name, email = email, birth = birth, name = first_name, surname = last_name, token = token, tokenInfos = tokenInfos)
+        if output:
+            user, keychain = output
+            print "User %s has registered." % user.username, user
+            return jsonify(user = user, token = keychain.auth_token)
+        raise TPException() # trovare exception appropriata
 
 #api che effettua il logout dell'utente
 @auth.route("/logout", methods = ["POST"])

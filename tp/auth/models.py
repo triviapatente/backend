@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from tp import app
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum, Date, BigInteger
 from sqlalchemy.orm import relationship
 from passlib.apps import custom_app_context as pwd_context
 
@@ -12,6 +12,7 @@ from tp.base.models import Base, CommonPK
 from werkzeug.utils import secure_filename
 from validate_email import validate_email
 from sqlalchemy.orm import validates
+from datetime import datetime
 
 import os
 
@@ -30,6 +31,8 @@ class User(Base, CommonPK):
   surname = Column(String)
   #path dell'immagine
   image = Column(String)
+  #data di nascita
+  birth = Column(Date)
   #punteggio di partenza del giocatore
   score = Column(Integer, default = app.config["DEFAULT_USER_SCORE"])
   #partite giocate dal giocatore
@@ -49,21 +52,37 @@ class User(Base, CommonPK):
   def allowed_file(filename):
       return '.' in filename and filename.rsplit('.')[-1] in app.config["ALLOWED_EXTENSIONS"]
 
+class FacebookToken(Base, CommonPK):
+  #utente che possiede il token
+  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, unique = True)
+  user = relationship("User")
+  #id di facebook dell'utente
+  fb_id = Column(BigInteger, nullable = False, unique = True)
+  expiration = Column(Date, nullable = False)
+  token = Column(String, nullable = False)
+
+  @staticmethod
+  def getFrom(user, token, tokenInfos):
+      output = FacebookToken(user_id = user.id)
+      data = tokenInfos["data"]
+      if data["is_valid"] == False:
+          raise FBTokenNotValidException()
+      output.fb_id = data["user_id"]
+      output.expiration = datetime.fromtimestamp(data["expires_at"])
+      output.token = token
+      return output
+
 
 class Keychain(Base, CommonPK):
   #utente che possiede il keychain
-  user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
+  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, unique = True)
   user = relationship("User")
 
   lifes = Column(Integer, nullable = False)
-  #TODO: aggiungere controllo, uno dei due tra password o facebookToken deve essere sempre settato
 
   password = Column(String)
   #nonce per permettere l'invalidazione anticipata del token
   nonce = Column(String)
-
-  #facebookToken dell'utente
-  facebookToken = Column(String)
 
   #TODO: put token inside Installation
   #TODO: il token tiene conto del tempo, e gli serve per calcolare l'expiration
