@@ -10,6 +10,7 @@ from tp.game.utils import getInvitesCountFor
 from tp.rank.queries import getUserPosition
 from tp.stats.queries import getCategoryPercentages
 from tp.preferences.queries import getPreferencesFromUser
+from tp.auth.social.facebook.utils import getFBTokenInfosFromUser
 #chiave associata al token negli header http di ogni richiesta (il valore è deciso qui)
 TOKEN_KEY = 'tp-session-token'
 #chiamata che a partire da una richiesta ritorna il token.
@@ -71,5 +72,6 @@ def get_connection_values(user):
     output["global_rank_position"] = getUserPosition(user)
     output["stats"] = getCategoryPercentages(user)
     output["preferences"] = getPreferencesFromUser(user)
+    output["fb"] = getFBTokenInfosFromUser(user)
     #TODO: add rank on friends
     return output
