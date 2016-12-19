@@ -30,12 +30,14 @@ def createUser(username, email, name = None, surname = None, birth = None, passw
     keychain.renew_nonce()
     db.session.add(keychain)
     return (user, keychain)
-
+#ottengo il record che rappresenta il token facebook dell'utente, e se non lo trovo in db lo creo, con le info passate
 def obtainFacebookToken(user, token, tokenInfos):
     tokenInstance = FacebookToken.query.filter(FacebookToken.user_id == user.id).first()
     if tokenInstance:
         return tokenInstance
     else: return FacebookToken.getFrom(user, token, tokenInfos)
+
+#routine che crea un utente assieme al suo record facebookToken
 def createFBUser(username, email, name, surname, birth, token, tokenInfos):
     image = FBManager.profileImage(tokenInfos)
     (user, keychain) = createUser(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
