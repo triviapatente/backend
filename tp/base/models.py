@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, DateTime, Integer
+from sqlalchemy import Column, DateTime, Integer, BigInteger
 from sqlalchemy.ext.declarative import declared_attr
 
 import json
@@ -77,4 +77,4 @@ class CommonPK(db.Model):
     __abstract__ = True
 
     #questo è l'id, l'elemento che hanno in comune
-    id =  Column(Integer, primary_key = True)
+    id =  Column(BigInteger, primary_key = True)

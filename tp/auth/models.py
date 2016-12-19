@@ -54,7 +54,7 @@ class User(Base, CommonPK):
 
 class FacebookToken(Base, CommonPK):
   #utente che possiede il token
-  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, unique = True)
+  user_id = Column(BigInteger, ForeignKey("user.id"), nullable = False, unique = True)
   user = relationship("User")
   #id di facebook dell'utente
   fb_id = Column(BigInteger, nullable = False, unique = True)
@@ -75,7 +75,7 @@ class FacebookToken(Base, CommonPK):
 
 class Keychain(Base, CommonPK):
   #utente che possiede il keychain
-  user_id = Column(Integer, ForeignKey("user.id"), nullable = False, unique = True)
+  user_id = Column(BigInteger, ForeignKey("user.id"), nullable = False, unique = True)
   user = relationship("User")
 
   lifes = Column(Integer, nullable = False)
