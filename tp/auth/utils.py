@@ -19,7 +19,7 @@ def tokenFromRequest():
     return request.headers.get(TOKEN_KEY)
 
 def createUser(username = None, email = None, name = None, surname = None, birth = None, password = None, image = None):
-    user = User(email = email, name = name, surname = surname, birth = birth, image = image)
+    user = User(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
     if username is None:
         user.generateUsername()
     db.session.add(user)
