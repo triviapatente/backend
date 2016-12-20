@@ -85,7 +85,7 @@ def fb_auth():
         keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
         return jsonify(user = user, token = keychain.auth_token)
     else:
-        output = doTransaction(createFBUser, username = first_name + " " + last_name, email = email, birth = birth, name = first_name, surname = last_name, token = token, tokenInfos = tokenInfos)
+        output = doTransaction(createFBUser, email = email, birth = birth, name = first_name, surname = last_name, token = token, tokenInfos = tokenInfos)
         if output:
             user, keychain = output
             print "User %s has registered." % user.username, user

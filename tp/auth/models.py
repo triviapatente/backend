@@ -47,6 +47,28 @@ class User(Base, CommonPK):
       else:
           return False
 
+  def getUsernameCounter(self, candidate):
+      start = len(candidate)
+      suffix = self.username[start:]
+      if suffix.isdigit():
+          return int(suffix)
+      return None
+
+  def generateUsername(self):
+      if self.name and self.surname:
+          candidate = self.name.lower() + self.surname.lower()
+          matches = User.query.filter(User.username.like(candidate + "%")).order_by(User.username.asc()).all()
+          if len(matches) == 0:
+              self.username = candidate
+          else:
+              counters = [user.getUsernameCounter(candidate) for user in matches]
+              max_counter = max(counters)
+              if max_counter is None:
+                  counter = 1
+              else:
+                  counter = max(counters) + 1
+              self.username = "%s%d" % (candidate, counter)
+
   #proprietà che definisce quando un file è permesso o no
   @staticmethod
   def allowed_file(filename):

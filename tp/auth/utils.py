@@ -18,8 +18,10 @@ TOKEN_KEY = 'tp-session-token'
 def tokenFromRequest():
     return request.headers.get(TOKEN_KEY)
 
-def createUser(username, email, name = None, surname = None, birth = None, password = None, image = None):
-    user = User(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
+def createUser(username = None, email = None, name = None, surname = None, birth = None, password = None, image = None):
+    user = User(email = email, name = name, surname = surname, birth = birth, image = image)
+    if username is None:
+        user.generateUsername()
     db.session.add(user)
     #creo le preferenze dell'utente (default) e le associo all'utente
     preferences = Preferences(user = user)
@@ -43,7 +45,7 @@ def linkUserToFB(profileData, tokenInfos, token):
     #ottengo il token dell'utente (se già registrato)
     fbToken = obtainFacebookToken(g.user, token, tokenInfos)
     tokenData = tokenInfos["data"]
-    fbToken.setExpiration(tokenData["expires_at"]) 
+    fbToken.setExpiration(tokenData["expires_at"])
     db.session.add(fbToken)
     return fbToken
 #ottengo il record che rappresenta il token facebook dell'utente, e se non lo trovo in db lo creo, con le info passate
@@ -54,9 +56,9 @@ def obtainFacebookToken(user, token, tokenInfos):
     else: return FacebookToken.getFrom(user, token, tokenInfos)
 
 #routine che crea un utente assieme al suo record facebookToken
-def createFBUser(username, email, name, surname, birth, token, tokenInfos):
+def createFBUser(username = None, email = None, name = None, surname = None, birth = None, token = None, tokenInfos = None):
     image = FBManager.profileImage(tokenInfos)
-    (user, keychain) = createUser(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
+    (user, keychain) = createUser(email = email, name = name, surname = surname, birth = birth, image = image)
     tokenInstance = obtainFacebookToken(user, token, tokenInfos)
     db.session.add(tokenInstance)
     return (user, keychain)
