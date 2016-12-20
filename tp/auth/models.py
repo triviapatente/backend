@@ -68,9 +68,12 @@ class FacebookToken(Base, CommonPK):
       if data["is_valid"] == False:
           raise FBTokenNotValidException()
       output.fb_id = data["user_id"]
-      output.expiration = datetime.fromtimestamp(data["expires_at"])
+      output.setExpiration(data["expires_at"])
       output.token = token
       return output
+
+  def setExpiration(self, expiration):
+      self.expiration = datetime.fromtimestamp(expiration)
 
 
 class Keychain(Base, CommonPK):

@@ -7,8 +7,8 @@ from tp.exceptions import *
 from tp.decorators import auth_required, needs_values, needs_values
 from tp.preferences.models import *
 from tp.utils import *
-from tp.auth.utils import createUser, createFBUser, obtainFacebookToken
-from tp.auth.social.facebook.utils import FBManager
+from tp.auth.utils import createUser, createFBUser, obtainFacebookToken, linkUserToFB
+from tp.auth.social.facebook.utils import FBManager, getFBTokenInfosFromUser
 import os
 
 auth = Blueprint("auth", __name__, url_prefix = "/auth")
@@ -90,8 +90,22 @@ def fb_auth():
             user, keychain = output
             print "User %s has registered." % user.username, user
             return jsonify(user = user, token = keychain.auth_token)
-        raise TPException() # trovare exception appropriata
+        raise TPException() #TODO: trovare exception appropriata
 
+@fb.route("/link", methods = ["POST"])
+@needs_values("POST", "token")
+@auth_required
+def link_to_fb():
+    token = g.post.get("token")
+    api = FBManager(token)
+    profileData = api.getUserInfos()
+    tokenInfos = api.getTokenInfos()
+    output = doTransaction(linkUserToFB, profileData = profileData, tokenInfos = tokenInfos, token = token)
+    if output:
+        print "User %s has linked its account to Facebook" % g.user.username
+        infos = getFBTokenInfosFromUser(g.user)
+        return jsonify(infos = infos, user = g.user)
+    raise TPException #TODO: trovare exception appropriata
 #api che effettua il logout dell'utente
 @auth.route("/logout", methods = ["POST"])
 @auth_required

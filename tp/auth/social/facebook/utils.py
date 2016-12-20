@@ -21,5 +21,5 @@ def getFBTokenInfosFromUser(user):
     output = {}
     output["has_token"] = token is not None
     if token:
-        output["expiration"] = token.expiration
+        output["expiration"] = token.expiration.isoformat()
     return output

@@ -31,6 +31,21 @@ def createUser(username, email, name = None, surname = None, birth = None, passw
     keychain.renew_nonce()
     db.session.add(keychain)
     return (user, keychain)
+
+def linkUserToFB(profileData, tokenInfos, token):
+    #modifico le informazioni dell'utente con i dati pescati da facebook
+    g.user.birth = profileData.get("birth_date")
+    if not g.user.name:
+        g.user.name = profileData.get("first_name")
+    if not g.user.surname:
+        g.user.surname = profileData.get("last_name")
+    db.session.add(g.user)
+    #ottengo il token dell'utente (se già registrato)
+    fbToken = obtainFacebookToken(g.user, token, tokenInfos)
+    tokenData = tokenInfos["data"]
+    fbToken.setExpiration(tokenData["expires_at"]) 
+    db.session.add(fbToken)
+    return fbToken
 #ottengo il record che rappresenta il token facebook dell'utente, e se non lo trovo in db lo creo, con le info passate
 def obtainFacebookToken(user, token, tokenInfos):
     tokenInstance = FacebookToken.query.filter(FacebookToken.user_id == user.id).first()
