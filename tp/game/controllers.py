@@ -137,7 +137,7 @@ def processInvite(game_id):
         print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
         raise NotAllowed()
     #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
-    invite = doTransaction(handleInvite, invite = invite)
+    invite = doTransaction(handleInvite, invite = invite, game = game)
     if invite:
         events.invite_processed([invite.sender], invite)
         print "User %s processed invite for game %d:" % (g.user.username, game_id), invite

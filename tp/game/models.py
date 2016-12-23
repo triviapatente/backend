@@ -25,6 +25,8 @@ class Game(Base, CommonPK):
   creator = relationship("User", foreign_keys = [creator_id])
   #il gioco è finito?
   ended = Column(Boolean, default = False)
+  #il gioco è iniziato? ovvero tutti gli inviti son stati accettati?
+  started = Column(Boolean, default = False)
 
   export_properties = ["my_turn", "opponent_id", "opponent_username", "opponent_image", "question"]
   #ottiene l'utente avversario all'utente userToExclude e lo inserisce nel modello per la serializzazione

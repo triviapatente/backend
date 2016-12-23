@@ -185,6 +185,13 @@ class GameSocketTestCase(TPAuthTestCase):
         # controllo che abbia vinto user
         assert response.json.get("winner_id") == self.user.get("id")
 
+        print "#10: Creo una partita, e accedo al round senza che l'utente abbia accettato l'invito"
+        self.game = new_game(self, self.opponent_id).json.get("game")
+        join_room(self.socket, self.game.get("id"), RoomType.game.value)
+        response = init_round(self.socket, self.game.get("id"))
+        assert response.json.get("success") == True
+        assert response.json.get("waiting") == "invite"
+
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id).json.get("round").get("id")
         self.opponent_socket.get_received() #consumo l'evento round_started, innescato dalla precedente chiamata a init_round

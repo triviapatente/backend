@@ -31,12 +31,13 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         game = response.json.get("game")
         assert game
+        assert game.get("started") == False
         assert response.json.get("user")
 
-        print "#1.1: Nessuna partecipation è stata creata (vengono aggiunte con l'invito accettato):"
+        print "#1.1: Due partecipation sono state create:"
         game_id = game.get("id")
         partecipations = Partecipation.query.filter(Partecipation.game_id == game_id).all()
-        assert len(partecipations) == 0
+        assert len(partecipations) == 2
 
         print "#2 Event Test: l'avversario ha ricevuto l'evento"
         response = self.first_opponent_socket.get_received()
@@ -219,13 +220,9 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("invite")
 
-        print "#1.1: la mia partecipation viene creata"
-        partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == game_id).first()
-        assert partecipation
-
-        print "#1.1.1: la partecipation del sender viene creata"
-        partecipation = Partecipation.query.filter(Partecipation.user_id == self.user.get("id")).filter(Partecipation.game_id == game_id).first()
-        assert partecipation
+        print "#1.1: il game è segnato come started"
+        game = Game.query.filter(Game.id == game_id).first()
+        assert game.started == True
 
         print "#1.2: il sender dell'invito riceve l'evento invite_processed"
         response = self.socket.get_received()
@@ -237,10 +234,6 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = process_invite(self, second_game_id, False, opponent_token)
         assert response.json.get("success") == True
         assert response.json.get("invite")
-
-        print "#2.1: la mia partecipation non viene creata"
-        partecipation = Partecipation.query.filter(Partecipation.user_id == opponent_id).filter(Partecipation.game_id == second_game_id).first()
-        assert partecipation is None
 
         print "#2.2: il sender dell'invito riceve l'evento invite_processed"
         response = self.socket.get_received()

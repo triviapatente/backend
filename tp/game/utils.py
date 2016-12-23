@@ -23,19 +23,18 @@ def createGame(opponents):
         #TODO: gestire la logica per mandare le notifiche push a chi di dovere
         invite = Invite(sender = g.user, receiver = opponent, game = new_game)
         db.session.add(invite)
+        p = Partecipation(user = opponent)
+        new_game.users.append(p)
+    p = Partecipation(user = g.user)
+    new_game.users.append(p)
     db.session.add(new_game)
     return (new_game, invite)
 
-def handleInvite(invite):
+def handleInvite(invite, game):
     invite.accepted = g.post["accepted"]
     if strtobool(invite.accepted) == True:
-        ownerPartecipation = Partecipation.query.filter(Partecipation.game_id == invite.game_id).filter(Partecipation.user_id == invite.sender_id).first()
-        #se non è gia stato aggiunto, aggiungo l'owner
-        if not ownerPartecipation:
-            ownerPartecipation = Partecipation(game_id = invite.game_id, user_id = invite.sender_id)
-            db.session.add(ownerPartecipation)
-        myPartecipation = Partecipation(game_id = invite.game_id, user_id = g.user.id)
-        db.session.add(myPartecipation)
+        game.started = True
+        db.session.add(game)
     db.session.add(invite)
     return invite
 
@@ -255,7 +254,7 @@ def getNumberOfActiveGames(users):
     # devo considerare solo i giocatori in ##users
     users_usernames = [user.username for user in users]
     # ottengo una lista di tuple (username, games_count)
-    players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(Partecipation).join(Game).filter(Partecipation.user_id == User.id and Game.ended == False).group_by(User.username).all()
+    players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(Partecipation).join(Game).filter(Partecipation.user_id == User.id and Game.ended == False and Game.started == True).group_by(User.username).all()
     # converto la lista di tuple (username, games_count) in un dictionary
     users_games_count = {}
     for e in players_with_games:
@@ -332,7 +331,7 @@ def getRecentGames(user):
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
     RECENT_GAMES_PER_PAGE = app.config["RECENT_GAMES_PER_PAGE"]
-    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(Game.ended.asc(), desc("my_turn"), Game.createdAt.desc()).limit(RECENT_GAMES_PER_PAGE)
+    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(Game.ended.asc(), desc("my_turn"), Game.createdAt.desc())#.limit(RECENT_GAMES_PER_PAGE)
     output = []
     for g in recent_games:
         game = g[0]

@@ -25,6 +25,8 @@ def init_round(data):
     #costanti
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     NUMBER_OF_ROUNDS = app.config["NUMBER_OF_ROUNDS"]
+    if not game.started:
+        return emit("init_round", {"success": True, "waiting": "invite"})
     #round di riferimento in base all'attività precedente dell'utente
     next_number = getNextRoundNumber(game)
     #round precedente a quello di riferimento
