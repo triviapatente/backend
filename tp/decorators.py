@@ -3,6 +3,7 @@
 from flask import g, request, session
 from functools import wraps
 from tp import db
+from time import time
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
@@ -17,6 +18,16 @@ def auth_required(f):
         authenticate()
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         return f(*args, **kwargs)
+    return decorated_function
+
+def track_time(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        start_time = time()
+        output = f(*args, **kwargs)
+        elapsed_time = time() - start_time
+        print "[%s] Elapsed time: %f" % (f.__name__, elapsed_time)
+        return output
     return decorated_function
 
 #decorator che serve per controllare prima di un api call se esistono i parametri passati come argomento

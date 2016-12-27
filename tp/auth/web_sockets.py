@@ -6,12 +6,13 @@ from flask_socketio import emit, disconnect
 from models import Keychain
 from tp import db
 from tp.events.models import Socket
-from tp.decorators import needs_values
+from tp.decorators import needs_values, track_time
 from tp.ws_decorators import ws_auth_required
 from utils import get_connection_values
 
 @socketio.on("auth")
 @needs_values("SOCKET", "token")
+@track_time
 def authenticate(data):
     token = g.params["token"]
     g.user = Keychain.verify_auth_token(token)
@@ -30,7 +31,7 @@ def authenticate(data):
     output["success"] = g.user != None
     emit("auth", output)
 
-#TODO: rimuovere socket entry in logout e anche in disconnessione 
+#TODO: rimuovere socket entry in logout e anche in disconnessione
 
 @socketio.on("logout")
 @ws_auth_required
