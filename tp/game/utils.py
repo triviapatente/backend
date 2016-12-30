@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tp import app, db
+from tp import app, db, socketio
 from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz, Category
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
@@ -353,10 +353,18 @@ def getNextRoundNumber(game):
             return prev_round.number
     return 1
 
-#TODO: change to verify that i'm in the room of the game
 def isOpponentOnline(game):
-    opponent = User.query.join(Partecipation).filter(Partecipation.game_id == game.id, Partecipation.user_id != g.user.id).first()
-    return Socket.query.filter(Socket.user_id == opponent.id).first() is not None
+    opponent = User.query.join(Partecipation).filter(Partecipation.game_id == game.id).filter(User.id != g.user.id).first()
+    return isUserOnline(game, opponent)
+
+def isUserOnline(game, user):
+    socket = Socket.query.filter(Socket.user_id == user.id).first()
+    if not socket:
+        #l'utente non è connesso al socket
+        return False
+    room = roomName(game.id, "game")
+    rooms = socketio.server.rooms(socket.socket_id)
+    return room in rooms
 
 def get_closed_round_details(game):
     users = getUsersFromGame(game)

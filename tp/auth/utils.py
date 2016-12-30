@@ -63,7 +63,7 @@ def createFBUser(username = None, email = None, name = None, surname = None, bir
     db.session.add(tokenInstance)
     return (user, keychain)
 
-def authenticate(socket = False):
+def getUserFromRequest(socket = False):
     #ottengo il token, con la chiamata trovata in app.auth.utils se non parliamo di socket, nella sessione se invece ne parliamo
     if socket:
         token = session.get("token")
@@ -71,7 +71,10 @@ def authenticate(socket = False):
         token = tokenFromRequest()
     print "Got token from request: %s." % token
     #provo a verificare il token e vedere se riesco a ottenere l'user
-    user = Keychain.verify_auth_token(token)
+    return  Keychain.verify_auth_token(token)
+    
+def authenticate(socket = False):
+    user = getUserFromRequest(socket)
     #se non lo ottengo vuol dire che il token non è verificato
     if user is None:
         print "No user associated with token, forbidden!"

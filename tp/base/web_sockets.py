@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from flask import g, request
-from tp import socketio
+from tp import socketio, db
 from tp.ws_decorators import ws_auth_required, filter_input_room
 from tp.base.utils import roomName
+from tp.auth.utils import getUserFromRequest
+from tp.events.models import Socket
 from tp.decorators import needs_values
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
@@ -42,3 +44,14 @@ def leave_rooms_for(type, actual_room = None):
 @socketio.on("connect")
 def connect():
     print "Anonymous user just connected."
+
+@socketio.on("disconnect")
+def disconnect():
+    user = getUserFromRequest(socket = True)
+    if user:
+        leave_rooms_for("game")
+        Socket.query.filter(Socket.user_id == user.id).delete()
+        db.session.commit()
+        print "User %s has disconnected" % user.username
+    else:
+        print "Anonymous user has disconnected"

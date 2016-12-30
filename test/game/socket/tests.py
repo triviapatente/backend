@@ -6,9 +6,12 @@ from test.game.http.api import new_game, process_invite, leave_game
 from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_rooms
 from api import *
-from tp.game.models import Round, Question, ProposedCategory, ProposedQuestion
+from tp.game.models import Round, Question, ProposedCategory, ProposedQuestion, Game
+from tp.auth.models import User
+from tp.events.models import Socket
 from tp.base.utils import RoomType
 from tp import db, app
+from tp.game.utils import isUserOnline
 from sqlalchemy.exc import IntegrityError
 from utils import dumb_crawler, generate_random_category, generate_random_question, generateRound
 class GameSocketTestCase(TPAuthTestCase):
@@ -544,3 +547,28 @@ class GameSocketTestCase(TPAuthTestCase):
         response = round_details(self.socket, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
+
+    def test_user_online(self):
+        userInstance = User.query.filter(User.id == self.user.get("id")).one()
+        opponentInstance = User.query.filter(User.id == self.opponent_id).one()
+        gameInstance = Game.query.filter(Game.id == self.game_id).one()
+        print "#1: Io sono online"
+        assert isUserOnline(gameInstance, userInstance) == True
+        print "#2: Il mio opponent è online"
+        assert isUserOnline(gameInstance, opponentInstance) == True
+        print "#3: Il mio opponent esce, ed è offline"
+        leave_rooms(self.opponent_socket, "game")
+        assert isUserOnline(gameInstance, opponentInstance) == False
+        print "#4: Io esco, io sono offline"
+        leave_rooms(self.socket, "game")
+        assert isUserOnline(gameInstance, userInstance) == False
+        print "#5: Mi disconnetto, la mia istanza socket viene eliminata"
+        self.socket.disconnect()
+        assert Socket.query.filter(Socket.user_id == userInstance.id).count() == 0
+        print "#6: L'avversario si disconnette, l'istanza socket viene eliminata"
+        self.opponent_socket.disconnect()
+        assert Socket.query.filter(Socket.user_id == opponentInstance.id).count() == 0
+        print "#6.1: Ora sono offline"
+        assert isUserOnline(gameInstance, userInstance) == False
+        print "#6.2: L'avversario è offline"
+        assert isUserOnline(gameInstance, opponentInstance) == False
