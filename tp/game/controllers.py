@@ -148,6 +148,9 @@ def processInvite(game_id):
 @game.route("/recents", methods = ["GET"])
 @auth_required
 def recent_games():
+    #timestamp = g.query.get("timestamp")
+    #if timestamp:
+    #    date = datetime.fromtimestamp(float(timestamp))
     recent_games = getRecentGames(g.user)
     return jsonify(success = True, recent_games = recent_games)
 
