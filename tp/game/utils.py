@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db, socketio
-from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz, Category
+from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz, Category, ProposedQuestion
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
@@ -374,39 +374,35 @@ def isUserOnline(game, user):
     rooms = socketio.server.rooms(socket.socket_id)
     return room in rooms
 
-def get_closed_round_details(game):
-    users = getUsersFromGame(game)
-    #ho bisogno del dato solo se il gioco è finito
-    partecipations = None
-    if game.ended:
-        partecipations = getPartecipationFromGame(game)
-    max_questions_per_round = getMaxQuestionNumberFrom(game)
-    #query che ottiene i round completati
-    grouped_rounds = Question.query.join(Round).filter(Round.game_id == game.id).with_entities(Round.number, Round.id, func.count(Question.round_id).label("count")).group_by(Round.number, Round.id).all()
-    #query che estrapola solo gli id
-    rounds = [id for (number, id, count) in grouped_rounds if count == max_questions_per_round]
-    (quizzes, answers, categories) =  get_info_for_multiple(rounds)
-    return (quizzes, answers, categories, users, partecipations)
+def getRoundInfosTill(round_number, game):
+    output = Round.query.join(Category).with_entities(Round, Category).filter(Round.number <= round_number).filter(Round.game_id == game.id).all()
+    rounds = []
+    categories = []
+    for (round, category) in output:
+        rounds.append(round)
+        categories.append(category)
+    return (rounds, categories)
 
-#ottiene quiz, risposte, e categorie dei round passati
-#come parametro accetta un array di id di round
-def get_info_for_multiple(rounds):
-    if len(rounds) == 0:
-        return([], [], [])
-    #ottiene le domande dei round finiti
-    answers = Question.query.join(Round).with_entities(Question, Round.number).filter(Question.round_id.in_(rounds)).order_by(Question.round_id.asc(), Question.createdAt).all()
-    answers = [setRoundNumber(item, number) for (item, number) in answers]
-    #TODO: remove this info, and add round.cat_id instead. Categories should be cached on device
-    categories = Round.query.filter(Round.id.in_(rounds)).join(Category).with_entities(Category).all()
-    quizzes = Quiz.query.join(Question).filter(Question.round_id.in_(rounds)).group_by(Quiz.id).all()
-    return (quizzes, answers, categories)
-#ottiene quiz, risposte, e categoria di un round passato
-#come parametro accetta un id di round
-def get_info_for_single(round_id):
-    (quizzes, answers, categories) = get_info_for_multiple([round_id])
-    if len(categories) == 0:
-        return (quizzes, answers)
-    return (quizzes, answers, categories[0])
+def getMyAnswersTill(round_number, game):
+    output = Question.query.join(Quiz).with_entities(Question, Quiz.answer).filter(Question.user_id == g.user.id).join(Round).filter(Round.game_id == game.id).filter(Round.number <= round_number).all()
+    return [setRealAnswer(question, correct) for (question, correct) in output]
+
+def getOpponentsAnswersAt(quiz_ids, game):
+    output = Question.query.join(Quiz).with_entities(Question, Quiz.answer).filter(Question.quiz_id.in_(quiz_ids)).filter(Question.user_id != g.user.id).join(Round).filter(Round.game_id == game.id).all()
+    return [setRealAnswer(question, answer) for (question, answer) in output]
+
+def setRealAnswer(question, answer):
+    question.correct = (answer == question.answer)
+    return question
+
+#TODO: rimuovere answer dai quiz a cui non ho ancora risposto
+def getQuizzesTill(round_number, game):
+    return Quiz.query.join(ProposedQuestion).join(Round).filter(Round.number <= round_number).filter(Round.game_id == game.id).all()
+
+def get_round_infos(round_id):
+    category = Category.query.join(Round).filter(Round.id == round_id).first()
+    quizzes = Quiz.query.join(Question).filter(Question.round_id == round_id).group_by(Quiz.id).all()
+    return (quizzes, category)
 def setRoundNumber(question, number):
     question.round_number = number
     return question

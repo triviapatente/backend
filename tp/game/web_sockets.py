@@ -3,7 +3,7 @@ from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
-from tp.game.utils import get_closed_round_details, getScoreIncrementForWinning, get_dealer, getNextRoundNumber, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner, numberOfAnswersFor, isOpponentOnline
+from tp.game.utils import *
 from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
 from tp.decorators import needs_values, fetch_models
@@ -103,9 +103,6 @@ def init_round(data):
     #TODO informazione ridondante, rimuoverla quando avremo il db lato client (in tal caso basterà l'id della categoria, che è messo nel round)
     output["category"] = Category.query.filter(Category.id == round.cat_id).first()
     emit("init_round", output)
-    #se è stato creato un nuovo round, mando l'evento
-    if need_new_round:
-        events.round_started(g.roomName, round)
 
 
 @socketio.on("get_categories")
@@ -229,6 +226,7 @@ def answer(data):
     emit("answer", {"success": True, "correct_answer": correct})
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
         events.round_ended(g.roomName, round)
+    events.user_answered(g.roomName, question, quiz)
 
 @socketio.on("round_details")
 @ws_auth_required
@@ -237,9 +235,25 @@ def answer(data):
 @check_in_room(RoomType.game, "game")
 def round_details(data):
     game = g.models["game"]
-    (quizzes, answers, categories, users, partecipations) = get_closed_round_details(game)
-    output = {"answers": answers, "quizzes": quizzes, "categories": categories, "users": users, "game": game.json}
+    #ottengo i round a cui ho partecipato (quelli che ho chiuso e quelli a cui non ho ancora finito di giocare), con le relative categorie
+    last_round_number = getNextRoundNumber(game)
+    (rounds, categories) = getRoundInfosTill(last_round_number, game)
+    #ottengo gli id dei round a cui ho giocato
+    round_ids = [round.id for round in rounds]
+    my_answers = getMyAnswersTill(last_round_number, game)
+    quiz_ids = [answer.quiz_id for answer in my_answers]
+    opponents_answers = getOpponentsAnswersAt(quiz_ids, game)
+    answers = my_answers + opponents_answers
+    output = {"answers": answers, "categories": categories, "game": game.json}
+    #ottengo i quiz dei round in cui ho giocato
+    output["quizzes"] = quizzes = getQuizzesTill(last_round_number, game)
+    #ottengo gli utenti del gioco
+    output["users"] = getUsersFromGame(game)
+    #se il gioco è completato
     if game.ended:
-        output["partecipations"] = partecipations
-    output["score_increment"] = getScoreIncrementForWinning(game)
+        #ottengo i risultati del gioco
+        output["partecipations"] = getPartecipationFromGame(game)
+    else:
+        #ottengo il punteggio che otterrei se vincessi
+        output["score_increment"] = getScoreIncrementForWinning(game)
     return emit("round_details", output)

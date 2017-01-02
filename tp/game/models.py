@@ -85,7 +85,7 @@ class Question(Base):
 
   round_id = Column(BigInteger, ForeignKey("round.id"), nullable = False, primary_key = True)
   user_id = Column(BigInteger, ForeignKey("user.id"), nullable = False, primary_key = True)
-  export_properties = ["round_number"]
+  export_properties = ["round_number", "correct"]
 
 class Invite(Base):
     #il game a cui sei stato invitato
