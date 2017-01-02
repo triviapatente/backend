@@ -47,10 +47,10 @@ def connect():
 
 @socketio.on("disconnect")
 def disconnect():
-    user = getUserFromRequest(socket = True)
-    if user:
+    g.user = getUserFromRequest(socket = True)
+    if g.user:
         leave_rooms_for("game")
-        Socket.query.filter(Socket.user_id == user.id).delete()
+        Socket.query.filter(Socket.user_id == g.user.id).delete()
         db.session.commit()
         print "User %s has disconnected" % user.username
     else:
