@@ -52,6 +52,6 @@ def disconnect():
         leave_rooms_for("game")
         Socket.query.filter(Socket.user_id == g.user.id).delete()
         db.session.commit()
-        print "User %s has disconnected" % user.username
+        print "User %s has disconnected" % g.user.username
     else:
         print "Anonymous user has disconnected"
