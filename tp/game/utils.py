@@ -131,7 +131,7 @@ def getScoreDecrementForLosing(game):
     opponents = [user for user in users if user.id != g.user.id]
     #TODO: renderlo multiutente
     winner = opponents[0]
-    return getScoreChangeWith(game, winner)
+    return getScoreChangeWith(game, users, winner)
 
 #funzione che ritorna lo score increment che avrei io nel game, se vincessi
 def getScoreIncrementForWinning(game):
