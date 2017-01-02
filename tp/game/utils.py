@@ -125,12 +125,20 @@ def updateScore(game):
         return users
     return doTransaction(newScores, **{"users": users, "updateParams": updateParams, "game_id": game.id})
 
-#funzione che ritorna lo score decrement che avrebbe un utente nel game, se lasciasse
+#funzione che ritorna lo score decrement che avrei io nel game, se lasciassi
 def getScoreDecrementForLosing(game):
     users = getUsersFromGame(game)
     opponents = [user for user in users if user.id != g.user.id]
     #TODO: renderlo multiutente
     winner = opponents[0]
+    return getScoreChangeWith(game, winner)
+
+#funzione che ritorna lo score increment che avrei io nel game, se vincessi
+def getScoreIncrementForWinning(game):
+    users = getUsersFromGame(game)
+    return getScoreChangeWith(game, users, g.user)
+#funzione generica che data una partita e un utente generico della stessa, ritorna il cambiamento di punteggio che riceverebbe quell'utente se vincesse
+def getScoreChangeWith(game, users, winner):
     scoreRange = calculateGameRange(game)
     effectiveResult = getEffectiveResult(g.user, winner)
     expectedScore = getExpectedScoreForUser(g.user, users, scoreRange)

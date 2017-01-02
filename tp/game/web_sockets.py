@@ -3,7 +3,7 @@ from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
 from tp.base.utils import roomName
-from tp.game.utils import get_closed_round_details, get_dealer, getNextRoundNumber, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner, numberOfAnswersFor, isOpponentOnline
+from tp.game.utils import get_closed_round_details, getScoreIncrementForWinning, get_dealer, getNextRoundNumber, getUsersFromGame, updateScore, gameEnded, getPartecipationFromGame, setWinner, numberOfAnswersFor, isOpponentOnline
 from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
 from tp.decorators import needs_values, fetch_models
@@ -241,4 +241,5 @@ def round_details(data):
     output = {"answers": answers, "quizzes": quizzes, "categories": categories, "users": users, "game": game.json}
     if game.ended:
         output["partecipations"] = partecipations
+    output["score_increment"] = getScoreIncrementForWinning(game)
     return emit("round_details", output)

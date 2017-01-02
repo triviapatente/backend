@@ -487,10 +487,13 @@ class GameSocketTestCase(TPAuthTestCase):
         quizzes = response.json.get("quizzes")
         answers = response.json.get("answers")
         categories = response.json.get("categories")
+        score_increment = response.json.get("score_increment")
         assert len(users) == 2
         assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 2)
         assert len(answers) == len(quizzes) * len(users)
         assert len(categories) == (len(quizzes) / NUMBER_OF_QUESTIONS_PER_ROUND)
+        assert score_increment is not None
+        assert score_increment > 0
 
         print "#3: Dopo 3 round in cui un utente ha risposto a tutto, l'altro ha risposto a n domande su 4 del 3 (con n < 4), mi vengono ritornate NUMBER_OF_QUESTIONS_PER_ROUND * 2 risposte * 2 utenti"
         round_id = init_round(self.socket, self.game_id).json.get("round").get("id")
