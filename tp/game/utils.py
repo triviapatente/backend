@@ -404,7 +404,7 @@ def manipulateQuiz(quiz, round_id, quiz_ids):
 
 #TODO: rimuovere answer dai quiz a cui non ho ancora risposto
 def getQuizzesTill(round_number, quiz_ids, game):
-    quizzes = Quiz.query.join(ProposedQuestion).with_entities(Quiz, ProposedQuestion.round_id).join(Round).filter(Round.number <= round_number).filter(Round.game_id == game.id).order_by(Quiz.id.asc()).all()
+    quizzes = Quiz.query.join(ProposedQuestion).with_entities(Quiz, ProposedQuestion.round_id).join(Round).filter(Round.number <= round_number).filter(Round.game_id == game.id).order_by(ProposedQuestion.round_id.asc(), Quiz.id.asc()).all()
     quizzes = [manipulateQuiz(q, id, quiz_ids) for (q, id) in quizzes]
     return quizzes
 

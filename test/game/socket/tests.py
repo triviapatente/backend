@@ -332,6 +332,10 @@ class GameSocketTestCase(TPAuthTestCase):
         questions_a = response.json.get("questions")
         assert questions_a
 
+        print "#2.1: Le domande sono ordinate per id"
+        ids = [q.get("id") for q in questions_a]
+        assert ids == sorted(ids)
+
         print "#3: Ottengo correttamente le domande come secondo utente"
         response = get_questions(self.opponent_socket, self.game_id, round_id)
         assert response.json.get("success") == True
@@ -511,7 +515,6 @@ class GameSocketTestCase(TPAuthTestCase):
         quizzes = response.json.get("quizzes")
         answers = response.json.get("answers")
         categories = response.json.get("categories")
-        print len(quizzes), len(answers)
         assert len(users) == 2
         assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 3)
         assert len(answers) == len(quizzes) * len(users) - (NUMBER_OF_QUESTIONS_PER_ROUND - n)
