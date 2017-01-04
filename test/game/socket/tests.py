@@ -523,10 +523,15 @@ class GameSocketTestCase(TPAuthTestCase):
         quizzes = response.json.get("quizzes")
         answers = response.json.get("answers")
         categories = response.json.get("categories")
+        quizzes_length = len(quizzes)
         assert len(users) == 2
-        assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 3)
-        assert len(answers) == len(quizzes) * len(users) - (NUMBER_OF_QUESTIONS_PER_ROUND - n) * 2
-        assert len(categories) == (len(quizzes) / NUMBER_OF_QUESTIONS_PER_ROUND)
+        assert quizzes_length == (NUMBER_OF_QUESTIONS_PER_ROUND * 3)
+        assert len(answers) == quizzes_length * len(users) - (NUMBER_OF_QUESTIONS_PER_ROUND - n) * 2
+        assert len(categories) == (quizzes_length / NUMBER_OF_QUESTIONS_PER_ROUND)
+
+        print "#3.3: All'avversario non vengono ritornate le soluzioni dei quiz non giocati"
+        assert quizzes[quizzes_length - 2].get("answer") is not None
+        assert quizzes[quizzes_length - 1].get("answer") is None
 
         print "#4: Event test: round_ended"
         answer(self.opponent_socket, True, self.game_id, round_id, question_id)

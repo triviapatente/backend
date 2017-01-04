@@ -394,14 +394,19 @@ def getOpponentsAnswersAt(quiz_ids, game):
 def setRealAnswer(question, answer):
     question.correct = (answer == question.answer)
     return question
-def setRoundId(quiz, round_id):
+
+def manipulateQuiz(quiz, round_id, quiz_ids):
     quiz.round_id = round_id
-    return quiz
+    output = quiz.json
+    if not quiz.id in quiz_ids:
+        del output["answer"]
+    return output
 
 #TODO: rimuovere answer dai quiz a cui non ho ancora risposto
-def getQuizzesTill(round_number, game):
+def getQuizzesTill(round_number, quiz_ids, game):
     quizzes = Quiz.query.join(ProposedQuestion).with_entities(Quiz, ProposedQuestion.round_id).join(Round).filter(Round.number <= round_number).filter(Round.game_id == game.id).order_by(Quiz.id.asc()).all()
-    return [setRoundId(q, id) for (q, id) in quizzes]
+    quizzes = [manipulateQuiz(q, id, quiz_ids) for (q, id) in quizzes]
+    return quizzes
 
 def get_round_infos(round_id):
     category = Category.query.join(Round).filter(Round.id == round_id).first()

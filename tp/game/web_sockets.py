@@ -246,7 +246,7 @@ def round_details(data):
     answers = my_answers + opponents_answers
     output = {"answers": answers, "categories": categories, "game": game.json}
     #ottengo i quiz dei round in cui ho giocato
-    output["quizzes"] = getQuizzesTill(last_round_number, game)
+    output["quizzes"] = getQuizzesTill(last_round_number, quiz_ids, game)
     #ottengo gli utenti del gioco
     output["users"] = getUsersFromGame(game)
     #se il gioco è completato
