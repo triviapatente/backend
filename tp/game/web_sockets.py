@@ -2,6 +2,7 @@
 from flask import g, request, json
 from tp import socketio, app, db
 from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
+from tp.decorators import check_game_not_ended
 from tp.base.utils import roomName
 from tp.game.utils import *
 from tp.auth.models import User
@@ -18,6 +19,7 @@ import events
 @ws_auth_required
 @needs_values("SOCKET", "game")
 @fetch_models(game = Game)
+@check_game_not_ended("game")
 @check_in_room(RoomType.game, "game")
 def init_round(data):
     #parametri in input
@@ -110,6 +112,7 @@ def init_round(data):
 @needs_values("SOCKET", "round_id", "game")
 #round id, non round number!!!
 @fetch_models(round_id = Round, game = Game)
+@check_game_not_ended("game")
 @check_in_room(RoomType.game, "game")
 def get_random_categories(data):
     #ottengo i modelli dalla richiesta
@@ -139,6 +142,7 @@ def get_random_categories(data):
 @ws_auth_required
 @needs_values("SOCKET", "category", "game", "round_id")
 @fetch_models(game = Game, round_id = Round, category = Category)
+@check_game_not_ended("game")
 @check_in_room(RoomType.game, "game")
 def choose_category(data):
     #ottengo i modelli
@@ -175,6 +179,7 @@ def choose_category(data):
 @ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
 @fetch_models(round_id = Round, game = Game)
+@check_game_not_ended("game")
 @check_in_room(RoomType.game, "game")
 def get_questions(data):
     #ottengo i modelli dalla richiesta
@@ -200,6 +205,7 @@ def get_questions(data):
 @ws_auth_required
 @needs_values("SOCKET", "answer", "game", "round_id", "quiz_id")
 @fetch_models(game = Game, round_id = Round, quiz_id = Quiz)
+@check_game_not_ended("game")
 @check_in_room(RoomType.game, "game")
 def answer(data):
     #ottengo i modelli

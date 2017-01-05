@@ -9,7 +9,7 @@ from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
 from tp.game.models import Game
 from tp.base.utils import roomName
-from tp.exceptions import MissingParameter, ChangeFailed
+from tp.exceptions import MissingParameter, ChangeFailed, NotAllowed
 #decorator che serve per markare una api call in modo che avvenga un controllo sul token mandato dall'utente prima della sua esecuzione.
 #per metterlo in funzione basterà anteporre @auth_required alla stessa
 def auth_required(f):
@@ -84,6 +84,17 @@ def fetch_models(**keys):
                     missing[key] = id
             if missing:
                 raise MissingParameter(missing)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def check_game_not_ended(key):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            game = g.models[key]
+            if game.ended:
+                raise NotAllowed()
             return f(*args, **kwargs)
         return decorated_function
     return decorator

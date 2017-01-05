@@ -5,7 +5,7 @@ from tp.auth.models import User
 from tp.game.models import *
 from tp.utils import doTransaction
 from sqlalchemy.orm import aliased
-from tp.decorators import auth_required, fetch_models, needs_values
+from tp.decorators import auth_required, fetch_models, needs_values, check_game_not_ended
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
 from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
@@ -38,6 +38,7 @@ def newGame():
 @auth_required
 @needs_values("GET", "game_id")
 @fetch_models(game_id = Game)
+@check_game_not_ended("game_id")
 def get_leave_score_decrement():
     game = g.models["game_id"]
     user_ids = [u.id for u in getUsersFromGame(game)]
@@ -50,6 +51,7 @@ def get_leave_score_decrement():
 @game.route("/leave", methods = ["POST"])
 @auth_required
 @fetch_models(game_id = Game)
+@check_game_not_ended("game_id")
 def leave_game():
     game = g.models["game_id"]
     users = getUsersFromGame(game)

@@ -142,6 +142,16 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("user_id")
         assert response.json.get("winner_id")
 
+        print "#6: Mi ritolgo dallo stesso gioco"
+        response = leave_game(self, game_id)
+        assert response.json.get("status_code") == 403
+        assert response.json.get("success") == False
+
+        print "#7: Una volta uscito, ogni azione mi considera fuori room"
+        response = init_round(self.socket, game_id)
+        assert response.json.get("status_code") == 403
+        assert response.json.get("success") == False
+
     def test_random_search(self):
 
         print "#1: Creazione game"
