@@ -19,7 +19,6 @@ import events
 @ws_auth_required
 @needs_values("SOCKET", "game")
 @fetch_models(game = Game)
-@check_game_not_ended("game")
 @check_in_room(RoomType.game, "game")
 def init_round(data):
     #parametri in input
