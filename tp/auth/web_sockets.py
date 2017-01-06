@@ -20,7 +20,6 @@ def authenticate(data):
     if g.user:
         #assegno il token alla sessione
         session["token"] = token
-        Socket.query.filter(Socket.user_id == g.user.id).filter(Socket.socket_id != request.sid).delete()
         s = Socket.query.filter(Socket.user_id == g.user.id).filter(Socket.socket_id == request.sid).first()
         if not s:
             s = Socket(user_id = g.user.id, socket_id = request.sid)
