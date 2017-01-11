@@ -361,8 +361,22 @@ def getNextRoundNumber(game):
             return prev_round.number
     return 1
 
+def getOpponentFrom(game):
+    return User.query.join(Partecipation).filter(Partecipation.game_id == game.id).filter(User.id != g.user.id).first()
+
+def isMyTurn(game):
+    number = getNextRoundNumber(game)
+    if number > NUMBER_OF_ROUNDS:
+        return None #turno di nessuno, il game è finito
+    round = Round.query.filter(Round.game_id == game.id, Round.number == number).first()
+    if round.dealer_id == g.user.id:
+        return True
+    elif round.cat_id != None:
+        return True
+    return False
+
 def isOpponentOnline(game):
-    opponent = User.query.join(Partecipation).filter(Partecipation.game_id == game.id).filter(User.id != g.user.id).first()
+    opponent = getOpponentFrom(game)
     return isUserOnline(game, opponent)
 
 def isUserOnline(game, user):

@@ -11,6 +11,8 @@ from tp.exceptions import ChangeFailed, NotAllowed
 from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
 from tp.base.utils import RoomType
 import events
+from events import RecentGameEvents
+
 game = Blueprint("game", __name__, url_prefix = "/game")
 quiz = Blueprint("quiz", __name__, url_prefix = "/quiz")
 category = Blueprint("category", __name__, url_prefix = "/category")
@@ -77,6 +79,7 @@ def leave_game():
         #ritorno le varie risposte
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         events.game_left(users, game, partecipations)
+        RecentGameEvents.ended(game = game)
         return jsonify(success = True, ended = True, game = game, winner = opponent, partecipations = partecipations)
     #nessun avversario.. solo io nel gioco
     #NOTE: non dovrebbe succedere mai, in new_game l'opponent è obbligatorio
@@ -142,6 +145,8 @@ def processInvite(game_id):
     invite = doTransaction(handleInvite, invite = invite, game = game)
     if invite:
         events.invite_processed([invite.sender], invite)
+        if invite.accepted:
+            RecentGameEvents.created(game = game)
         print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
         return jsonify(success = True, invite = invite)
     else:

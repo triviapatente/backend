@@ -14,6 +14,7 @@ from tp.base.utils import RoomType
 from tp.exceptions import NotAllowed, ChangeFailed
 from sqlalchemy import func, and_
 import events
+from events import RecentGameEvents
 
 @socketio.on("init_round")
 @ws_auth_required
@@ -45,6 +46,7 @@ def init_round(data):
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
             print "User's score updated."
+            RecentGameEvents.ended(game = game)
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         winner = User.query.filter(User.id == game.winner_id).first()
@@ -57,7 +59,8 @@ def init_round(data):
     #controllo il caso in cui si è al round 10, con domande completate, e quindi si fa riferimento all'11, ma la partita non è finita:
     #vuol dire che gli altri utenti devono ancora giocare
     if next_number > NUMBER_OF_ROUNDS:
-        return emit("init_round", {"success": True, "waiting": "game"})
+        opponent = getOpponentFrom(game)
+        return emit("init_round", {"success": True, "waiting": "game", "waiting_for": opponent})
     #caso in cui ho completato il secondo round (di cui son sicuramente dealer), ma l'avversario è ancora fermo all'1
     if next_number > 3:
         #ottengo gli utenti del match
@@ -65,7 +68,8 @@ def init_round(data):
         #controllo se ci sono risposte non date dagli utenti nel round precedente a quello in cui ho appena giocato
         answered_count = Round.query.filter(Round.number == next_number - 3).filter(Round.game_id == game.id).join(Question).count()
         if answered_count != len(users) * NUMBER_OF_QUESTIONS_PER_ROUND:
-            return emit("init_round", {"success": True, "waiting": "game"})
+            opponent = getOpponentFrom(game)
+            return emit("init_round", {"success": True, "waiting": "game", "waiting_for": opponent})
     #ottengo il round di riferimento
     round = Round.query.filter(Round.game_id == game.id, Round.number == next_number).first()
     need_new_round = round is None
@@ -231,6 +235,9 @@ def answer(data):
     emit("answer", {"success": True, "correct_answer": correct})
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
         events.round_ended(g.roomName, round)
+        my_turn = isMyTurn(game)
+        if my_turn is not None:
+            RecentGameEvents.turn_changed(game, my_turn)
     events.user_answered(g.roomName, question, quiz)
 
 @socketio.on("round_details")
