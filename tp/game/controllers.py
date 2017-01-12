@@ -142,11 +142,13 @@ def processInvite(game_id):
         print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
         raise NotAllowed()
     #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
-    invite = doTransaction(handleInvite, invite = invite, game = game)
+    (invite, game) = doTransaction(handleInvite, invite = invite, game = game)
     if invite:
         events.invite_processed([invite.sender], invite)
-        if invite.accepted:
-            RecentGameEvents.created(game = game)
+        #TODO: fixare... devo ripetere la query perchè dice che il game non è associato a una sessione
+        newGame = Game.query.filter(Game.id == game_id).first()
+        if newGame.started:
+            RecentGameEvents.created(game = newGame)
         print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
         return jsonify(success = True, invite = invite)
     else:

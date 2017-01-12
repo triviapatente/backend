@@ -36,7 +36,7 @@ def handleInvite(invite, game):
         game.started = True
         db.session.add(game)
     db.session.add(invite)
-    return invite
+    return (invite, game)
 
 def last_game_result_query(user_id):
     user_games = Partecipation.query.with_entities(Partecipation.game_id).filter(Partecipation.user_id == g.user.id)

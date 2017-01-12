@@ -45,26 +45,30 @@ def invite_processed(users, invite):
 class RecentGameEvents:
     #Eventi Recent games
     @staticmethod
-    @event("recent_game", action = EventActions.create)
+    @event("recent_game", action = EventActions.create, needs_push = False)
     def created(game, users = None):
         if users is None:
             users = [getOpponentFrom(game)]
-        data = {"game": game}
+        game.getOpponentForExport()
+        game.my_turn = True
+        data = {"game": game.json}
         return (users, data)
 
     @staticmethod
-    @event("recent_game", action = EventActions.update)
+    @event("recent_game", action = EventActions.update, needs_push = False)
     def ended(game, users = None):
         if users is None:
             users = [getOpponentFrom(game)]
-        data = {"game": game}
+        game.getOpponentForExport()
+        data = {"game": game.json}
         return (users, data)
 
     @staticmethod
-    @event("recent_game", action = EventActions.update)
+    @event("recent_game", action = EventActions.update, needs_push = False)
     def turn_changed(game, my_turn, users = None):
         if users is None:
             users = [getOpponentFrom(game)]
         game.my_turn = my_turn
-        data = {"game": game}
+        game.getOpponentForExport()
+        data = {"game": game.json}
         return (users, data)
