@@ -105,7 +105,7 @@ def link_to_fb():
         print "User %s has linked its account to Facebook" % g.user.username
         infos = getFBTokenInfosFromUser(g.user)
         return jsonify(infos = infos, user = g.user)
-    raise TPException #TODO: trovare exception appropriata
+    raise TPException() #TODO: trovare exception appropriata
 #api che effettua il logout dell'utente
 @auth.route("/logout", methods = ["POST"])
 @auth_required
