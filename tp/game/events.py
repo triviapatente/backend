@@ -46,29 +46,26 @@ class RecentGameEvents:
     #Eventi Recent games
     @staticmethod
     @event("recent_game", action = EventActions.create, needs_push = False)
-    def created(game, users = None):
-        if users is None:
-            users = [getOpponentFrom(game)]
-        game.getOpponentForExport()
+    def created(game):
+        opponent = getOpponentFrom(game)
+        game.setOpponent(opponent)
         game.my_turn = True
         data = {"game": game.json}
-        return (users, data)
+        return ([opponent], data)
 
     @staticmethod
     @event("recent_game", action = EventActions.update, needs_push = False)
-    def ended(game, users = None):
-        if users is None:
-            users = [getOpponentFrom(game)]
-        game.getOpponentForExport()
+    def ended(game):
+        opponent = getOpponentFrom(game)
+        game.setOpponent(opponent)
         data = {"game": game.json}
-        return (users, data)
+        return ([opponent], data)
 
     @staticmethod
     @event("recent_game", action = EventActions.update, needs_push = False)
-    def turn_changed(game, my_turn, users = None):
-        if users is None:
-            users = [getOpponentFrom(game)]
+    def turn_changed(game, my_turn):
+        opponent = getOpponentFrom(game)
+        game.setOpponent(opponent)
         game.my_turn = my_turn
-        game.getOpponentForExport()
         data = {"game": game.json}
-        return (users, data)
+        return ([opponent], data)

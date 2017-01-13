@@ -36,12 +36,16 @@ class Game(Base, CommonPK):
           userToExclude = g.user
       opponent = User.query.join(Partecipation).filter(Partecipation.game_id == self.id).filter(Partecipation.user_id != userToExclude.id).first()
       #DEVE esserci, ma controllo lo stesso per sicurezza
+      self.setOpponent(opponent)
+
+  def setOpponent(self, opponent):
       if opponent:
           self.opponent_id = opponent.id
           self.opponent_image = opponent.image
           self.opponent_username = opponent.username
           self.opponent_name = opponent.name
           self.opponent_surname = opponent.surname
+
 
 
 #rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte

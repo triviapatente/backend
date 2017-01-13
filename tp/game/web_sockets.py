@@ -162,6 +162,7 @@ def choose_category(data):
     #se ho già scelto la categoria, non posso più farlo
     if round.cat_id != None:
         raise NotAllowed()
+    previous_opponent_turn = isOpponentTurn(game)
     #aggiorno la categoria e salvo in db
     round.cat_id = category.id
     db.session.add(round)
@@ -173,6 +174,10 @@ def choose_category(data):
         db.session.add(q)
     db.session.commit()
     db.session.commit()
+
+    opponent_turn = isOpponentTurn(game)
+    if opponent_turn != previous_opponent_turn:
+        RecentGameEvents.turn_changed(game, opponent_turn)
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
     emit("choose_category", {"success": True, "category": category})
@@ -235,9 +240,9 @@ def answer(data):
     emit("answer", {"success": True, "correct_answer": correct})
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
         events.round_ended(g.roomName, round)
-        my_turn = isMyTurn(game)
-        if my_turn is not None:
-            RecentGameEvents.turn_changed(game, my_turn)
+        opponent_turn = isOpponentTurn(game)
+        if opponent_turn is not None:
+            RecentGameEvents.turn_changed(game, opponent_turn)
     events.user_answered(g.roomName, question, quiz)
 
 @socketio.on("round_details")

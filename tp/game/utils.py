@@ -349,27 +349,35 @@ def getRecentGames(user):
     return output
 
 #ottiene il numero del round corrente se non è stato ancora completato, altrimenti il successivo
-def getNextRoundNumber(game):
+def getNextRoundNumberFor(game, user):
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     #ottengo l'ultimo round a cui ho giocato
-    prev_round = Round.query.filter(Round.game_id == game.id).join(Question).filter(Question.user_id == g.user.id).order_by(Round.number.desc()).first()
+    prev_round = Round.query.filter(Round.game_id == game.id).join(Question).filter(Question.user_id == user.id).order_by(Round.number.desc()).first()
     if prev_round:
-        number_of_answers = Question.query.filter(Question.round_id == prev_round.id).filter(Question.user_id == g.user.id).count()
+        number_of_answers = Question.query.filter(Question.round_id == prev_round.id).filter(Question.user_id == user.id).count()
         if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
             return prev_round.number + 1
         else:
             return prev_round.number
     return 1
 
+def getNextRoundNumber(game):
+    return getNextRoundNumberFor(game, g.user)
+
 def getOpponentFrom(game):
     return User.query.join(Partecipation).filter(Partecipation.game_id == game.id).filter(User.id != g.user.id).first()
 
-def isMyTurn(game):
-    number = getNextRoundNumber(game)
+def isOpponentTurn(game):
+    opponent = getOpponentFrom(game)
+    return isTurnOf(game, opponent)
+
+def isTurnOf(game, user):
+    number = getNextRoundNumberFor(game, user)
+    NUMBER_OF_ROUNDS = app.config["NUMBER_OF_ROUNDS"]
     if number > NUMBER_OF_ROUNDS:
         return None #turno di nessuno, il game è finito
     round = Round.query.filter(Round.game_id == game.id, Round.number == number).first()
-    if round.dealer_id == g.user.id:
+    if round.dealer_id == user.id:
         return True
     elif round.cat_id != None:
         return True
@@ -382,10 +390,13 @@ def isOpponentOnline(game):
 def isUserOnline(game, user):
     socket = Socket.query.filter(Socket.user_id == user.id).first()
     if not socket:
+        print "isUserOnline: user not connected to socket"
         #l'utente non è connesso al socket
         return False
     room = roomName(game.id, "game")
     rooms = socketio.server.rooms(socket.socket_id)
+    print "rooms", rooms
+    print "isUserOnline: is user in", room, room in rooms
     return room in rooms
 
 def getRoundInfosTill(round_number, game):
