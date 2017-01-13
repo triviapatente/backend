@@ -131,7 +131,7 @@ def init(testing = False, ci = False):
     #The following lines represents migration stuff
     #TODO: use flask-migrate
     from sqlalchemy.schema import CreateTable, DropTable
-    from tp.game.models import Round, Question, Game, Invite, Partecipation
+    from tp.game.models import Round, Question, Game, Partecipation
 
     from sqlalchemy.ext.compiler import compiles
     #this line make droptable to be in cascade mode for postgresql

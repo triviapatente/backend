@@ -27,8 +27,6 @@ def init_round(data):
     #costanti
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     NUMBER_OF_ROUNDS = app.config["NUMBER_OF_ROUNDS"]
-    if not game.started:
-        return emit("init_round", {"success": True, "waiting": "invite"})
     #round di riferimento in base all'attività precedente dell'utente
     next_number = getNextRoundNumber(game)
     #round precedente a quello di riferimento
@@ -175,13 +173,14 @@ def choose_category(data):
     db.session.commit()
     db.session.commit()
 
-    opponent_turn = isOpponentTurn(game)
-    if opponent_turn != previous_opponent_turn:
-        RecentGameEvents.turn_changed(game, opponent_turn)
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
     emit("choose_category", {"success": True, "category": category})
     events.category_chosen(g.roomName, category)
+
+    opponent_turn = isOpponentTurn(game)
+    if opponent_turn != previous_opponent_turn:
+        RecentGameEvents.turn_changed(game, opponent_turn)
 
 @socketio.on("get_questions")
 @ws_auth_required
@@ -219,6 +218,7 @@ def answer(data):
     #ottengo i modelli
     answer = g.params["answer"]
     round = g.models["round_id"]
+    game = g.models["game"]
     quiz = g.models["quiz_id"]
     question = Question.query.filter(Question.round_id == round.id, Question.user_id == g.user.id, Question.quiz_id == quiz.id).first()
     proposedQuestion = ProposedQuestion.query.filter(ProposedQuestion.round_id == round.id).filter(ProposedQuestion.quiz_id == quiz.id).first()

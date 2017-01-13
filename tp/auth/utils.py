@@ -6,7 +6,6 @@ from tp.auth.social.facebook.utils import FBManager
 from tp.auth.models import *
 from tp.preferences.models import *
 from tp.exceptions import Forbidden
-from tp.game.utils import getInvitesCountFor
 from tp.rank.queries import getUserPosition
 from tp.stats.queries import getCategoryPercentages
 from tp.preferences.queries import getPreferencesFromUser
@@ -72,7 +71,7 @@ def getUserFromRequest(socket = False):
     print "Got token from request: %s." % token
     #provo a verificare il token e vedere se riesco a ottenere l'user
     return  Keychain.verify_auth_token(token)
-    
+
 def authenticate(socket = False):
     user = getUserFromRequest(socket)
     #se non lo ottengo vuol dire che il token non è verificato
@@ -88,7 +87,6 @@ def get_connection_values(user):
     if not user:
         return {}
     output = {}
-    output["invites"] = getInvitesCountFor(user)
     output["global_rank_position"] = getUserPosition(user)
     output["stats"] = getCategoryPercentages(user)
     output["preferences"] = getPreferencesFromUser(user)

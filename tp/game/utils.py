@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db, socketio
-from tp.game.models import Game, Round, Invite, Partecipation, Question, Quiz, Category, ProposedQuestion
+from tp.game.models import Game, Round, Partecipation, Question, Quiz, Category, ProposedQuestion
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
@@ -21,22 +21,12 @@ def createGame(opponents):
     #spedisco tutti gli inviti
     for opponent in opponents:
         #TODO: gestire la logica per mandare le notifiche push a chi di dovere
-        invite = Invite(sender = g.user, receiver = opponent, game = new_game)
-        db.session.add(invite)
         p = Partecipation(user = opponent)
         new_game.users.append(p)
     p = Partecipation(user = g.user)
     new_game.users.append(p)
     db.session.add(new_game)
-    return (new_game, invite)
-
-def handleInvite(invite, game):
-    invite.accepted = g.post["accepted"]
-    if strtobool(invite.accepted) == True:
-        game.started = True
-        db.session.add(game)
-    db.session.add(invite)
-    return (invite, game)
+    return new_game
 
 def last_game_result_query(user_id):
     user_games = Partecipation.query.with_entities(Partecipation.game_id).filter(Partecipation.user_id == g.user.id)
@@ -317,9 +307,6 @@ def numberOfAnswersFor(user_id, round_id):
 def getCorrectAnswers(game):
     return User.query.with_entities(User.id.label("user_id"), func.count(Question.answer).label("number_of_correct_answer")).join(Question).join(Quiz, Question.quiz_id == Quiz.id).join(Round, Question.round_id == Round.id).filter(and_(Quiz.answer == Question.answer, Round.game_id == game.id)).group_by(User.id).all()
 
-# metodo che ritorna gli inviti per ##user
-def getInvitesCountFor(user):
-    return Invite.query.filter(Invite.receiver_id == user.id, Invite.accepted == None).count()
 #obtain recent games
 #TODO: add time range
 def getRecentGames(user):

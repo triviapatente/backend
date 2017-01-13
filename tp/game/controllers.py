@@ -8,7 +8,7 @@ from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values, check_game_not_ended
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
-from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, handleInvite, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
+from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
 from tp.base.utils import RoomType
 import events
 from events import RecentGameEvents
@@ -29,10 +29,11 @@ def welcome():
 @fetch_models(opponent = User)
 def newGame():
     opponent = g.models["opponent"]
-    (game, invite) = doTransaction(createGame, **({"opponents": [opponent]}))
-    if invite and game:
+    game = doTransaction(createGame, **({"opponents": [opponent]}))
+    if game:
         print "Game %d created." % game.id
-        events.invite_created([opponent], invite)
+        events.new_game(game)
+        RecentGameEvents.created(game)
         return jsonify(success = True, game = game, user = opponent)
     else:
         raise ChangeFailed()
@@ -47,7 +48,9 @@ def get_leave_score_decrement():
     #se non appartengo al gioco
     if g.user.id not in user_ids:
         raise NotAllowed()
-    decrement = getScoreDecrementForLosing(game)
+    decrement = 0
+    if game.started:
+        decrement = getScoreDecrementForLosing(game)
     return jsonify(success = True, decrement = decrement)
 
 @game.route("/leave", methods = ["POST"])
@@ -114,43 +117,13 @@ def randomSearch():
         print "No opponent found."
         return jsonify(success = False)
     #eseguo la transazione con l'utente trovato
-    (game, invite) = doTransaction(createGame, opponents = [opponent])
+    game = doTransaction(createGame, opponents = [opponent])
     #gestisco l'output
-    if game and invite:
+    if game:
         print "Game %d created." % game.id
-        events.invite_created([opponent], invite)
+        events.new_game(game)
+        RecentGameEvents.created(game)
         return jsonify(success = True, game = game, user = opponent)
-    else:
-        raise ChangeFailed()
-
-@game.route("/invites", methods = ["GET"])
-@auth_required
-def getPendingInvites():
-    invites = Invite.query.with_entities(Invite.game_id, Invite.sender_id, User.name.label("sender_name"), User.surname.label("sender_surname"), User.username.label("sender_username"), User.image.label("sender_image"))
-    invites = invites.filter(Invite.receiver_id == g.user.id, Invite.accepted == None).join(User, Invite.sender_id == User.id).all()
-    print "User %s got pending invites." % g.user.username
-    return jsonify(success = True, invites = invites)
-
-@game.route("/invites/<int:game_id>", methods = ["POST"])
-@needs_values("POST", "accepted")
-@fetch_models(game_id = Game)
-@auth_required
-def processInvite(game_id):
-    invite = Invite.query.filter(Invite.game_id == game_id, Invite.receiver_id == g.user.id, Invite.accepted == None).first()
-    game = g.models["game_id"]
-    if not invite:
-        print "User %s not allowed to process invite for game %d." % (g.user.username, game_id)
-        raise NotAllowed()
-    #TODO: gestire la logica che a un certo punto blocca gli inviti di gioco
-    (invite, game) = doTransaction(handleInvite, invite = invite, game = game)
-    if invite:
-        events.invite_processed([invite.sender], invite)
-        #TODO: fixare... devo ripetere la query perchè dice che il game non è associato a una sessione
-        newGame = Game.query.filter(Game.id == game_id).first()
-        if newGame.started:
-            RecentGameEvents.created(game = newGame)
-        print "User %s processed invite for game %d:" % (g.user.username, game_id), invite
-        return jsonify(success = True, invite = invite)
     else:
         raise ChangeFailed()
 

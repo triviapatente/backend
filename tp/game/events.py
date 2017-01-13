@@ -32,15 +32,11 @@ def game_left(room, game, partecipations):
     data = {"game": game.json, "user_id": g.user.id, "winner_id": game.winner_id, "partecipations": partecipations}
     return (room, data)
 
-@event("invite_created", action = EventActions.create, preferences_key = "notification_new_game")
-def invite_created(users, invite):
-    data = {"invite": invite.json, "user": g.user}
-    return (users, data)
-
-@event("invite_processed", action = EventActions.update)
-def invite_processed(users, invite):
-    data = {"accepted": invite.accepted}
-    return (users, data)
+@event("new_game", action = EventActions.create)
+def new_game(game):
+    opponent = getOpponentFrom(game)
+    data = {"game": game.json, "user": g.user.json}
+    return ([opponent], data)
 
 class RecentGameEvents:
     #Eventi Recent games

@@ -2,7 +2,7 @@
 
 from api import *
 from test.shared import TPAuthTestCase, get_socket_client
-from tp.game.models import Invite, Game, Partecipation
+from tp.game.models import Game, Partecipation
 from test.auth.http.api import register
 from test.auth.socket.api import login
 from test.base.socket.api import join_room
@@ -42,9 +42,8 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#2 Event Test: l'avversario ha ricevuto l'evento"
         response = self.first_opponent_socket.get_received()
         assert response.json.get("action") == "create"
-        assert response.json.get("invite")
         assert response.json.get("user")
-        assert response.json.get("name") == "invite_created"
+        assert response.json.get("name") == "new_game"
 
         print "#3: Creazione game con utente inesistente"
         response = new_game(self, 32)
@@ -62,10 +61,6 @@ class GameHTTPTestCase(TPAuthTestCase):
         other_opponent_token = self.second_opponent.get("token")
 
         game_id = new_game(self, opponent_id).json.get("game").get("id")
-        #l'avversario accetta l'invito
-        process_invite(self, game_id, True, opponent_token)
-        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
-        self.socket.get_received()
         #per intercettare e rendere 'innocuo' l'evento di creazione del game
         self.first_opponent_socket.get_received()
 
@@ -100,10 +95,6 @@ class GameHTTPTestCase(TPAuthTestCase):
         other_opponent_token = self.second_opponent.get("token")
 
         game_id = new_game(self, opponent_id).json.get("game").get("id")
-        #l'avversario accetta l'invito
-        process_invite(self, game_id, True, opponent_token)
-        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
-        self.socket.get_received()
         #per intercettare e rendere 'innocuo' l'evento di creazione del game
         self.first_opponent_socket.get_received()
 
@@ -185,96 +176,6 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         print "Opponents: ", user1.get("username"), user2.get("username"), user3.get("username")
 
-    def test_get_pending_invites(self):
-        #ottengo id e token dell'opponent del quale voglio vedere gli inviti
-        opponent_id = self.first_opponent.get("user").get("id")
-        opponent_token = self.first_opponent.get("token")
-
-        print "#1: Ottengo gli inviti, con 0 inviti"
-        response = get_pending_invites(self, opponent_token)
-        assert response.json.get("success") == True
-        assert len(response.json.get("invites")) == 0
-
-        print "#2: Ottengo gli inviti, con 1 invito"
-        new_game(self, opponent_id)
-        response = get_pending_invites(self, opponent_token)
-        assert response.json.get("success") == True
-        assert len(response.json.get("invites")) == 1
-
-        print "#3: Ottengo gli inviti, con 2 inviti"
-        new_game(self, opponent_id)
-        response = get_pending_invites(self, opponent_token)
-        assert response.json.get("success") == True
-        assert len(response.json.get("invites")) == 2
-
-        print "#4: Ottengo gli inviti, con 3 inviti"
-        new_game(self, opponent_id)
-        response = get_pending_invites(self, opponent_token)
-        assert response.json.get("success") == True
-        assert len(response.json.get("invites")) == 3
-
-    def test_process_invite(self):
-        #ottengo id e token dell'opponent del quale voglio vedere gli inviti
-        opponent_id = self.first_opponent.get("user").get("id")
-        opponent_token = self.first_opponent.get("token")
-        #game in cui partecipo
-        game_id = new_game(self, opponent_id).json.get("game").get("id")
-        second_game_id = new_game(self, opponent_id).json.get("game").get("id")
-        #ottengo l'id di un altro utente
-        other_opponent_id = self.second_opponent.get("user").get("id")
-        #game in cui NON partecipo (ho passato il token di un altro utente come terzo parametro, e quindi la chiamata viene fatta come se fossi quell'utente)
-        foreign_game = new_game(self, other_opponent_id, opponent_token).json.get("game")
-
-        print "#1: accetto un invito di un game valido"
-        response = process_invite(self, game_id, True, opponent_token)
-        assert response.json.get("success") == True
-        assert response.json.get("invite")
-
-        print "#1.1: il game è segnato come started"
-        game = Game.query.filter(Game.id == game_id).first()
-        assert game.started == True
-
-        print "#1.2: il sender dell'invito riceve l'evento invite_processed"
-        response = self.socket.get_received()
-        assert response.json.get("action") == "update"
-        assert response.json.get("accepted") == True
-        assert response.json.get("name") == "invite_processed"
-
-        print "#2: rifiuto l'invito ad un game valido"
-        response = process_invite(self, second_game_id, False, opponent_token)
-        assert response.json.get("success") == True
-        assert response.json.get("invite")
-
-        print "#2.2: il sender dell'invito riceve l'evento invite_processed"
-        response = self.socket.get_received()
-        assert response.json.get("action") == "update"
-        assert response.json.get("accepted") == False
-        assert response.json.get("name") == "invite_processed"
-
-        print "#3: accetto/ rifiuto un invito già accettato (o rifiutato eventualmente)"
-        response = process_invite(self, game_id, False, opponent_token)
-        assert response.json.get("success") == False
-        assert response.json.get("status_code") == 403
-
-        print "#4: accetto/rifiuto un invito di un game inesistente"
-        #Accetto
-        response = process_invite(self, 32423, True, opponent_token, )
-        assert response.json.get("success") == False
-        assert response.json.get("status_code") == 400
-
-        print "#5: accetto/rifiuto un invito di un game a cui non partecipo"
-        #Accetto
-        response = process_invite(self, foreign_game.get("id"), True, opponent_token)
-        assert response.json.get("success") == False
-        assert response.json.get("status_code") == 403
-
-        print "#6: Parametri mancanti"
-        print "#6.1: accept"
-        response = process_invite(self, game_id, None, opponent_token)
-        assert response.json.get("success") == False
-        print response.json.get("status_code")
-        assert response.json.get("status_code") == 400
-
     def prepare_round(self, socket, game):
         print "preparing round for game", game
         round_id = init_round(socket, game).json.get("round").get("id")
@@ -293,9 +194,6 @@ class GameHTTPTestCase(TPAuthTestCase):
         opponent_id = self.first_opponent.get("user").get("id")
         opponent_token = self.first_opponent.get("token")
         id = new_game(self, opponent_id).json.get("game").get("id")
-        process_invite(self, id, True, opponent_token)
-        #per intercettare e rendere 'innocuo' l'evento di accettazione invito
-        self.socket.get_received()
         join_room(self.socket, id, "game")
         join_room(self.first_opponent_socket, id, "game")
         self.socket.get_received()
