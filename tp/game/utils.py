@@ -364,9 +364,8 @@ def isTurnOf(game, user):
     if number > NUMBER_OF_ROUNDS:
         return None #turno di nessuno, il game è finito
     round = Round.query.filter(Round.game_id == game.id, Round.number == number).first()
-    if round.dealer_id == user.id:
-        return True
-    elif round.cat_id != None:
+    #TODO DA VERIFICARE LA CORRETTEZZA
+    if not round or round.dealer_id == user.id or round.cat_id != None:
         return True
     return False
 
