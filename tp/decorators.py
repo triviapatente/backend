@@ -84,7 +84,7 @@ def fetch_models(**keys):
                     missing[key] = id
             if missing:
                 raise MissingParameter(missing)
-            db.session.expunge_all()
+            #db.session.expunge_all() #doesn't fix at all
             return f(*args, **kwargs)
         return decorated_function
     return decorator
