@@ -38,7 +38,9 @@ def init_round(data):
         endedNow = not game.ended
         if endedNow:
             game.ended = True
-            game.winner = setWinner(game)
+            winner = setWinner(game)
+            if winner is not None:
+                game.winner_id = winner.id
             db.session.add(game)
             db.session.commit()
             print "Game %d ended. Updating scores.." % game.id
