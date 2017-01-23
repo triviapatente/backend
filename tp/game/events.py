@@ -22,17 +22,17 @@ def category_chosen(room, category):
     data = {"category": category.json, "user": g.user.json}
     return (room, data)
 
-@event("game_ended", action = EventActions.destroy)
+@event("game", action = EventActions.destroy)
 def game_ended(room, game, partecipations):
     data = {"game": game.json, "winner_id": game.winner_id, "partecipations": partecipations}
     return (room, data)
 
-@event("game_left", action = EventActions.game_left)
+@event("game", action = EventActions.game_left)
 def game_left(room, game, partecipations):
     data = {"game": game.json, "user_id": g.user.id, "winner_id": game.winner_id, "partecipations": partecipations}
     return (room, data)
 
-@event("new_game", action = EventActions.create)
+@event("game", action = EventActions.create)
 def new_game(game):
     opponent = getOpponentFrom(game)
     data = {"game": game.json, "user": g.user.json}
