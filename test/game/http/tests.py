@@ -43,7 +43,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = self.first_opponent_socket.get_received()
         assert response.json.get("action") == "create"
         assert response.json.get("user")
-        assert response.json.get("name") == "new_game"
+        assert response.json.get("name") == "game"
 
         print "#3: Creazione game con utente inesistente"
         response = new_game(self, 32)
