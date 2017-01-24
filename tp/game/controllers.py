@@ -139,7 +139,6 @@ def recent_games():
 @quiz.route("/image/<int:id>", methods = ["GET"])
 def getQuizImage(id):
     image = Image.query.filter(Image.id == id).first()
-    print id, image.id, image.imagePath
     if image:
         return send_file(image.imagePath)
     raise NotAllowed()
@@ -150,7 +149,7 @@ def getCategoryImage(id):
     if category:
         return send_file(category.imagePath)
     raise NotAllowed()
-    
+
 @game.route("/users/suggested", methods = ["GET"])
 @auth_required
 def get_suggested_users():
