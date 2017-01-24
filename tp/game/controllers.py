@@ -146,11 +146,11 @@ def getQuizImage(id):
 
 @category.route("/image/<int:id>", methods = ["GET"])
 def getCategoryImage(id):
-    folder = app.config["QUIZ_IMAGE_FOLDER"]
     category = Category.query.filter(Category.id == id).first()
     if category:
         return send_file(category.imagePath)
     raise NotAllowed()
+    
 @game.route("/users/suggested", methods = ["GET"])
 @auth_required
 def get_suggested_users():
