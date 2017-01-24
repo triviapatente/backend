@@ -34,19 +34,21 @@ def event(name, action, preferences_key = None, needs_push = True):
 
 def send(name, user, data, preferences_key, needs_push):
     sockets = Socket.query.filter(Socket.user_id == user.id).all()
-    if sockets:
-        for socket in sockets:
-            print "[SOCKET EVENT, name = %s, user = %d, sid = %s]" % (name, user.id, socket.socket_id), data
-            socketio.emit(name, data, room = socket.socket_id)
+    for socket in sockets:
+        socketio.emit(name, data, room = socket.socket_id)
+#    if sockets:
+#        for socket in sockets:
+#            print "[SOCKET EVENT, name = %s, user = %d, sid = %s]" % (name, user.id, socket.socket_id), data
+#            socketio.emit(name, data, room = socket.socket_id)
 
-    elif needs_push:
-        if preferences_key:
-            preferences = Preferences.query.filter(Preferences.user_id == user.id).first()
-            if preferences[preferences_key]:
-                print "[PUSH EVENT, name = %s, user = %d]" % (name, user.id), data
-                #TODO: send push
-                pass
-        else:
-            print "[PUSH EVENT, name = %s, user = %d]" % (name, user.id), data
-            #TODO: send push
-            pass
+#    elif needs_push:
+#        if preferences_key:
+#            preferences = Preferences.query.filter(Preferences.user_id == user.id).first()
+#            if preferences[preferences_key]:
+#                print "[PUSH EVENT, name = %s, user = %d]" % (name, user.id), data
+#                #TODO: send push
+#                pass
+#        else:
+#            print "[PUSH EVENT, name = %s, user = %d]" % (name, user.id), data
+#            #TODO: send push
+#            pass
