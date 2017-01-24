@@ -62,7 +62,7 @@ NUMBER_OF_ROUNDS = 10
 QUIZ_IMAGE_FOLDER = "images/"
 CATEGORY_IMAGE_FOLDER = "images/categories/"
 #percorso delle immagini utenti
-UPLOAD_FOLDER = "images/users"
+UPLOAD_FOLDER = "images/users/"
 #numero di risultati mostrati nella classifica italiana
 RESULTS_LIMIT_RANK_ITALY = 10
 #fattore moltiplicativo massimo e minimo
