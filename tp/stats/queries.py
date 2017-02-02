@@ -111,7 +111,6 @@ def getCategoryPercentages(user):
     query = db.session.query(Quiz).outerjoin(a, and_(a.quiz_id == Quiz.id, a.answer == Quiz.answer, a.createdAt == max_created, a.user_id == user.id)).join(Category).with_entities(Category.id, Category.hint, correct_questions, total_questions).order_by(Category.hint).group_by(Category.id, Category.hint)
     output = query.all()
     general = getGeneralInfos()
-    output.insert(0, general)
     categoryPercentages = []
     for (id, hint, correct_answers, total_answers) in output:
         categoryPercentages.append({'id': id, 'hint': hint, 'correct_answers': correct_answers, 'total_answers': total_answers})
