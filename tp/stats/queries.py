@@ -115,4 +115,5 @@ def getCategoryPercentages(user):
     categoryPercentages = []
     for (id, hint, correct_answers, total_answers) in output:
         categoryPercentages.append({'id': id, 'hint': hint, 'correct_answers': correct_answers, 'total_answers': total_answers})
+    output.insert(0, general)
     return categoryPercentages
