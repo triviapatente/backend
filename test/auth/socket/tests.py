@@ -6,6 +6,7 @@ from tp.game.models import Category
 
 class AuthSocketTestCase(TPAuthTestCase):
     def test_login(self):
+        # run dumb crawler
         dumb_crawler()
 
         print "#1: Successful login"
