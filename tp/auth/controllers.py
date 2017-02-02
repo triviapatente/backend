@@ -190,9 +190,12 @@ def changeImage():
 @auth_required
 def getUserImage(id):
     user = User.query.filter(User.id == id).first()
-    if user and user.image:
+    if not user:
+        raise NotAllowed()
+    elif user.image:
         return send_file("../" + user.image)
-    raise NotAllowed()
+    else:
+        return ""
 
 @account.route("/user", methods = ["GET"])
 @auth_required
