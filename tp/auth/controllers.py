@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint, g
+from flask import request, jsonify, Blueprint, g, send_file
 from tp import app, db
 from tp.auth.queries import *
 from tp.auth.models import *
@@ -186,6 +186,16 @@ def changeImage():
         print "User image not allowed."
         raise FormatNotAllowed()
 
+@account.route("/image/<int:id>", methods = ["GET"])
+@auth_required
+def getUserImage(id):
+    user = User.query.filter(User.id == id).first()
+    if not user:
+        raise NotAllowed()
+    elif user.image:
+        return send_file("../" + user.image)
+    else:
+        return ""
 
 @account.route("/user", methods = ["GET"])
 @auth_required

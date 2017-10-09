@@ -137,20 +137,21 @@ def recent_games():
     return jsonify(success = True, recent_games = recent_games)
 
 @quiz.route("/image/<int:id>", methods = ["GET"])
+@auth_required
 def getQuizImage(id):
     image = Image.query.filter(Image.id == id).first()
-    print id, image.id, image.imagePath
     if image:
         return send_file(image.imagePath)
     raise NotAllowed()
 
 @category.route("/image/<int:id>", methods = ["GET"])
+@auth_required
 def getCategoryImage(id):
-    folder = app.config["QUIZ_IMAGE_FOLDER"]
     category = Category.query.filter(Category.id == id).first()
     if category:
         return send_file(category.imagePath)
     raise NotAllowed()
+
 @game.route("/users/suggested", methods = ["GET"])
 @auth_required
 def get_suggested_users():

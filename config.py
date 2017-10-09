@@ -48,8 +48,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 #vite iniziali per utente
 INITIAL_LIFES = 3
 
-#percorso delle immagini utenti
-UPLOAD_FOLDER = "users/images/"
 #estensioni ammesse
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 #numero di categorie proposte per il gioco
@@ -63,6 +61,8 @@ NUMBER_OF_ROUNDS = 10
 #percorso dove vengono salvate le immagini dei quiz
 QUIZ_IMAGE_FOLDER = "images/"
 CATEGORY_IMAGE_FOLDER = "images/categories/"
+#percorso delle immagini utenti
+UPLOAD_FOLDER = "images/users/"
 #numero di risultati mostrati nella classifica italiana
 RESULTS_LIMIT_RANK_ITALY = 10
 #fattore moltiplicativo massimo e minimo
