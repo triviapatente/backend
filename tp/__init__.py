@@ -100,20 +100,20 @@ def init(testing = False, ci = False):
     app.register_blueprint(game)
     app.register_blueprint(quiz)
     app.register_blueprint(category)
-    app.register_blueprint(message)
-    app.register_blueprint(preferences)
+    #app.register_blueprint(message)
+    #app.register_blueprint(preferences)
     app.register_blueprint(account)
-    app.register_blueprint(info)
-    app.register_blueprint(fb)
-    app.register_blueprint(shop)
+    #app.register_blueprint(info)
+    #app.register_blueprint(fb)
+    #app.register_blueprint(shop)
     app.register_blueprint(rank)
-    app.register_blueprint(stats)
+    #app.register_blueprint(stats)
 
 
     # Add websockets
     import tp.auth.web_sockets
     import tp.base.web_sockets
-    import tp.message.web_sockets
+    #import tp.message.web_sockets
     import tp.game.web_sockets
     # Creazione directory per upload users pictures
     import os

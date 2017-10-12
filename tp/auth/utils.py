@@ -88,8 +88,7 @@ def get_connection_values(user):
         return {}
     output = {}
     output["global_rank_position"] = getUserPosition(user)
-    output["stats"] = getCategoryPercentages(user)
-    output["preferences"] = getPreferencesFromUser(user)
-    output["fb"] = getFBTokenInfosFromUser(user)
-    #TODO: add rank on friends
+    #output["stats"] = getCategoryPercentages(user)
+    #output["preferences"] = getPreferencesFromUser(user)
+    #output["fb"] = getFBTokenInfosFromUser(user)
     return output
