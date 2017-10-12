@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint
 from tp import app, db
+from flask import g
 from porting import getJSONModels
-from tp.exceptions import NotAllowed
+from tp.exceptions import NotAllowed, BadParameters
+from tp.decorators import auth_required, needs_values
+from tp.base.models import Feedback
+from sqlalchemy import exc
+
 base = Blueprint("base", __name__, url_prefix = "/ws")
 
-@base.route("/", methods = ["GET"])
+@base.route("/")
 def welcome():
     output = app.config["PUBLIC_INFOS"]
     return jsonify(output)
@@ -17,3 +22,21 @@ def obtainModels():
         raise NotAllowed()
     output = getJSONModels()
     return jsonify(output)
+
+#API usata per intercettare le richieste di contatto degli utenti
+@base.route("/contact/", methods = ["POST"])
+@needs_values("POST", "message", "scope")
+@auth_required
+def contactUs():
+    #ottengo l'input
+    message = g.post.get("message")
+    scope = g.post.get("scope")
+    #inserimento in db
+    feedback = Feedback(user = g.user, message = message, scope = scope)
+    db.session.add(feedback)
+    try:
+        db.session.commit()
+    except exc.SQLAlchemyError:
+        raise BadParameters(["scope"])
+
+    return jsonify(success = True)

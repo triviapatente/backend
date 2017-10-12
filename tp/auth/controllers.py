@@ -4,7 +4,7 @@ from tp import app, db
 from tp.auth.queries import *
 from tp.auth.models import *
 from tp.exceptions import *
-from tp.decorators import auth_required, needs_values, needs_values
+from tp.decorators import auth_required, needs_values
 from tp.preferences.models import *
 from tp.utils import *
 from tp.auth.utils import createUser, createFBUser, obtainFacebookToken, linkUserToFB
