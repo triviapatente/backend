@@ -154,5 +154,5 @@ def init(testing = False, ci = False):
     # This will create the database file using SQLAlchemy
     db.create_all()
 
-    from tp.purchases.models import ShopItem
-    ShopItem.init()
+    #from tp.purchases.models import ShopItem
+    #ShopItem.init()
