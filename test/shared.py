@@ -66,8 +66,11 @@ def fake_request(test_client, fn):
         #faccio l'encode della risposta
         response.data = response.data.encode("utf-8")
         print "Risposta HTTP (url = %s): " % url, response.data
-        #aggiungo il json alla risposta
-        response.json = json.loads(response.data)
+        try:
+            #aggiungo il json alla risposta
+            response.json = json.loads(response.data)
+        except:
+            pass
         return response
     return request
 

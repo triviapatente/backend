@@ -175,6 +175,7 @@ def forgotPasswordWebPageResult():
     #decript token and retrieve user_id
     user = Keychain.verify_auth_token(token, nonce_key = "change_password_nonce")
     success = user is not None
+    status_code = None
     if success:
         #change password of user_id to 'password'
         keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
@@ -182,9 +183,11 @@ def forgotPasswordWebPageResult():
         keychain.renew_change_password_nonce()
         db.session.add(keychain)
         db.session.commit()
-
+        status_code = 200
+    else:
+        status_code = 403
     #return page with confirmation
-    return render_template("forgot_password/result.ejs", success = success)
+    return render_template("forgot_password/result.ejs", success = success), status_code
 
 
 #api(s) per le modifiche

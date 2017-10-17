@@ -34,3 +34,15 @@ def changePassword(self, old, new, token = None):
     if not token:
         token = self.token
     return self.app.post("auth/password/edit", data = {"old_value": old, "new_value": new}, token = token)
+
+def requestNewPassword(self, email):
+    return self.app.post("auth/password/request", data = {"email": email})
+
+def changePasswordWebPage(self, token):
+    suffix = ""
+    if token:
+        suffix = "?token=%s" % token
+    return self.app.get("auth/password/change_from_email%s" % suffix)
+
+def changePasswordWebPageResult(self, token, password):
+    return self.app.post("auth/password/change_from_email", data = {"token": token, "password": password})
