@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint, g, send_file
-from tp import app, db
+from flask import request, jsonify, Blueprint, g, send_file, render_template
+from flask_mail import Message
+from tp import app, db, mail
 from tp.auth.queries import *
 from tp.auth.models import *
 from tp.exceptions import *
@@ -133,6 +134,57 @@ def changePassword():
         db.session.commit()
         return jsonify(token = keychain.auth_token, success = True)
     raise OldPasswordNotMatching()
+
+#richiesta da app per il forgot password. Quando chiamata, provvede a mandare la mail in cui l'utente confermerà che vuole mandare la password
+@auth.route("/password/request", methods = ["POST"])
+@needs_values("POST", "email")
+def requestNewPassword():
+    email = g.post.get("email")
+    #check if email is present in db
+    user = User.query.filter(User.email == email).first()
+    if user is not None:
+        #ottengo l'email_token dell'utente
+        keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
+        token = keychain.change_password_token
+        #if so, send email to the recipient with unique token
+        email = Message(
+            sender = app.config["EMAIL_SENDER"],
+            subject = "Richiesta cambiamento password",
+            recipients = [email]
+        )
+        email.html = render_template("forgot_password/email.ejs", token = token)
+        mail.send(email)
+        return jsonify(success = True)
+    else:
+        raise Forbidden()
+
+#richiesta che viene chiamata quando l'utente preme il bottone 'Cambia password' nella mail. Provvede a mostrare la pagina per cambiare password
+@auth.route("/password/change_from_email", methods = ["GET"])
+@needs_values("GET", "token")
+def forgotPasswordWebPage():
+    token = g.query.get("token")
+    #present web page
+    return render_template("forgot_password/change.ejs", token = token)
+
+#richiesta che viene chiamata quando l'utente cambia effettivamente la password da web. Cambia la password e mostra l'esito
+@auth.route("/password/change_from_email", methods = ["POST"])
+@needs_values("POST", "token", "password")
+def forgotPasswordWebPageResult():
+    password = g.post.get("password")
+    token = g.post.get("token")
+    #decript token and retrieve user_id
+    user = Keychain.verify_auth_token(token, check_nonce = False)
+    success = user is not None
+    if success:
+        #change password of user_id to 'password'
+        keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
+        keychain.hash_password(password)
+        db.session.add(keychain)
+        db.session.commit()
+
+    #return page with confirmation
+    return render_template("forgot_password/result.ejs", success = success)
+
 
 #api(s) per le modifiche
 

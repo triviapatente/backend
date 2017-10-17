@@ -1,0 +1,8 @@
+<!doctype html>
+<title>Richiesta cambiamento password</title>
+<h1>Cambia password</h1>
+<form action="change_from_email" method="POST">
+    <input type="password" name="password" placeholder="Inserisci qui la password"/>
+    <input type="hidden" name="token" value="{{token}}"/>
+    <input type="submit" value="Conferma"/>
+</form>

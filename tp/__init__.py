@@ -4,18 +4,22 @@
 app = None
 socketio = None
 db = None
+mail = None
 
 def init(testing = False, ci = False):
     print "app initialization"
     global app
     global socketio
     global db
+    global mail
 
     # Import flask and template operators
     from flask import Flask, render_template, jsonify, json
 
     # Import SQLAlchemy
     from flask.ext.sqlalchemy import SQLAlchemy
+
+    from flask.ext.mail import Mail
 
     from flask.json import JSONEncoder
 
@@ -56,6 +60,8 @@ def init(testing = False, ci = False):
     # by modules and controllers
     db = SQLAlchemy(app)
     socketio = SocketIO(app, json = json)
+    mail = Mail()
+    mail.init_app(app)
 
     from tp.exceptions import TPException
     from flask import request

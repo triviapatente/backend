@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from tp import app
+import sys
 
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum, Date, BigInteger
 from sqlalchemy.orm import relationship
@@ -120,6 +121,12 @@ class Keychain(Base, CommonPK):
       s = self.getSerializer()
       #critto l'id dell'utente proprietario del keychain e il nonce e ne ottengo un token
       return s.dumps({ 'id': self.user_id, 'nonce': self.nonce})
+  @property
+  def change_password_token(self):
+      #ottengo il serializer
+      s = self.getSerializer()
+      #critto l'id dell'utente proprietario del keychain
+      return s.dumps({ 'id': self.user_id})
 
   #metodo centrale che contiene l'istanza del serializer per generazione e verifica di token
   #muovendolo in un metodo centrale siamo sicuri che la chiave usata per generare/verificare è sempre la stessa
@@ -129,7 +136,7 @@ class Keychain(Base, CommonPK):
 
   #metodo statico che analizza e verifica un token, indicando se la sessione è ancora attiva
   @classmethod
-  def verify_auth_token(self, token):
+  def verify_auth_token(self, token, check_nonce = True):
       #ottengo il serializer
       s = self.getSerializer()
       user = None
@@ -138,7 +145,7 @@ class Keychain(Base, CommonPK):
           data = s.loads(token)
           user = User.query.get(data['id'])
           #vedo se il token non è scaduto (controllo il nonce)
-          if Keychain.query.filter_by(user_id = user.id).first().nonce != data['nonce']:
+          if check_nonce and Keychain.query.filter_by(user_id = user.id).first().nonce != data['nonce']:
               # se lo è setto l'utente a None
               user = None
       #se non riesco ritorno None

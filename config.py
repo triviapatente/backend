@@ -39,6 +39,17 @@ PUBLIC_INFOS = {
     "webservice type": "REST",
     "last_run": datetime.now(pytz.utc)
 }
+#mail config
+#NOTE: temporaneo, quando compriamo il dominio è da cambiare
+EMAIL_SENDER = "support@triviapatente.it"
+MAIL_SERVER = "smtp.gmail.com"
+MAIL_PORT = 465
+MAIL_USE_SSL = True
+#MAIL_USE_TLS : default False
+#MAIL_DEBUG : default app.debug
+MAIL_USERNAME = "triviapatente@gmail.com"
+MAIL_PASSWORD = "TriviaPatente1"
+
 INIT_DB = False
 TRAP_BAD_REQUEST_ERRORS = DEBUG
 DEFAULT_USER_SCORE = 800
@@ -64,7 +75,7 @@ CATEGORY_IMAGE_FOLDER = "images/categories/"
 #percorso delle immagini utenti
 UPLOAD_FOLDER = "images/users/"
 #numero di risultati mostrati nella classifica italiana
-RESULTS_LIMIT_RANK_ITALY = 10
+RESULTS_LIMIT_RANK_ITALY = 20
 #fattore moltiplicativo massimo e minimo
 MAX_MULTIPLIER_FACTOR = 100
 MIN_MULTIPLIER_FACTOR = 32
