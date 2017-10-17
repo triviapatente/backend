@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, g, jsonify, request
 from tp.decorators import auth_required, needs_values
 from tp.exceptions import BadParameters
 from tp.rank.queries import *
@@ -15,9 +15,8 @@ def getItalianRank():
     thresold = None
     direction = None
     #ottengo i parametri, se ci sono
-    if hasattr(g, "query"):
-        thresold = g.query["thresold"]
-        direction = g.query["direction"]
+    thresold = request.args.get("thresold")
+    direction = request.args.get("direction")
     #se non ci sono informazioni paginazione, ritorno la classifica localizzata attorno alla posizione dell'utente
     if not thresold and not direction:
         rank = getRank()
@@ -25,7 +24,7 @@ def getItalianRank():
     elif thresold is None:
         raise BadParameters(["thresold"])
     #se invece ci sono info di paginazione, ma solo il thresold oppure la direction è sbagliata, fallisco
-    elif direction is None or not re.match(r'up|down', direction):
+    elif direction is None or re.match(r'up|down', direction) is None:
         raise BadParameters(["direction"])
     #se ci sono corrette info di paginazione, avvio una query paginata
     else:
