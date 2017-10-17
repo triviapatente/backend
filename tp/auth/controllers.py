@@ -173,12 +173,13 @@ def forgotPasswordWebPageResult():
     password = g.post.get("password")
     token = g.post.get("token")
     #decript token and retrieve user_id
-    user = Keychain.verify_auth_token(token, check_nonce = False)
+    user = Keychain.verify_auth_token(token, nonce_key = "change_password_nonce")
     success = user is not None
     if success:
         #change password of user_id to 'password'
         keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
         keychain.hash_password(password)
+        keychain.renew_change_password_nonce()
         db.session.add(keychain)
         db.session.commit()
 

@@ -109,6 +109,8 @@ class Keychain(Base, CommonPK):
   password = Column(String)
   #nonce per permettere l'invalidazione anticipata del token
   nonce = Column(String)
+  #nonce che permette di invalidare un password_token quando è usato
+  change_password_nonce = Column(String)
 
   #TODO: put token inside Installation
   #TODO: il token tiene conto del tempo, e gli serve per calcolare l'expiration
@@ -126,7 +128,7 @@ class Keychain(Base, CommonPK):
       #ottengo il serializer
       s = self.getSerializer()
       #critto l'id dell'utente proprietario del keychain
-      return s.dumps({ 'id': self.user_id})
+      return s.dumps({ 'id': self.user_id, 'nonce': self.change_password_nonce})
 
   #metodo centrale che contiene l'istanza del serializer per generazione e verifica di token
   #muovendolo in un metodo centrale siamo sicuri che la chiave usata per generare/verificare è sempre la stessa
@@ -136,7 +138,7 @@ class Keychain(Base, CommonPK):
 
   #metodo statico che analizza e verifica un token, indicando se la sessione è ancora attiva
   @classmethod
-  def verify_auth_token(self, token, check_nonce = True):
+  def verify_auth_token(self, token, nonce_key = "nonce"):
       #ottengo il serializer
       s = self.getSerializer()
       user = None
@@ -145,7 +147,10 @@ class Keychain(Base, CommonPK):
           data = s.loads(token)
           user = User.query.get(data['id'])
           #vedo se il token non è scaduto (controllo il nonce)
-          if check_nonce and Keychain.query.filter_by(user_id = user.id).first().nonce != data['nonce']:
+          nonce = Keychain.query.filter_by(user_id = user.id).first()[nonce_key]
+          print "nonce: ", nonce
+          print "data.nonce: ", data["nonce"]
+          if nonce != data['nonce']:
               # se lo è setto l'utente a None
               user = None
       #se non riesco ritorno None
@@ -161,6 +166,9 @@ class Keychain(Base, CommonPK):
   #metodo che salva genera, hasha e salva un nuovo nonce di lunghezza ##length numeri consecutivi (in media di 2/3 cifre)
   def renew_nonce(self, length = 16):
       self.nonce = ''.join(str(x) for x in map(ord, os.urandom(length)))
+  #metodo che salva genera, hasha e salva un nuovo change_password_nonce di lunghezza ##length numeri consecutivi (in media di 2/3 cifre)
+  def renew_change_password_nonce(self, length = 16):
+      self.change_password_nonce = ''.join(str(x) for x in map(ord, os.urandom(length)))
 
   #metodo che controlla se la password candidata è equivalente all'hash salvato
   def check_password(self, candidate):
