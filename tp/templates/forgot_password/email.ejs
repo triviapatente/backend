@@ -1,4 +1,4 @@
 <!doctype html>
 <h1>Cambiamento password</h1>
 
-<a href="http://158.110.167.58:8000/auth/password/change_from_email?token={{token}}">Clicca qui per cambiarla</a>
+<a href="{{request.url_root + url_for('auth.forgotPasswordWebPage', token = token)[1:]}}">Clicca qui per cambiarla</a>

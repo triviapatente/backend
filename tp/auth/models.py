@@ -148,8 +148,6 @@ class Keychain(Base, CommonPK):
           user = User.query.get(data['id'])
           #vedo se il token non è scaduto (controllo il nonce)
           nonce = Keychain.query.filter_by(user_id = user.id).first()[nonce_key]
-          print "nonce: ", nonce
-          print "data.nonce: ", data["nonce"]
           if nonce != data['nonce']:
               # se lo è setto l'utente a None
               user = None
