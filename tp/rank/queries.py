@@ -9,15 +9,17 @@ from tp import db
 # query che ritorna i primi n utenti in classifica
 def getTopRank():
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
-    entities = userAndPositionEntities()
-    return User.query.with_entities(*entities).order_by(asc("position")).limit(limit).all()
+    position = getPositionJoin()
+    return User.query.with_entities(User, position).order_by(asc("position")).limit(limit).all()
 
 #tutte le colonne di user, più position
-def userAndPositionEntities():
-    columns = [c for c in User.__table__.c]
-    position = getPositionJoin().label("position")
-    columns.append(position)
-    return columns
+def sanitizeRankResponse(rank):
+    output = []
+    for user in rank:
+        item = user[0]
+        item.position = user[1]
+        output.append(item)
+    return output
 
 # query che ritorna i primi n utenti in classifica
 def getRank():
@@ -25,32 +27,33 @@ def getRank():
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
     # non sono tra i primi n utenti della classifica
     if getUserPosition(g.user) > limit:
-        entities = userAndPositionEntities()
+        position = getPositionJoin()
         #in tal caso, ritorno i primi n/2 - 1 utenti maggiori e i primi n/2 minori, assieme a me
-        q_min = User.query.with_entities(*entities).order_by(desc("position")).filter(User.score >= g.user.score).limit(limit / 2).all()
+        q_min = User.query.with_entities(User, position).order_by(desc("position")).filter(User.score >= g.user.score).limit(limit / 2).all()
         q_min.reverse()
-        q_max = User.query.with_entities(*entities).order_by(asc("position")).filter(User.score < g.user.score).limit(limit / 2).all()
-        return q_min + q_max
+        q_max = User.query.with_entities(User, position).order_by(asc("position")).filter(User.score < g.user.score).limit(limit / 2).all()
+        return sanitizeRankResponse(q_min + q_max)
     else:
-        return getTopRank()
+        return sanitizeRankResponse(getTopRank())
 
 #ottiene la classifica con le informazioni di paginazione
 #direction = up/down
 #esempio: se ho bisogno degli utenti con punteggio maggiore di n, thresold diventa n, mentre direction diventa up
 def getPaginatedRank(thresold, direction):
-    entities = userAndPositionEntities()
+    position = getPositionJoin()
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
-    query = User.query.with_entities(*entities)
+    query = User.query.with_entities(User, position)
+    output = None
     if direction == "up":
         output = query.filter(User.score > thresold).order_by(desc("position")).limit(limit).all()
         output.reverse()
-        return output
     else:
-        return query.filter(User.score < thresold).order_by(asc("position")).limit(limit).all()
+        output = query.filter(User.score < thresold).order_by(asc("position")).limit(limit).all()
+    return sanitizeRankResponse(output)
 
 def getPositionJoin():
     a = aliased(User, name = "a")
-    return db.session.query(func.count(distinct(a.score)) + 1).filter(a.score > User.score)
+    return db.session.query(func.count(distinct(a.score)) + 1).filter(a.score > User.score).label("position")
 
 #ottiene la posizione dell'utente
 def getUserPosition(user):
@@ -63,5 +66,6 @@ def search(query):
         #WHERE score > a.score) as position
     #FROM public.user a
     #WHERE username LIKE '%query%'
-    entities = userAndPositionEntities()
-    return User.query.with_entities(*entities).filter(User.username.ilike(query)).order_by(asc("position")).all()
+    position = getPositionJoin()
+    output = User.query.with_entities(User, position).filter(User.username.ilike(query)).order_by(asc("position")).all()
+    return sanitizeRankResponse(output)
