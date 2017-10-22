@@ -1,6 +1,14 @@
+{% extends "forgot_password/layout.html" %}
 <!doctype html>
 <title>Richiesta cambiamento password</title>
 <h1>Cambia password</h1>
+{% if success %}
+    <p>Cambiamento password effettuato</p>
+{% else %}
+    <p>Errore nel cambiamento della password. Richiedine la possibilità</p>
+{% endif %}
+<h3>Da questa pagina potrai cambiare la password smarrita per l'account {{user.username}}, come hai richiesto.</h3>
+
 <form action="change_from_email" method="POST">
     <input type="password" name="password" placeholder="Inserisci qui la password"/>
     <input type="hidden" name="token" value="{{token}}"/>

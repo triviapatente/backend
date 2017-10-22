@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Richiesta di reimpostazione password</title>
+        <link rel="stylesheet" href="{{request.url_root +  url_for('static', filename='css/forgot_password.css')[1:] }}">
+        <link rel="stylesheet" href="{{request.url_root +  url_for('static', filename='assets/bootstrap/css/bootstrap.min.css')[1:] }}">
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    </head>
+    <body>
+          <div class="page">
+              <center>
+                  <img class="app-logo" src="{{request.url_root +  url_for('static', filename='images/logo.png')[1:] }}">
+                  <h1 class="display-1 text-white">Trivia Patente</h1>
+                  <h3 class="display-3 text-white">Richiesta di reimpostazione password</h3>
+              </center>
+              {% block body %}{% endblock %}
+              <center>
+                  <p class="lead small text-white"><small>Copyright © 2017 TriviaPatente. All rights reserved.</small></p>
+              </center>
+          </div>
+    </body>
+    <script type="text/javascript" src="{{request.url_root +  url_for('static', filename='assets/jquery.min.js')[1:] }}"/>
+    <script type="text/javascript" src="{{request.url_root +  url_for('static', filename='assets/bootstrap/js/bootstrap.min.js')[1:] }}"/>
+
+</html>

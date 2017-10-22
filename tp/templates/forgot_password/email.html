@@ -1,0 +1,9 @@
+{% extends "forgot_password/layout.html" %}
+{% block body %}
+
+<p class="lead text-white content">Il nostro sistema ha ricevuto una richiesta di reset della password. Se sei stato tu procedi premendo il bottone sottostante. Se non hai inviato la richiesta in questione, non devi fare altro che ignorare questa mail, e al tuo account non succederà nulla.</p>
+<div class="button-area">
+    <a class="btn btn-primary" href="{{request.url_root + url_for('auth.forgotPasswordWebPage', token = token)[1:]}}" role="button">Reimposta password</a>
+</div>
+<p class="lead small text-white">Questa email è stata generata automaticamente dai nostri sistemi.</p>
+{% endblock %}

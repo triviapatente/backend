@@ -152,19 +152,22 @@ def requestNewPassword():
             subject = "Richiesta cambiamento password",
             recipients = [email]
         )
-        email.html = render_template("forgot_password/email.ejs", token = token)
+        email.html = render_template("forgot_password/email.html", token = token)
         mail.send(email)
         return jsonify(success = True)
     else:
         raise Forbidden()
-
+    
+@auth.route("/password/", methods = ["GET"])
+def passwordPage():
+    return render_template("forgot_password/email.html")
 #richiesta che viene chiamata quando l'utente preme il bottone 'Cambia password' nella mail. Provvede a mostrare la pagina per cambiare password
 @auth.route("/password/change_from_email", methods = ["GET"])
 @needs_values("GET", "token")
 def forgotPasswordWebPage():
     token = g.query.get("token")
     #present web page
-    return render_template("forgot_password/change.ejs", token = token)
+    return render_template("forgot_password/change.html", token = token)
 
 #richiesta che viene chiamata quando l'utente cambia effettivamente la password da web. Cambia la password e mostra l'esito
 @auth.route("/password/change_from_email", methods = ["POST"])
@@ -187,7 +190,7 @@ def forgotPasswordWebPageResult():
     else:
         status_code = 403
     #return page with confirmation
-    return render_template("forgot_password/result.ejs", success = success), status_code
+    return render_template("forgot_password/change.html", success = success), status_code
 
 
 #api(s) per le modifiche
