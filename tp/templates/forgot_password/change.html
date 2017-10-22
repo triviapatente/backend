@@ -1,16 +1,39 @@
 {% extends "forgot_password/layout.html" %}
-<!doctype html>
-<title>Richiesta cambiamento password</title>
-<h1>Cambia password</h1>
-{% if success %}
-    <p>Cambiamento password effettuato</p>
-{% else %}
-    <p>Errore nel cambiamento della password. Richiedine la possibilità</p>
-{% endif %}
-<h3>Da questa pagina potrai cambiare la password smarrita per l'account {{user.username}}, come hai richiesto.</h3>
+{% block body %}
+    <p class="lead text-white content">Da questa pagina potrai cambiare la password smarrita per l'account {{user.username}}, come hai richiesto.</p>
+<center>    
+        {% if success != null %}
+            {% if success == true %}
+                <div class="info-box success">
+            {% else %}
+                <div class="info-box failure">
+            {% endif %}
+                    <div class="icon col-sm-3"> 
+                        <img src="logo.png">
+                    </div>
+                    <div class="description col-sm-9">
+                        {% if success == true %}
+                            Cambiamento password effettuato con successo! Ora puoi tornare ad allenarti!
+                        {% else %}
+                            Cambio password fallito. Controlla che le due password combacino e che contengano almeno 8 caratteri.
+                        {% endif %}
+                    </div>
+                </div>
+        {% endif %}
 
-<form action="change_from_email" method="POST">
-    <input type="password" name="password" placeholder="Inserisci qui la password"/>
-    <input type="hidden" name="token" value="{{token}}"/>
-    <input type="submit" value="Conferma"/>
-</form>
+    <form action="change_from_email" method="POST">
+            <label for="password" class="text-white input-label">Nuova password</label>
+            <div class="input-group">
+                <input class="input" type="password" name="password" id="password" placeholder="Nuova password"/>
+            </div>
+            <label for="confirm-password" class="text-white input-label">Ripeti nuova password</label>
+            <div class="input-group">
+                <input class="input" type="password" name="password" id="confirm-password" placeholder="Ripeti nuova password"/>
+            </div>
+            <input type="hidden" name="token" value="{{token}}"/>
+        <div class="button-area">
+            <input class="btn btn-primary submit" type="submit" value="Reimposta password"/>
+        </div>
+    </form>
+</center>
+{% endblock %}

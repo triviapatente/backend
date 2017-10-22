@@ -166,8 +166,12 @@ def passwordPage():
 @needs_values("GET", "token")
 def forgotPasswordWebPage():
     token = g.query.get("token")
+    #decript token and retrieve user_id
+    g.user = Keychain.verify_auth_token(token, nonce_key = "change_password_nonce")
+    if g.user is None:
+        raise Forbidden()
     #present web page
-    return render_template("forgot_password/change.html", token = token)
+    return render_template("forgot_password/change.html", token = token, user = g.user)
 
 #richiesta che viene chiamata quando l'utente cambia effettivamente la password da web. Cambia la password e mostra l'esito
 @auth.route("/password/change_from_email", methods = ["POST"])
@@ -176,12 +180,12 @@ def forgotPasswordWebPageResult():
     password = g.post.get("password")
     token = g.post.get("token")
     #decript token and retrieve user_id
-    user = Keychain.verify_auth_token(token, nonce_key = "change_password_nonce")
-    success = user is not None
+    g.user = Keychain.verify_auth_token(token, nonce_key = "change_password_nonce")
+    success = g.user is not None
     status_code = None
     if success:
         #change password of user_id to 'password'
-        keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
+        keychain = Keychain.query.filter(Keychain.user_id == g.user.id).first()
         keychain.hash_password(password)
         keychain.renew_change_password_nonce()
         db.session.add(keychain)
@@ -190,7 +194,7 @@ def forgotPasswordWebPageResult():
     else:
         status_code = 403
     #return page with confirmation
-    return render_template("forgot_password/change.html", success = success), status_code
+    return render_template("forgot_password/change.html", success = success, user = g.user), status_code
 
 
 #api(s) per le modifiche
