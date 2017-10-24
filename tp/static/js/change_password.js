@@ -10,3 +10,9 @@ function checkPasswordInput() {
     else
         $("#submit").attr("disabled", true);
 }
+
+function disableInput() {
+    $("#password").attr("disabled", true);
+        $("#confirm-password").attr("disabled", true);
+        $("#submit").attr("disabled", true);
+}

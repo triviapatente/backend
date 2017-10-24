@@ -12,17 +12,20 @@
                     });
                 </script>
                 <div class="info-box success">
+                    <div class="icon col-sm-3">
+                        <img class="info-box-icon" src="{{request.url_root +  url_for('static', filename='images/ok.png')[1:] }}">
+                    </div>
             {% else %}
                 <div class="info-box failure">
-            {% endif %}
-                    <div class="icon col-sm-3">
-                        <img src="logo.png">
+                    <div class="info-box-icon-area col-sm-3">
+                        <img class="info-box-icon" src="{{request.url_root +  url_for('static', filename='images/logo.png')[1:] }}">
                     </div>
+            {% endif %}
                     <div class="description col-sm-9">
                         {% if success == true %}
                             Cambiamento password effettuato con successo! Ora puoi tornare ad allenarti!
                         {% else %}
-                            Cambio password fallito. Controlla che le due password combacino e che contengano almeno 8 caratteri.
+                            Cambio password fallito, prova a richiederne una nuova oppure contatta l'assistenza.
                         {% endif %}
                     </div>
                 </div>

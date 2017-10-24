@@ -157,7 +157,7 @@ def requestNewPassword():
         return jsonify(success = True)
     else:
         raise Forbidden()
-    
+
 @auth.route("/password/", methods = ["GET"])
 def passwordPage():
     return render_template("forgot_password/email.html")
