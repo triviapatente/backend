@@ -2,7 +2,6 @@ $(checkPasswords);
 function checkPasswords() {
     $("#password, #confirm-password").keyup(checkPasswordInput);
 }
-
 function checkPasswordInput() {
     var password = $("#password").val();
     var confirmPassword = $("#confirm-password").val();
