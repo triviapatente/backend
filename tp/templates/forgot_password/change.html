@@ -1,14 +1,21 @@
 {% extends "forgot_password/layout.html" %}
 {% block body %}
     <p class="lead text-white content">Da questa pagina potrai cambiare la password smarrita per l'account {{user.username}}, come hai richiesto.</p>
-<center>    
+<center>
         {% if success != null %}
             {% if success == true %}
+                <script type="text/javascript">
+                    $(function() {
+                        $("#password").attr("disabled", true);
+                        $("#confirm-password").attr("disabled", true);
+                        $("#submit").attr("disabled", true);
+                    });
+                </script>
                 <div class="info-box success">
             {% else %}
                 <div class="info-box failure">
             {% endif %}
-                    <div class="icon col-sm-3"> 
+                    <div class="icon col-sm-3">
                         <img src="logo.png">
                     </div>
                     <div class="description col-sm-9">
@@ -32,7 +39,7 @@
             </div>
             <input type="hidden" name="token" value="{{token}}"/>
         <div class="button-area">
-            <input class="btn btn-primary submit" type="submit" value="Reimposta password"/>
+            <input class="btn btn-primary submit" id="submit" type="submit" value="Reimposta password"/>
         </div>
     </form>
 </center>
