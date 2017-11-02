@@ -188,18 +188,18 @@ class AuthHTTPTestCase(TPTestCase):
         user = response.json.get("user")
 
         print "#1: Email presente in db"
-        email = user.get("email")
-        response = requestNewPassword(self, email)
+        username = user.get("username")
+        response = requestNewPassword(self, username)
         assert response.status_code == 200
         assert response.json.get("success") == True
 
-        print "#2: Email non presente in db"
-        email = "dsfsdfsdfß@dsfsdf.it"
-        response = requestNewPassword(self, email)
+        print "#2: Username non presente in db"
+        username = "dsfsdfsdf"
+        response = requestNewPassword(self, username)
         assert response.status_code == 401
 
         print "#3: Parametri mancanti"
-        print "#3.1: email"
+        print "#3.1: username"
         response = requestNewPassword(self, None)
         assert response.status_code == 400
 

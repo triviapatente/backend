@@ -137,11 +137,11 @@ def changePassword():
 
 #richiesta da app per il forgot password. Quando chiamata, provvede a mandare la mail in cui l'utente confermerà che vuole mandare la password
 @auth.route("/password/request", methods = ["POST"])
-@needs_values("POST", "email")
+@needs_values("POST", "username")
 def requestNewPassword():
-    email = g.post.get("email")
+    username = g.post.get("username")
     #check if email is present in db
-    user = User.query.filter(User.email == email).first()
+    user = User.query.filter(User.username == username).first()
     if user is not None:
         #ottengo l'email_token dell'utente
         keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
@@ -150,7 +150,7 @@ def requestNewPassword():
         email = Message(
             sender = app.config["EMAIL_SENDER"],
             subject = "Richiesta cambiamento password",
-            recipients = [email]
+            recipients = [user.email]
         )
         email.html = render_template("forgot_password/email.html", token = token)
         mail.send(email)
@@ -158,9 +158,9 @@ def requestNewPassword():
     else:
         raise Forbidden()
 
-@auth.route("/password/", methods = ["GET"])
-def passwordPage():
-    return render_template("forgot_password/email.html")
+#@auth.route("/password/", methods = ["GET"])
+#def passwordPage():
+#    return render_template("forgot_password/email.html")
 #richiesta che viene chiamata quando l'utente preme il bottone 'Cambia password' nella mail. Provvede a mostrare la pagina per cambiare password
 @auth.route("/password/change_from_email", methods = ["GET"])
 @needs_values("GET", "token")
