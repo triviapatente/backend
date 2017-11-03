@@ -256,7 +256,7 @@ def getNumberOfActiveGames(users):
     # converto la lista di tuple (username, games_count) in un dictionary
     users_games_count = {}
     for (username, games_count) in players_with_games:
-        users_games_count[username] = e[games_count]
+        users_games_count[username] = games_count
     # utenti ancora non inseriti
     userRange = [user for user in users if user.username not in users_games_count.keys()]
     # completo il dictionary con gli utenti senza partite
