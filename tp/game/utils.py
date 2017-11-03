@@ -255,8 +255,8 @@ def getNumberOfActiveGames(users):
     players_with_games = User.query.with_entities(User.username, func.count("user_id").label("games_count")).join(Partecipation).join(Game).filter(Partecipation.user_id == User.id and Game.ended == False and Game.started == True).group_by(User.username).all()
     # converto la lista di tuple (username, games_count) in un dictionary
     users_games_count = {}
-    for e in players_with_games:
-        users_games_count[e.__dict__["username"]] = e.__dict__["games_count"]
+    for (username, games_count) in players_with_games:
+        users_games_count[username] = e[games_count]
     # utenti ancora non inseriti
     userRange = [user for user in users if user.username not in users_games_count.keys()]
     # completo il dictionary con gli utenti senza partite
