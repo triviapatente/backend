@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from test.shared import TPTestCase
+from tp.auth.models import Keychain
 from flask import json
 from api import *
 from tp import app
@@ -179,4 +180,71 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#3.2 new_password"
         response = changePassword(self, "dfsf", None, new_token)
+        assert response.status_code == 400
+
+    def test_request_new_password(self):
+        #registrazione iniziale
+        response = register(self, "user", "user@gmail.com", "dfsdvsv")
+        user = response.json.get("user")
+
+        print "#1: Email presente in db"
+        username = user.get("username")
+        response = requestNewPassword(self, username)
+        assert response.status_code == 200
+        assert response.json.get("success") == True
+
+        print "#2: Username non presente in db"
+        username = "dsfsdfsdf"
+        response = requestNewPassword(self, username)
+        assert response.status_code == 401
+
+        print "#3: Parametri mancanti"
+        print "#3.1: username"
+        response = requestNewPassword(self, None)
+        assert response.status_code == 400
+
+    def test_change_password_webpage(self):
+        #registrazione iniziale
+        response = register(self, "user", "user@gmail.com", "dfsdvsv")
+        user_id = response.json.get("user").get("id")
+
+        print "#1: Richiesta successful"
+        #ottengo il token giusto per l'utente
+        keychain = Keychain.query.filter(Keychain.user_id == user_id).first()
+        token = keychain.change_password_token
+
+        response = changePasswordWebPage(self, token)
+        assert response.status_code == 200
+
+        print "#2: Parametri mancanti"
+        print "#2.1: token"
+        response = changePasswordWebPage(self, None)
+        assert response.status_code == 400
+
+    def test_change_password_webpage_result(self):
+
+        #registrazione iniziale
+        response = register(self, "user", "user@gmail.com", "dfsdvsv")
+        user_id = response.json.get("user").get("id")
+
+        print "#1: Token presente in db"
+        #ottengo il token giusto per l'utente
+        keychain = Keychain.query.filter(Keychain.user_id == user_id).first()
+        token = keychain.change_password_token
+
+        response = changePasswordWebPageResult(self, token, "fuffa")
+        assert response.status_code == 200
+
+        print "#2: Token invalidato, e quindi non presente in db"
+
+        response = changePasswordWebPageResult(self, token, "fuffa")
+        assert response.status_code == 403
+
+        print "#3: Parametri mancanti"
+        print "#3.1: token"
+        response = changePasswordWebPageResult(self, None, "fuffa")
+        assert response.status_code == 400
+
+        print "#3.2: password"
+        response = changePasswordWebPageResult(self, "dsf", None)
         assert response.status_code == 400

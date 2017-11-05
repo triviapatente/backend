@@ -4,18 +4,22 @@
 app = None
 socketio = None
 db = None
+mail = None
 
 def init(testing = False, ci = False):
     print "app initialization"
     global app
     global socketio
     global db
+    global mail
 
     # Import flask and template operators
     from flask import Flask, render_template, jsonify, json
 
     # Import SQLAlchemy
     from flask.ext.sqlalchemy import SQLAlchemy
+
+    from flask.ext.mail import Mail
 
     from flask.json import JSONEncoder
 
@@ -56,6 +60,8 @@ def init(testing = False, ci = False):
     # by modules and controllers
     db = SQLAlchemy(app)
     socketio = SocketIO(app, json = json)
+    mail = Mail()
+    mail.init_app(app)
 
     from tp.exceptions import TPException
     from flask import request
@@ -100,20 +106,20 @@ def init(testing = False, ci = False):
     app.register_blueprint(game)
     app.register_blueprint(quiz)
     app.register_blueprint(category)
-    app.register_blueprint(message)
-    app.register_blueprint(preferences)
+    #app.register_blueprint(message)
+    #app.register_blueprint(preferences)
     app.register_blueprint(account)
-    app.register_blueprint(info)
-    app.register_blueprint(fb)
-    app.register_blueprint(shop)
+    #app.register_blueprint(info)
+    #app.register_blueprint(fb)
+    #app.register_blueprint(shop)
     app.register_blueprint(rank)
-    app.register_blueprint(stats)
+    #app.register_blueprint(stats)
 
 
     # Add websockets
     import tp.auth.web_sockets
     import tp.base.web_sockets
-    import tp.message.web_sockets
+    #import tp.message.web_sockets
     import tp.game.web_sockets
     # Creazione directory per upload users pictures
     import os
@@ -154,5 +160,5 @@ def init(testing = False, ci = False):
     # This will create the database file using SQLAlchemy
     db.create_all()
 
-    from tp.purchases.models import ShopItem
-    ShopItem.init()
+    #from tp.purchases.models import ShopItem
+    #ShopItem.init()

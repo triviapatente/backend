@@ -45,6 +45,13 @@ def leave_rooms_for(type, actual_room = None):
 def connect():
     print "Anonymous user just connected."
 
+@socketio.on("reconnect")
+def reconnect():
+    g.user = getUserFromRequest(socket = True)
+    if g.user:
+        print "User %s just reconnected." % g.user.username
+    else:
+        print "Anonymous user just reconnected."
 @socketio.on("disconnect")
 def disconnect():
     g.user = getUserFromRequest(socket = True)

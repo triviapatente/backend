@@ -241,6 +241,9 @@ def answer(data):
     correct = (quiz.answer == question.answer)
     emit("answer", {"success": True, "correct_answer": correct})
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
+        game.started = True
+        db.session.add(game)
+        db.session.commit()
         events.round_ended(g.roomName, round)
         opponent_turn = isOpponentTurn(game)
         if opponent_turn is not None:

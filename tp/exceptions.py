@@ -28,6 +28,15 @@ class MissingParameter(TPException):
         self.message = "Alcuni parametri della richiesta non sono presenti"
         self.parameters = parameters
 
+#eccezione chiamata quando un parametro richiesto ha un formato/valore errato
+class BadParameters(TPException):
+    status_code = 400 #bad request
+
+    def __init__(self, parameters):
+        TPException.__init__(self)
+        self.message = "Alcuni parametri della richiesta sono errati"
+        self.parameters = parameters
+
 #eccezione chiamata quando l'utente da inserire è già esistente
 class AlreadyRegisteredUser(TPException):
     status_code = 403 #unauthorized
