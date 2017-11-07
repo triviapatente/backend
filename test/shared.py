@@ -6,6 +6,7 @@ import tempfile
 from unittest import TestCase
 from flask import json
 from tp import app, db, socketio
+from test.base.socket.api import global_infos
 from test.auth.http.api import register
 class TPTestCase(TestCase):
     def setUp(self):

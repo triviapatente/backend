@@ -371,19 +371,19 @@ def isTurnOf(game, user):
 
 def isOpponentOnline(game):
     opponent = getOpponentFrom(game)
-    return isUserOnline(game, opponent)
+    return isUserOnline(game.id, opponent.id)
 
-def isUserOnline(game, user):
-    socket = Socket.query.filter(Socket.user_id == user.id).first()
+def isUserOnline(game_id, user_id):
+    socket = Socket.query.filter(Socket.user_id == user_id).first()
     if not socket:
         print "isUserOnline: user not connected to socket"
         #l'utente non è connesso al socket
         return False
-    room = roomName(game.id, "game")
+    room = roomName(game_id, "game")
     rooms = socketio.server.rooms(socket.socket_id)
-    print "rooms", rooms
-    print "isUserOnline: is user in", room, room in rooms
-    return room in rooms
+    isInRoom = room in rooms
+    print "isUserOnline: is user in", room, isInRoom
+    return isInRoom
 
 def getRoundInfosTill(round_number, game):
     output = Round.query.join(Category).with_entities(Round, Category).filter(Round.number <= round_number).filter(Round.game_id == game.id).all()

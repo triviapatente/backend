@@ -22,3 +22,6 @@ def choose_category(socket, category, game, round, token):
 def round_details(socket, game, token):
     socket.emit("round_details", {"tp-session-token": token, "body": {"game": game}})
     return socket.get_received()
+def is_user_online(socket, game_id, user_id, token):
+    socket.emit("is_user_online", {"tp-session-token": token, "body": {"game": game_id, "user": user_id}})
+    return socket.get_received().json["answer"]
