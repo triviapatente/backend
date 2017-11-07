@@ -72,7 +72,7 @@ def outputKeyForMethod(method):
 
 def getAllRequestParams():
     stores = []
-    if hasattr(request, "event") and request.event and request.event.get("args"): stores.append(request.event.get("args")[0])
+    if hasattr(request, "event") and request.event and request.event.get("args"): stores.append(request.event.get("args")[0].get("body"))
     if hasattr(request, "form") and request.form: stores.append(request.form)
     if hasattr(request, "args") and request.args: stores.append(request.args)
     if hasattr(request, "view_args") and request.view_args: stores.append(request.view_args)

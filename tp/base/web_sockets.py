@@ -51,7 +51,9 @@ def leave_rooms_for(type, actual_room = None):
 
 @socketio.on("disconnect")
 def disconnect():
+    print "About to be disconnected"
     g.user = getUserFromRequest(socket = True)
+    print g.user.id
     if g.user:
         leave_rooms_for("game")
         Socket.query.filter(Socket.user_id == g.user.id).delete()

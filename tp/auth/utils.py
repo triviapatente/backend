@@ -17,9 +17,11 @@ TOKEN_KEY = 'tp-session-token'
 def tokenFromRequest(socket):
     if socket == True:
         try:
-            return request.event["args"][0][TOKEN_KEY]
+            token = request.event["args"][0][TOKEN_KEY]
+            session[TOKEN_KEY] = token
+            return token
         except:
-            return None
+            return session[TOKEN_KEY]
     else:
         return request.headers.get(TOKEN_KEY)
 
