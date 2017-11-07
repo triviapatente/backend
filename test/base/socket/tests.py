@@ -4,7 +4,6 @@ from test.shared import TPAuthTestCase
 from api import *
 from test.game.http.api import new_game
 from test.auth.http.api import register
-from test.auth.socket.api import login
 from test.shared import get_socket_client
 class BaseSocketTestCase(TPAuthTestCase):
     game = None
@@ -19,8 +18,6 @@ class BaseSocketTestCase(TPAuthTestCase):
         self.opponent_token = opponent_response.json.get("token")
         # creo un socket per il nuovo utente
         self.opponent_socket = get_socket_client()
-        # il socket opponent accede
-        login(self, self.opponent_socket, self.opponent_token)
         #viene eseguito prima di ogni singolo metodo
         response = new_game(self, self.opponent.get("id"))
         self.game = response.json.get("game")

@@ -1,6 +1,3 @@
-from test.auth.http.api import register as register_user
-from flask import json
-
-def logout(socket):
-    socket.emit("logout")
+def logout(socket, token):
+    socket.emit("logout", {"tp-session-token": token})
     return socket.get_received()

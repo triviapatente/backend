@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from test.auth.http.api import register
-from test.auth.socket.api import login
 from test.game.http.api import new_game, leave_game
 from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_rooms

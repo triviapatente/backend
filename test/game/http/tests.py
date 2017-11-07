@@ -4,7 +4,6 @@ from api import *
 from test.shared import TPAuthTestCase, get_socket_client
 from tp.game.models import Game, Partecipation
 from test.auth.http.api import register
-from test.auth.socket.api import login
 from test.base.socket.api import join_room
 from test.game.socket.api import *
 from test.game.socket.utils import dumb_crawler

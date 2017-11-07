@@ -4,6 +4,7 @@ from flask import request, session, g
 from tp import db
 from tp.auth.social.facebook.utils import FBManager
 from tp.auth.models import *
+from tp.events.models import Socket
 from tp.preferences.models import *
 from tp.exceptions import Forbidden
 from tp.stats.queries import getCategoryPercentages
@@ -14,10 +15,13 @@ TOKEN_KEY = 'tp-session-token'
 #chiamata che a partire da una richiesta ritorna il token.
 #centralizzata, cosi la si può usare dappertutto
 def tokenFromRequest(socket):
-    params = request.headers
     if socket == True:
-        params = request.params
-    return params.get(TOKEN_KEY)
+        try:
+            return request.event["args"][0][TOKEN_KEY]
+        except:
+            return None
+    else:
+        return request.headers.get(TOKEN_KEY)
 
 def createUser(username = None, email = None, name = None, surname = None, birth = None, password = None, image = None):
     user = User(username = username, email = email, name = name, surname = surname, birth = birth, image = image)

@@ -3,7 +3,6 @@
 from test.shared import TPAuthTestCase, get_socket_client
 from test.base.socket.api import join_room
 from test.auth.http.api import register
-from test.auth.socket.api import login
 from test.game.http.api import new_game
 from api import *
 

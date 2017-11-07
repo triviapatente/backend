@@ -7,7 +7,6 @@ from unittest import TestCase
 from flask import json
 from tp import app, db, socketio
 from test.auth.http.api import register
-from test.auth.socket.api import login
 class TPTestCase(TestCase):
     def setUp(self):
         self.app = get_test_client()
@@ -24,9 +23,6 @@ class TPAuthTestCase(TPTestCase):
         self.user = response.json.get("user")
         assert self.token
         assert self.user
-        if socket:
-            response = login(self, None, self.token)
-            assert response.json.get("success") == True
 
 #metodo che ottiene il client per fare il test, un pò modificato
 def get_test_client():
