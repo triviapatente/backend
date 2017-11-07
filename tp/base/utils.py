@@ -2,6 +2,7 @@
 from flask import g
 from tp.auth.models import User
 from tp.game.models import Partecipation
+from tp.rank.queries import getUserPosition
 
 # enumeration of room type
 from enum import Enum
@@ -38,3 +39,13 @@ def getRoomsFor(type, user):
     if type == RoomType.game:
         rooms = Game.query.with_entities(Game.id).join(User).filter(User.id == user.id)
     return [roomName(id, type) for id in rooms]
+
+def get_connection_values(user):
+    if not user:
+        return {}
+    output = {}
+    output["global_rank_position"] = getUserPosition(user)
+    #output["stats"] = getCategoryPercentages(user)
+    #output["preferences"] = getPreferencesFromUser(user)
+    #output["fb"] = getFBTokenInfosFromUser(user)
+    return output

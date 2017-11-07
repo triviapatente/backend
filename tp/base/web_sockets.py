@@ -2,7 +2,7 @@
 from flask import g, request
 from tp import socketio, db
 from tp.ws_decorators import ws_auth_required, filter_input_room
-from tp.base.utils import roomName
+from tp.base.utils import roomName, get_connection_values
 from tp.auth.utils import getUserFromRequest
 from tp.events.models import Socket
 from tp.decorators import needs_values
@@ -21,6 +21,14 @@ def join_room_request(data):
     emit("join_room", {"success": True})
     events.user_joined(g.roomName)
     leave_rooms_for(type, g.roomName)
+
+
+@socketio.on("global_infos")
+@ws_auth_required
+def get_global_infos():
+    output = get_connection_values(g.user)
+    output["success"] = True
+    emit("global_infos", output)
 
 @socketio.on("leave_room")
 @ws_auth_required
@@ -41,17 +49,6 @@ def leave_rooms_for(type, actual_room = None):
             events.user_left(name)
             print "User %s left room %s." % (g.user.username, name)
 
-@socketio.on("connect")
-def connect():
-    print "Anonymous user just connected."
-
-@socketio.on("reconnect")
-def reconnect():
-    g.user = getUserFromRequest(socket = True)
-    if g.user:
-        print "User %s just reconnected." % g.user.username
-    else:
-        print "Anonymous user just reconnected."
 @socketio.on("disconnect")
 def disconnect():
     g.user = getUserFromRequest(socket = True)

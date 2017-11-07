@@ -25,6 +25,28 @@ class BaseSocketTestCase(TPAuthTestCase):
         response = new_game(self, self.opponent.get("id"))
         self.game = response.json.get("game")
 
+    def test_global_infos(self):
+        # run dumb crawler
+        dumb_crawler()
+
+        print "#1: Successful global_infos"
+        response = global_infos(self, self.token)
+        assert response.json.get("global_rank_position") is not None
+        #assert response.json.get("preferences") is not None
+        #assert response.json.get("fb") is not None
+        #TODO: assert response.json.get("friends_rank_position") is not None
+        #stats = response.json.get("stats")
+        #assert stats is not None
+        #first = stats[0]
+        #assert first
+        #assert first.get("id") is None
+        #assert first.get("hint") == "Complessivo"
+
+        #print "#2: Le statistiche sono su tutte le categorie"
+        #stats = response.json.get("stats")
+        #count = Category.query.count()
+        #il +1 sta ad indicare 'complessivo'
+        #assert len(stats) == count + 1
     def test_join_room(self):
         game_id = self.game.get("id")
 

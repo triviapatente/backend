@@ -48,7 +48,10 @@ def storeForMethod(method):
     elif method == "SOCKET":
         args = request.event["args"]
         if args:
-            return args[0]
+            if args[0]:
+                return args[0]["body"]
+            else:
+                return {}
         else:
             return {}
     elif method == "GET":
