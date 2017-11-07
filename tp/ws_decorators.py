@@ -14,8 +14,9 @@ def filter_input_room(f):
     def decorated_function(*args, **kwargs):
         #parametri della richiesta socket
         params = request.event["args"][0]
-        id = params.get("id")
-        type = params.get("type")
+        body = params.get("body")
+        id = body.get("id")
+        type = body.get("type")
         output = getUsersFromRoom(type, id, True)
         #se l'id non è settato, mi viene ritornato un valore diverso da none se la room ha un nome sensato, se l'id è settato invece, mi deve ritornare un array con length > 0
         if (id is None and output is not None) or output:

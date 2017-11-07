@@ -83,9 +83,11 @@ def authenticate(socket = False):
         #lancio un errore Forbidden
         raise Forbidden()
     elif socket == True:
-        s = Socket(user_id = user.id, socket_id = request.sid)
-        db.session.add(s)
-        db.session.commit()
+        s = Socket.query.filter(Socket.user_id == user.id).filter(Socket.socket_id == request.sid).first()
+        if s is None:
+            s = Socket(user_id = user.id, socket_id = request.sid)
+            db.session.add(s)
+            db.session.commit()
 
     print "User %s associated with token." % user.username
     #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente

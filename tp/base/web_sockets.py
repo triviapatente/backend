@@ -15,7 +15,7 @@ import events
 @needs_values("SOCKET", "id", "type")
 @filter_input_room
 def join_room_request(data):
-    type = data.get("type")
+    type = data.get("body").get("type")
     join_room(g.roomName)
     print "User %s joined room %s." % (g.user.username, g.roomName)
     emit("join_room", {"success": True})
@@ -25,7 +25,7 @@ def join_room_request(data):
 
 @socketio.on("global_infos")
 @ws_auth_required
-def get_global_infos():
+def get_global_infos(data):
     output = get_connection_values(g.user)
     output["success"] = True
     emit("global_infos", output)
@@ -36,7 +36,7 @@ def get_global_infos():
 @filter_input_room
 def leave_room_request(data):
     #tipo di room (room di gioco, per esempio)
-    type = data.get("type")
+    type = data.get("body").get("type")
     leave_rooms_for(type)
     emit("leave_room", {"success": True})
 
