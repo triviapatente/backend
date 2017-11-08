@@ -284,17 +284,7 @@ class GameHTTPTestCase(TPAuthTestCase):
 
     def test_suggested_users(self):
         user_id = self.user.get("id")
-        a_id = register(self, "a", "a@gmail.com", "c").json.get("user").get("id")
-        register(self, "b", "b@gmail.com", "c")
-        register(self, "c", "c@gmail.com", "c")
-        register(self, "d", "d@gmail.com", "c")
-        register(self, "e", "e@gmail.com", "c")
-        register(self, "f", "f@gmail.com", "c")
-        register(self, "g", "g@gmail.com", "c")
-        register(self, "h", "h@gmail.com", "c")
-        register(self, "i", "i@gmail.com", "c")
-        register(self, "l", "l@gmail.com", "c")
-        register(self, "m", "m@gmail.com", "c")
+        first_opponent_id = self.first_opponent.get("user").get("id")
 
         #Aggiunta di un game già finito con vincitore me stesso per testare last won
         game = Game(creator_id = user_id, ended = True, winner_id = user_id)
@@ -302,7 +292,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         db.session.commit()
 
         part_1 = Partecipation(user_id = user_id, game_id = game.id)
-        part_2 = Partecipation(user_id = a_id, game_id = game.id)
+        part_2 = Partecipation(user_id = first_opponent_id, game_id = game.id)
         db.session.add_all([part_1, part_2])
         db.session.commit()
 
@@ -315,26 +305,35 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#1.1 Controllo che sia indicato che l'ultima partita con a la ho vinta io"
         for user in users:
             last_game_won = user.get("last_game_won")
-            if user.get("id") == a_id:
+            if user.get("id") == first_opponent_id:
                 assert last_game_won == True
             else:
-                assert last_game_won is None
+                assert last_game_won is None or last_game_won == False
 
-        print "#1.1 Controllo che sia indicato che l'ultima partita con a la ho persa io"
+        print "#2.1 Controllo che sia indicato che l'ultima partita con a la ho persa io"
         #cambio il vincitore dell'ultimo game con a, e lo setto ad a stesso
-        game.winner_id = a_id
+        game.winner_id = first_opponent_id
         db.session.add(game)
         db.session.commit()
 
+        response = suggested_users(self)
+        assert response.json.get("success") == True
+        users = response.json.get("users")
+
         for user in users:
             last_game_won = user.get("last_game_won")
-            if user.get("id") == a_id:
-                assert last_game_won == True
+            print last_game_won
+            if user.get("id") == first_opponent_id:
+                assert last_game_won == False
             else:
-                assert last_game_won is None
+                assert last_game_won is None or last_game_won == False
 
-        print "#2. Lunghezza output = 10"
-        assert len(users) == 10
+        print "#3. Lunghezza output = 10"
+        assert len(users) == 3
+
+        print "#4. Non ci sono io nell'output"
+        for user in users:
+            assert user.get("id") != user_id
 
 
     def test_search_user(self):

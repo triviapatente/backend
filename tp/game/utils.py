@@ -14,6 +14,7 @@ from distutils.util import strtobool
 from tp.base.utils import roomName
 from tp.events.utils import getUsersFromRoomID
 from tp.events.models import Socket
+from tp.rank.queries import getRank
 
 #metodo transazionale per la creazione di una partita
 def createGame(opponents):
@@ -28,9 +29,23 @@ def createGame(opponents):
     db.session.add(new_game)
     return new_game
 
-def last_game_result_query(user_id):
-    user_games = Partecipation.query.with_entities(Partecipation.game_id).filter(Partecipation.user_id == g.user.id)
-    return Partecipation.query.filter(Partecipation.user_id == user_id).filter(Partecipation.game_id.in_(user_games)).join(Game).with_entities(Game.winner_id).filter(Game.ended == True).order_by(Game.createdAt.desc()).limit(1).label("last_game_winner_id")
+def sanitizeSuggestedUsers(users):
+    output = []
+    for (user, last_game_winner) in users:
+        if last_game_winner is not None:
+            user.last_game_won = (last_game_winner == g.user.id)
+        output.append(user)
+    return output
+
+def getLastOpponents():
+    pass#return User.query.join(Partecipation).filter(Partecipation.user_id)
+
+def getSuggestedUsers(user):
+    output = []
+    if len(output) == 0:
+        return getRank(True)
+    return output
+
 # utils per il calcolo del punteggio
 # enumeration of possible results for match
 from enum import Enum
