@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from tp import db
 from tp.auth.models import *
-from sqlalchemy import func, distinct, desc, asc
+from sqlalchemy import func, distinct, desc, asc, or_, and_
 from sqlalchemy.orm import aliased
 from flask import g
 from tp import db
+from utils import *
 
 # query che ritorna i primi n utenti in classifica
 def getTopRank():
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
-    position = getPositionJoin()
-    return User.query.with_entities(User, position).order_by(asc("position")).limit(limit).all()
+    alias = aliased(User, name = "a")
+    (internalPosition, position) = (getInternalPositionJoin(alias), getPositionJoin(alias))
+    output = User.query.with_entities(alias, position, internalPosition).order_by(asc("internal_position")).limit(limit).all()
+    return sanitizeRankResponse(output)
 
 #tutte le colonne di user, più position
 def sanitizeRankResponse(rank):
@@ -18,46 +21,53 @@ def sanitizeRankResponse(rank):
     for user in rank:
         item = user[0]
         item.position = user[1]
+        if len(user) > 2:
+            item.internalPosition = user[2]
         output.append(item)
     return output
 
+#query che ottiene la classifica attorno al mio utente, e non la top_rank
+def getLocalRank(exclude_me = False):
+    limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
+    myUser = g.user
+    myUser.position = getUserPosition(myUser)
+    myUser.internalPosition = getUserInternalPosition(myUser)
+
+    left_users = getPaginatedRank(myUser.internalPosition, "down", limit / 2)
+    right_limit = limit / 2
+    if not exclude_me:
+        right_limit -= 1
+    right_users = getPaginatedRank(myUser.internalPosition, "up", right_limit)
+    if not exclude_me:
+        left_users.append(myUser)
+    return extractArrayFrom(left_users, right_users, limit)
+
 # query che ritorna i primi n utenti in classifica
-def getRank():
+def getRank(exclude_me = False):
     #numero di utenti max da ritornare
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
+    output = None
     # non sono tra i primi n utenti della classifica
-    if getUserPosition(g.user) > limit:
-        position = getPositionJoin()
+    if getUserInternalPosition(g.user) > limit:
         #in tal caso, ritorno i primi n/2 - 1 utenti maggiori e i primi n/2 minori, assieme a me
-        q_min = User.query.with_entities(User, position).order_by(desc("position")).filter(User.score >= g.user.score).limit(limit / 2).all()
-        q_min.reverse()
-        q_max = User.query.with_entities(User, position).order_by(asc("position")).filter(User.score < g.user.score).limit(limit / 2).all()
-        return sanitizeRankResponse(q_min + q_max)
+        return getLocalRank(exclude_me)
     else:
-        return sanitizeRankResponse(getTopRank())
+        return getTopRank()
 
 #ottiene la classifica con le informazioni di paginazione
 #direction = up/down
-#esempio: se ho bisogno degli utenti con punteggio maggiore di n, thresold diventa n, mentre direction diventa up
-def getPaginatedRank(thresold, direction):
-    position = getPositionJoin()
-    limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
-    query = User.query.with_entities(User, position)
+#esempio: se ho bisogno degli utenti con internalPosition maggiore di n, thresold diventa n, mentre direction diventa up
+def getPaginatedRank(thresold, direction, limit = app.config["RESULTS_LIMIT_RANK_ITALY"]):
+    alias = aliased(User, name = "a")
+    (position, internalPosition) = (getPositionJoin(alias), getInternalPositionJoin(alias))
+    query = User.query.with_entities(alias, position, internalPosition)
     output = None
     if direction == "up":
-        output = query.filter(User.score > thresold).order_by(desc("position")).limit(limit).all()
-        output.reverse()
+        output = query.filter(internalPosition > thresold).order_by(asc("internal_position")).limit(limit).all()
     else:
-        output = query.filter(User.score < thresold).order_by(asc("position")).limit(limit).all()
+        output = query.filter(internalPosition < thresold).order_by(desc("internal_position")).limit(limit).all()
+        output.reverse()
     return sanitizeRankResponse(output)
-
-def getPositionJoin():
-    a = aliased(User, name = "a")
-    return db.session.query(func.count(distinct(a.score)) + 1).filter(a.score > User.score).label("position")
-
-#ottiene la posizione dell'utente
-def getUserPosition(user):
-    return db.session.query(func.count(distinct(User.score))).filter(User.score > user.score).scalar() + 1
 
 def search(query):
     #SELECT *,
@@ -66,6 +76,34 @@ def search(query):
         #WHERE score > a.score) as position
     #FROM public.user a
     #WHERE username LIKE '%query%'
-    position = getPositionJoin()
-    output = User.query.with_entities(User, position).filter(User.username.ilike(query)).order_by(asc("position")).all()
+    position = getPositionJoin(User)
+    output = User.query.with_entities(User, position).filter(User.username.ilike(query)).all()
     return sanitizeRankResponse(output)
+
+
+
+#ottiene la posizione dell'utente
+def getUserPosition(user):
+    query = userPositionQuery(User, user)
+    print query
+    return query.scalar()
+#ottiene la posizione interna dell'utente
+def getUserInternalPosition(user):
+    query = userInternalPositionQuery(User, user)
+    print query
+    return query.scalar()
+
+def getPositionJoin(fatherQuery):
+    alias = aliased(User, name = "b")
+    return userPositionQuery(alias, fatherQuery).label("position")
+
+def getInternalPositionJoin(fatherQuery):
+    alias = aliased(User, name = "c")
+    return userInternalPositionQuery(alias, fatherQuery).label("internal_position")
+
+#query utilizzate per le posizioni
+#la fatherQuery è la query (o entità) a cui si appoggia tutto per il confronto
+def userPositionQuery(user, fatherQuery):
+    return db.session.query(func.count(distinct(user.score)) + 1).filter(fatherQuery.score < user.score)
+def userInternalPositionQuery(user, fatherQuery):
+    return db.session.query(func.count(user.score) + 1).filter(or_(fatherQuery.score < user.score, and_(fatherQuery.score == user.score, fatherQuery.username > user.username)))

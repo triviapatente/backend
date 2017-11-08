@@ -30,7 +30,7 @@ def getItalianRank():
     else:
         rank = getPaginatedRank(thresold, direction)
     print "User %s got global rank." % g.user.username
-    return jsonify(rank = rank, my_position = getUserPosition(g.user))
+    return jsonify(rank = rank)
 
 @rank.route("/friends", methods = ["GET"])
 @auth_required
