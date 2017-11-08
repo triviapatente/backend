@@ -24,7 +24,7 @@ def obtainModels():
     return jsonify(output)
 
 #API usata per intercettare le richieste di contatto degli utenti
-@base.route("/contact/", methods = ["POST"])
+@base.route("/contact", methods = ["POST"])
 @needs_values("POST", "message", "scope")
 @auth_required
 def contactUs():

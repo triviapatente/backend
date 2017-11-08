@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from tp import db
 from tp.auth.models import *
+from tp.game.models import Partecipation, Game
+
 from sqlalchemy import func, distinct, desc, asc, or_, and_
 from sqlalchemy.orm import aliased
 from flask import g
@@ -8,11 +10,14 @@ from tp import db
 from utils import *
 
 # query che ritorna i primi n utenti in classifica
-def getTopRank():
+def getTopRank(exclude_me = False):
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
     alias = aliased(User, name = "a")
-    (internalPosition, position) = (getInternalPositionJoin(alias), getPositionJoin(alias))
-    output = User.query.with_entities(alias, position, internalPosition).order_by(asc("internal_position")).limit(limit).all()
+    (internalPosition, position, lastGameResult) = (getInternalPositionJoin(alias), getPositionJoin(alias), getLastGameResultJoin(alias))
+    query = User.query.with_entities(alias, position, internalPosition, lastGameResult)
+    if exclude_me:
+        query = query.filter(alias.id != g.user.id)
+    output = query.order_by(asc("internal_position")).limit(limit).all()
     return sanitizeRankResponse(output)
 
 #tutte le colonne di user, più position
@@ -23,6 +28,9 @@ def sanitizeRankResponse(rank):
         item.position = user[1]
         if len(user) > 2:
             item.internalPosition = user[2]
+        if len(user) > 3:
+            if user[3] is not None:
+                item.last_game_won = (user[3] == g.user.id)
         output.append(item)
     return output
 
@@ -46,21 +54,20 @@ def getLocalRank(exclude_me = False):
 def getRank(exclude_me = False):
     #numero di utenti max da ritornare
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
-    output = None
     # non sono tra i primi n utenti della classifica
     if getUserInternalPosition(g.user) > limit:
         #in tal caso, ritorno i primi n/2 - 1 utenti maggiori e i primi n/2 minori, assieme a me
         return getLocalRank(exclude_me)
     else:
-        return getTopRank()
+        return getTopRank(exclude_me)
 
 #ottiene la classifica con le informazioni di paginazione
 #direction = up/down
 #esempio: se ho bisogno degli utenti con internalPosition maggiore di n, thresold diventa n, mentre direction diventa up
 def getPaginatedRank(thresold, direction, limit = app.config["RESULTS_LIMIT_RANK_ITALY"]):
     alias = aliased(User, name = "a")
-    (position, internalPosition) = (getPositionJoin(alias), getInternalPositionJoin(alias))
-    query = User.query.with_entities(alias, position, internalPosition)
+    (position, internalPosition, lastGameResult) = (getPositionJoin(alias), getInternalPositionJoin(alias), getLastGameResultJoin(alias))
+    query = User.query.with_entities(alias, position, internalPosition, lastGameResult)
     output = None
     if direction == "up":
         output = query.filter(internalPosition > thresold).order_by(asc("internal_position")).limit(limit).all()
@@ -92,6 +99,12 @@ def getUserInternalPosition(user):
     query = userInternalPositionQuery(User, user)
     print query
     return query.scalar()
+
+
+def getLastGameResultJoin(user):
+    user_games = Partecipation.query.with_entities(Partecipation.game_id).filter(Partecipation.user_id == g.user.id)
+    return Partecipation.query.filter(Partecipation.user_id == user.id).filter(Partecipation.game_id.in_(user_games)).join(Game).with_entities(Game.winner_id).filter(Game.ended == True).order_by(Game.createdAt.desc()).limit(1).label("last_game_winner_id")
+
 
 def getPositionJoin(fatherQuery):
     alias = aliased(User, name = "b")

@@ -8,7 +8,8 @@ from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values, check_game_not_ended
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
-from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
+from tp.rank.queries import getLastGameResultJoin
+from tp.game.utils import sanitizeSuggestedUsers, getSuggestedUsers, updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
 from tp.base.utils import RoomType
 import events
 from events import RecentGameEvents
@@ -155,7 +156,7 @@ def getCategoryImage(id):
 @game.route("/users/suggested", methods = ["GET"])
 @auth_required
 def get_suggested_users():
-    users = getSuggestedUsers()
+    users = getSuggestedUsers(g.user)
     return jsonify(success = True, users = users)
 
 
@@ -164,6 +165,6 @@ def get_suggested_users():
 @auth_required
 def search_user():
     query = "%" + g.query.get("query") + "%"
-    matches = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.id != g.user.id).filter(User.username.ilike(query)).order_by(User.score.desc()).all()
-    output = sanitize_last_game_result(matches)
+    matches = User.query.with_entities(User, getLastGameResultJoin(User)).filter(User.id != g.user.id).filter(User.username.ilike(query)).order_by(User.score.desc()).all()
+    output = sanitizeSuggestedUsers(matches)
     return jsonify(success = True, users = output)
