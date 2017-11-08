@@ -172,7 +172,7 @@ class RankHTTPTestCase(TPTestCase):
         print "#1: Risposta successful"
         response = search(self, "us")
         assert response.status_code == 200
-        matches = response.json.get("matches")
+        matches = response.json.get("users")
         assert matches is not None
         for match in matches:
             assert match.get("position")

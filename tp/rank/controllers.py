@@ -43,4 +43,4 @@ def getFriendsRank():
 def searchInRank():
     query = g.query["query"]
     matches = search("%" + query + "%")
-    return jsonify(matches = matches)
+    return jsonify(users = matches)
