@@ -30,18 +30,20 @@ def generate_random_question(category_id):
     return q
 
 #funzione che svolge un turno. I sockets devono essere forniti con quest'ordine: dealer, altri
-#i sockets sono una coppia: socket, socket_answer
+#i sockets sono una tripla: socket, socket_answer, token
 def generateRound(game_id, *sockets):
     dealer_socket = sockets[0][0]
     opponent_socket = sockets[1][0]
-    round_id = init_round(dealer_socket, game_id).json.get("round").get("id")
-    chosen_category_id = get_categories(dealer_socket, game_id, round_id).json.get("categories")[0].get("id")
-    choose_category(dealer_socket, chosen_category_id, game_id, round_id)
-    questions = get_questions(dealer_socket, game_id, round_id).json.get("questions")
+    dealer_token = sockets[0][2]
+    opponent_token = sockets[1][2]
+    round_id = init_round(dealer_socket, game_id, dealer_token).json.get("round").get("id")
+    chosen_category_id = get_categories(dealer_socket, game_id, round_id, dealer_token).json.get("categories")[0].get("id")
+    choose_category(dealer_socket, chosen_category_id, game_id, round_id, dealer_token)
+    questions = get_questions(dealer_socket, game_id, round_id, dealer_token).json.get("questions")
 
     dealer_answer = sockets[0][1]
     opponent_answer = sockets[1][1]
     for question in questions:
         question_id = question.get("id")
-        for (socket, socket_answer) in sockets:
-            answer(socket, socket_answer, game_id, round_id, question_id)
+        for (socket, socket_answer, token) in sockets:
+            answer(socket, socket_answer, game_id, round_id, question_id, token)

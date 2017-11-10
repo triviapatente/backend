@@ -8,7 +8,8 @@ from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values, check_game_not_ended
 from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
-from tp.game.utils import updateScore, last_game_result_query, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
+from tp.rank.queries import getLastGameResultJoin
+from tp.game.utils import sanitizeSuggestedUsers, getSuggestedUsers, updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
 from tp.base.utils import RoomType
 import events
 from events import RecentGameEvents
@@ -155,51 +156,15 @@ def getCategoryImage(id):
 @game.route("/users/suggested", methods = ["GET"])
 @auth_required
 def get_suggested_users():
-    a = aliased(Partecipation, "a")
-    n = 10
-    left_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score >= g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
-    right_users = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.score < g.user.score).filter(User.id != g.user.id).order_by(User.score.desc()).limit(n).all()
+    users = getSuggestedUsers(g.user)
+    return jsonify(success = True, users = users)
 
-    left_min = len(left_users) < (n / 2)
-    right_min = len(right_users) < (n / 2)
-    #entrambi hanno meno di 5 elementi a testa
-    if left_min and right_min:
-        #ritorno un risultato con lunghezza < 10
-        users = left_users + right_users
-    #l'array di sinistra ha meno di 5 elementi
-    elif left_min:
-        #dall'array di destra prendo (10 - gli elementi di sinistra) elementi
-        upper_bound = n - len(left_users)
-        #prendo tutti quelli da sinistra
-        users = left_users + right_users[:upper_bound]
-    #l'array di destra ha meno di 5 elementi
-    elif right_min:
-        #dall'array di sinistra prendo (10 - gli elementi di destra) elementi
-        lower_bound = len(left_users) - (n - len(right_users))
-        #prendo tutti quelli da destra
-        users = left_users[lower_bound:] + right_users
-    #entrambi gli array hanno un numero di elementi >= a 5
-    else:
-        #prendo gli ultimi 5 elementi da quello di sinistra, e i primi 5 da destra
-        users = left_users[(n/2):] + right_users[:(n/2)]
-    output = sanitize_last_game_result(users)
-    return jsonify(success = True, users = output)
-
-def sanitize_last_game_result(users):
-    output = []
-    for user in users:
-        item = user[0]
-        last_winner = user[1]
-        if last_winner is not None:
-            item.last_game_won = (last_winner == g.user.id)
-        output.append(item)
-    return output
 
 @game.route("/users/search", methods = ["GET"])
 @needs_values("GET", "query")
 @auth_required
 def search_user():
     query = "%" + g.query.get("query") + "%"
-    matches = User.query.with_entities(User, last_game_result_query(User.id)).filter(User.id != g.user.id).filter(User.username.ilike(query)).order_by(User.score.desc()).all()
-    output = sanitize_last_game_result(matches)
+    matches = User.query.with_entities(User, getLastGameResultJoin(User)).filter(User.id != g.user.id).filter(User.username.ilike(query)).order_by(User.score.desc()).all()
+    output = sanitizeSuggestedUsers(matches)
     return jsonify(success = True, users = output)

@@ -250,6 +250,18 @@ def answer(data):
             RecentGameEvents.turn_changed(game, opponent_turn)
     events.user_answered(g.roomName, question, quiz)
 
+@socketio.on("is_user_online")
+@ws_auth_required
+@needs_values("SOCKET", "game", "user")
+@fetch_models(game = Game, user = User)
+@check_in_room(RoomType.game, "game")
+def is_user_online(data):
+    user = g.models["user"]
+    game = g.models["game"]
+    output = isUserOnline(game.id, user.id)
+    emit("is_user_online", {"answer": output})
+
+
 @socketio.on("round_details")
 @ws_auth_required
 @needs_values("SOCKET", "game")

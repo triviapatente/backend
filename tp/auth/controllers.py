@@ -250,7 +250,6 @@ def changeImage():
         raise FormatNotAllowed()
 
 @account.route("/image/<int:id>", methods = ["GET"])
-@auth_required
 def getUserImage(id):
     user = User.query.filter(User.id == id).first()
     if not user:

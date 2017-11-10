@@ -4,9 +4,9 @@ from flask import request, session, g
 from tp import db
 from tp.auth.social.facebook.utils import FBManager
 from tp.auth.models import *
+from tp.events.models import Socket
 from tp.preferences.models import *
 from tp.exceptions import Forbidden
-from tp.rank.queries import getUserPosition
 from tp.stats.queries import getCategoryPercentages
 from tp.preferences.queries import getPreferencesFromUser
 from tp.auth.social.facebook.utils import getFBTokenInfosFromUser
@@ -14,8 +14,16 @@ from tp.auth.social.facebook.utils import getFBTokenInfosFromUser
 TOKEN_KEY = 'tp-session-token'
 #chiamata che a partire da una richiesta ritorna il token.
 #centralizzata, cosi la si può usare dappertutto
-def tokenFromRequest():
-    return request.headers.get(TOKEN_KEY)
+def tokenFromRequest(socket):
+    if socket == True:
+        try:
+            token = request.event["args"][0][TOKEN_KEY]
+            session[TOKEN_KEY] = token
+            return token
+        except:
+            return session[TOKEN_KEY]
+    else:
+        return request.headers.get(TOKEN_KEY)
 
 def createUser(username = None, email = None, name = None, surname = None, birth = None, password = None, image = None):
     user = User(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
@@ -64,10 +72,7 @@ def createFBUser(username = None, email = None, name = None, surname = None, bir
 
 def getUserFromRequest(socket = False):
     #ottengo il token, con la chiamata trovata in app.auth.utils se non parliamo di socket, nella sessione se invece ne parliamo
-    if socket:
-        token = session.get("token")
-    else:
-        token = tokenFromRequest()
+    token = tokenFromRequest(socket)
     print "Got token from request: %s." % token
     #provo a verificare il token e vedere se riesco a ottenere l'user
     return  Keychain.verify_auth_token(token)
@@ -79,16 +84,13 @@ def authenticate(socket = False):
         print "No user associated with token, forbidden!"
         #lancio un errore Forbidden
         raise Forbidden()
+    elif socket == True:
+        s = Socket.query.filter(Socket.user_id == user.id).filter(Socket.socket_id == request.sid).first()
+        if s is None:
+            s = Socket(user_id = user.id, socket_id = request.sid)
+            db.session.add(s)
+            db.session.commit()
+
     print "User %s associated with token." % user.username
     #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente
     g.user = user
-
-def get_connection_values(user):
-    if not user:
-        return {}
-    output = {}
-    output["global_rank_position"] = getUserPosition(user)
-    #output["stats"] = getCategoryPercentages(user)
-    #output["preferences"] = getPreferencesFromUser(user)
-    #output["fb"] = getFBTokenInfosFromUser(user)
-    return output
