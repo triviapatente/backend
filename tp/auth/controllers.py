@@ -156,7 +156,7 @@ def requestNewPassword():
         mail.send(email)
         return jsonify(success = True)
     else:
-        raise Forbidden()
+        raise NotFound()
 
 #@auth.route("/password/", methods = ["GET"])
 #def passwordPage():

@@ -196,7 +196,7 @@ class AuthHTTPTestCase(TPTestCase):
         print "#2: Username non presente in db"
         username = "dsfsdfsdf"
         response = requestNewPassword(self, username)
-        assert response.status_code == 401
+        assert response.status_code == 404
 
         print "#3: Parametri mancanti"
         print "#3.1: username"
