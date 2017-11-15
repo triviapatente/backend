@@ -1,6 +1,6 @@
 {% extends "forgot_password/layout.html" %}
 {% block body %}
-    <p class="lead text-white content">Da questa pagina potrai cambiare la password smarrita per l'account {{user.username}}, come hai richiesto.</p>
+    <center><p class="lead text-white content">Da questa pagina potrai cambiare la password smarrita per l'account <b>{{user.username}}</b>, come hai richiesto.</p></center>
 <center>
         {% if success != null %}
             {% if success == true %}
