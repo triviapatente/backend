@@ -35,8 +35,8 @@ def changePassword(self, old, new, token = None):
         token = self.token
     return self.app.post("auth/password/edit", data = {"old_value": old, "new_value": new}, token = token)
 
-def requestNewPassword(self, username):
-    return self.app.post("auth/password/request", data = {"username": username})
+def requestNewPassword(self, value):
+    return self.app.post("auth/password/request", data = {"usernameOrEmail": value})
 
 def changePasswordWebPage(self, token):
     suffix = ""

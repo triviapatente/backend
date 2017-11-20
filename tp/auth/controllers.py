@@ -4,6 +4,7 @@ from flask_mail import Message
 from tp import app, db, mail
 from tp.auth.queries import *
 from tp.auth.models import *
+from sqlalchemy import or_
 from tp.exceptions import *
 from tp.decorators import auth_required, needs_values
 from tp.preferences.models import *
@@ -137,11 +138,11 @@ def changePassword():
 
 #richiesta da app per il forgot password. Quando chiamata, provvede a mandare la mail in cui l'utente confermerà che vuole mandare la password
 @auth.route("/password/request", methods = ["POST"])
-@needs_values("POST", "username")
+@needs_values("POST", "usernameOrEmail")
 def requestNewPassword():
-    username = g.post.get("username")
+    value = g.post.get("usernameOrEmail")
     #check if email is present in db
-    user = User.query.filter(User.username == username).first()
+    user = User.query.filter(or_(User.email == value, User.username == value)).first()
     if user is not None:
         #ottengo l'email_token dell'utente
         keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
@@ -156,7 +157,7 @@ def requestNewPassword():
         mail.send(email)
         return jsonify(success = True)
     else:
-        raise Forbidden()
+        raise NotFound()
 
 #@auth.route("/password/", methods = ["GET"])
 #def passwordPage():

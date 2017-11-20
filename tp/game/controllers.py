@@ -165,6 +165,7 @@ def get_suggested_users():
 @auth_required
 def search_user():
     query = "%" + g.query.get("query") + "%"
-    matches = User.query.with_entities(User, getLastGameResultJoin(User)).filter(User.id != g.user.id).filter(User.username.ilike(query)).order_by(User.score.desc()).all()
+    limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
+    matches = User.query.with_entities(User, getLastGameResultJoin(User)).filter(User.id != g.user.id).filter(User.username.ilike(query)).limit(limit).all()
     output = sanitizeSuggestedUsers(matches)
     return jsonify(success = True, users = output)

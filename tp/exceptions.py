@@ -53,6 +53,12 @@ class AlreadyRegisteredUser(TPException):
         elif duplicateUsername:
             self.message = self.message + " username: {0}".format(username)
 
+class NotFound(TPException):
+    status_code = 404
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "L'elemento non è stato trovato"
+        
 #eccezione chiamata quando il login dell'utente fallisce
 class LoginFailed(TPException):
     status_code = 400

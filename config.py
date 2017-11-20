@@ -66,7 +66,7 @@ NUMBER_OF_CATEGORIES_PROPOSED = 5
 #numero di domande per gioco
 NUMBER_OF_QUESTIONS_PER_ROUND = 4
 #numero di recent games per pagina
-RECENT_GAMES_PER_PAGE = 10
+RECENT_GAMES_PER_PAGE = 50
 #numero di round per partita
 NUMBER_OF_ROUNDS = 10
 #percorso dove vengono salvate le immagini dei quiz
