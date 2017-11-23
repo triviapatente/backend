@@ -60,11 +60,9 @@ def register():
         raise AlreadyRegisteredUser(u, username, email)
     #i controlli son passati, posso creare l'utente e salvarlo
     output = doTransaction(createUser, username = username, email = email, password = password)
-    if output:
-        user, keychain = output
-        print "User %s has registered." % user.username, user
-        return jsonify(user = user, token = keychain.auth_token)
-    raise TPException() # trovare exception appropriata
+    user, keychain = output
+    print "User %s has registered." % user.username, user
+    return jsonify(user = user, token = keychain.auth_token)
 
 @fb.route("/auth", methods = ["POST"])
 @needs_values("POST", "token")

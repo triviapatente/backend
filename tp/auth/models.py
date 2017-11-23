@@ -13,6 +13,7 @@ from tp.base.models import Base, CommonPK
 from werkzeug.utils import secure_filename
 from validate_email import validate_email
 from sqlalchemy.orm import validates
+from tp.exceptions import *
 from datetime import datetime
 
 import os
@@ -24,9 +25,15 @@ class User(Base, CommonPK):
 
   @validates("email")
   def validate_email(self, key, value):
-      assert validate_email(value)
+      if not validate_email(value):
+          raise BadParameters(["email"])
       return value
-
+  @validates("username")
+  def validate_username(self, key, value):
+      min_length = app.config["USERNAME_MIN_CHARS"]
+      if len(value) < min_length:
+          raise BadParameters(["username"], "L'username deve contenere almeno 2 caratteri")
+      return value
   #dati personali dell'utente
   name = Column(String)
   surname = Column(String)
@@ -106,6 +113,13 @@ class Keychain(Base, CommonPK):
 
   lifes = Column(Integer, nullable = False)
 
+  @validates("password")
+  def validate_password(self, key, value):
+      min_length = app.config["PASSWORD_MIN_CHARS"]
+      if len(value) < min_length:
+          raise BadParameters(["password"], "La password deve contenere almeno 7 caratteri")
+      return value
+
   password = Column(String)
   #nonce per permettere l'invalidazione anticipata del token
   nonce = Column(String)
@@ -159,6 +173,7 @@ class Keychain(Base, CommonPK):
 
   #metodo che salva in password l'hash della password passata
   def hash_password(self, password):
+      self.validate_password("password", password)
       self.password = pwd_context.encrypt(password)
 
   #metodo che salva genera, hasha e salva un nuovo nonce di lunghezza ##length numeri consecutivi (in media di 2/3 cifre)

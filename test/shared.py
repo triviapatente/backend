@@ -19,7 +19,7 @@ class TPTestCase(TestCase):
 class TPAuthTestCase(TPTestCase):
     def setUp(self, socket = False):
         super(TPAuthTestCase, self).setUp()
-        response = register(self, "pippo", "pippo@gmail.com", "pippo")
+        response = register(self, "pippo", "pippo@gmail.com", "pisdfsdfppo")
         self.token = response.json.get("token")
         self.user = response.json.get("user")
         assert self.token

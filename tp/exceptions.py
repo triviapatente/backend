@@ -32,9 +32,12 @@ class MissingParameter(TPException):
 class BadParameters(TPException):
     status_code = 400 #bad request
 
-    def __init__(self, parameters):
+    def __init__(self, parameters, message = None):
         TPException.__init__(self)
-        self.message = "Alcuni parametri della richiesta sono errati"
+        if message:
+            self.message = message
+        else:
+            self.message = "Alcuni parametri della richiesta sono errati"
         self.parameters = parameters
 
 #eccezione chiamata quando l'utente da inserire è già esistente
@@ -58,7 +61,7 @@ class NotFound(TPException):
     def __init__(self):
         TPException.__init__(self)
         self.message = "L'elemento non è stato trovato"
-        
+
 #eccezione chiamata quando il login dell'utente fallisce
 class LoginFailed(TPException):
     status_code = 400

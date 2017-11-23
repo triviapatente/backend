@@ -59,6 +59,12 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 #vite iniziali per utente
 INITIAL_LIFES = 3
 
+#numero minimo di caratteri username
+USERNAME_MIN_CHARS = 3
+
+#numero minimo di caratteri password
+PASSWORD_MIN_CHARS = 7
+
 #estensioni ammesse
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 #numero di categorie proposte per il gioco

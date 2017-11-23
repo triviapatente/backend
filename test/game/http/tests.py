@@ -17,12 +17,12 @@ class GameHTTPTestCase(TPAuthTestCase):
     first_opponent_socket = None
     def setUp(self):
         super(GameHTTPTestCase, self).setUp(socket = True)
-        self.first_opponent = register(self, "test1", "test1@gmail.com", "test").json
+        self.first_opponent = register(self, "test1", "test1@gmail.com", "sdfsdfsdfds").json
         self.first_opponent_socket = get_socket_client()
         #il primo utente deve allacciarsi al socket per ricevere gli eventi, con una chiamata qualsiasi
         global_infos(self.first_opponent_socket, self.first_opponent.get("token"))
-        self.second_opponent = register(self, "test2", "test2@gmail.com", "test").json
-        self.third_opponent = register(self, "test3", "test3@gmail.com", "test").json
+        self.second_opponent = register(self, "test2", "test2@gmail.com", "sdfsdfsdfds").json
+        self.third_opponent = register(self, "test3", "test3@gmail.com", "sdfsdfsdfds").json
 
     def test_new_game(self):
         opponent_id = self.first_opponent.get("user").get("id")
