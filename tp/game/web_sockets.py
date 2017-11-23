@@ -283,6 +283,7 @@ def round_details(data):
     output["quizzes"] = getQuizzesTill(last_round_number, quiz_ids, game)
     #ottengo gli utenti del gioco
     output["users"] = getUsersFromGame(game)
+    output["rounds"] = rounds;
     #se il gioco è completato
     if game.ended:
         #ottengo i risultati del gioco
