@@ -191,9 +191,8 @@ def forgotPasswordWebPageResult():
 #api per il cambio del nome (##name)
 @account.route("/name/edit", methods = ["POST"])
 @auth_required
-@needs_values("POST", "name")
 def changeName():
-    g.user.name = g.post.get("name")
+    g.user.name = request.form.get("name")
     db.session.add(g.user)
     db.session.commit()
     print "User %d change name to: %s." % (g.user.id, g.user.name)
@@ -202,9 +201,8 @@ def changeName():
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
 @auth_required
-@needs_values("POST", "surname")
 def changeSurname():
-    g.user.surname = g.post.get("surname")
+    g.user.surname = request.form.get("surname")
     db.session.add(g.user)
     db.session.commit()
     print "User %d change surname to: %s" % (g.user.id, g.user.surname)
