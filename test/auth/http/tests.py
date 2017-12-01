@@ -101,17 +101,6 @@ class AuthHTTPTestCase(TPTestCase):
         assert response2.status_code == 200
         assert response.json.get("token") == response2.json.get("token")
 
-    def test_logout(self):
-        token = register(self, "user", "user@gmail.com", "ussdfsdfer").json.get("token")
-
-        print "#1: Logout corretto"
-        response = logout(self, token)
-        assert response.status_code == 200
-
-        print "#2: Impossibile accedere con lo stesso token"
-        response = getCurrentUser(self, token)
-        assert response.status_code == 401
-
     def test_changeName(self):
         token = register(self, "user", "user@gmail.com", "ussdfsdfer").json.get("token")
 

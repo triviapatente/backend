@@ -106,17 +106,7 @@ def link_to_fb():
         infos = getFBTokenInfosFromUser(g.user)
         return jsonify(infos = infos, user = g.user)
     raise TPException() #TODO: trovare exception appropriata
-#api che effettua il logout dell'utente
-@auth.route("/logout", methods = ["POST"])
-@auth_required
-def logout():
-    keychain = getKeychain(g.user.id)
-    # cambio il token
-    keychain.renew_nonce()
-    db.session.add(keychain)
-    db.session.commit()
-    print "%s just disconnected." % g.user.username
-    return jsonify(user = g.user)
+
 
 #api per il cambio della password
 @auth.route("/password/edit", methods = ["POST"])
