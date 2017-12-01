@@ -117,7 +117,6 @@ def init(testing = False, ci = False):
 
 
     # Add websockets
-    import tp.auth.web_sockets
     import tp.base.web_sockets
     #import tp.message.web_sockets
     import tp.game.web_sockets
