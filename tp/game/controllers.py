@@ -138,7 +138,6 @@ def recent_games():
     return jsonify(success = True, recent_games = recent_games)
 
 @quiz.route("/image/<int:id>", methods = ["GET"])
-@auth_required
 def getQuizImage(id):
     image = Image.query.filter(Image.id == id).first()
     if image:
@@ -146,7 +145,6 @@ def getQuizImage(id):
     raise NotAllowed()
 
 @category.route("/image/<int:id>", methods = ["GET"])
-@auth_required
 def getCategoryImage(id):
     category = Category.query.filter(Category.id == id).first()
     if category:

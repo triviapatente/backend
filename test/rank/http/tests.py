@@ -20,7 +20,7 @@ class RankHTTPTestCase(TPTestCase):
         #numero di utenti da generare per la classifica
         self.number_of_users = self.number_of_results + 10
         for i in range (0, self.number_of_users):
-            response = register(self, "user%s" % i, "user%s@gmail.com" % i, "user%s" % i)
+            response = register(self, "user%s" % i, "user%s@gmail.com" % i, "userpassword%s" % i)
             id = response.json.get("user").get("id")
             user = User.query.filter(User.id == id).first()
             #l'utente i-esimo avrà punteggio i
@@ -29,7 +29,7 @@ class RankHTTPTestCase(TPTestCase):
             db.session.commit()
 
         userNumber = self.number_of_users - 1
-        loginResponse = login(self, "user%s" % userNumber, "user%s" % userNumber)
+        loginResponse = login(self, "user%s" % userNumber, "userpassword%s" % userNumber)
         self.token = loginResponse.json.get("token")
         self.user_id = loginResponse.json.get("user").get("id")
 

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from test.shared import TPAuthTestCase
-from test.auth.http.api import logout
 from api import *
 
 class BaseHTTPTestCase(TPAuthTestCase):
@@ -32,7 +31,7 @@ class BaseHTTPTestCase(TPAuthTestCase):
         assert message.json.get("status_code") == 400
 
         print "4. Autenticazione richiesta"
-        logout(self)
+        self.token = "fuffa"
         message = contact(self, "Messaggio di prova", "hint")
         assert message.json.get("success") == False
         assert message.json.get("status_code") == 401

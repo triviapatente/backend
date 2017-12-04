@@ -30,7 +30,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         db.session.expunge(self.quiz_4)
 
         user_id = self.user.get("id")
-        opponent_user_id = register(self, "a", "a@a.it", "a").json.get("user").get("id")
+        opponent_user_id = register(self, "a", "a@a.it", "sdfsdfsdfsdf").json.get("user").get("id")
         game_id = new_game(self, opponent_user_id).json.get("game").get("id")
         r1 = Round(number = 1, dealer_id = user_id, game_id = game_id, cat_id = 1)
         r2 = Round(number = 2, dealer_id = user_id, game_id = game_id, cat_id = 2)

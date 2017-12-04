@@ -60,11 +60,9 @@ def register():
         raise AlreadyRegisteredUser(u, username, email)
     #i controlli son passati, posso creare l'utente e salvarlo
     output = doTransaction(createUser, username = username, email = email, password = password)
-    if output:
-        user, keychain = output
-        print "User %s has registered." % user.username, user
-        return jsonify(user = user, token = keychain.auth_token)
-    raise TPException() # trovare exception appropriata
+    user, keychain = output
+    print "User %s has registered." % user.username, user
+    return jsonify(user = user, token = keychain.auth_token)
 
 @fb.route("/auth", methods = ["POST"])
 @needs_values("POST", "token")
@@ -108,17 +106,7 @@ def link_to_fb():
         infos = getFBTokenInfosFromUser(g.user)
         return jsonify(infos = infos, user = g.user)
     raise TPException() #TODO: trovare exception appropriata
-#api che effettua il logout dell'utente
-@auth.route("/logout", methods = ["POST"])
-@auth_required
-def logout():
-    keychain = getKeychain(g.user.id)
-    # cambio il token
-    keychain.renew_nonce()
-    db.session.add(keychain)
-    db.session.commit()
-    print "%s just disconnected." % g.user.username
-    return jsonify(user = g.user)
+
 
 #api per il cambio della password
 @auth.route("/password/edit", methods = ["POST"])
@@ -203,9 +191,8 @@ def forgotPasswordWebPageResult():
 #api per il cambio del nome (##name)
 @account.route("/name/edit", methods = ["POST"])
 @auth_required
-@needs_values("POST", "name")
 def changeName():
-    g.user.name = g.post.get("name")
+    g.user.name = request.form.get("name")
     db.session.add(g.user)
     db.session.commit()
     print "User %d change name to: %s." % (g.user.id, g.user.name)
@@ -214,9 +201,8 @@ def changeName():
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
 @auth_required
-@needs_values("POST", "surname")
 def changeSurname():
-    g.user.surname = g.post.get("surname")
+    g.user.surname = request.form.get("surname")
     db.session.add(g.user)
     db.session.commit()
     print "User %d change surname to: %s" % (g.user.id, g.user.surname)

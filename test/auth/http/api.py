@@ -5,11 +5,6 @@ def login(self, username, password):
 def register(self, username, email, password):
     return self.app.post("/auth/register", data = {"username": username, "email": email, "password": password})
 
-def logout(self, token = None):
-    if not token:
-        token = self.token
-    return self.app.post("/auth/logout", token = token)
-
 def getCurrentUser(self, token = None):
     if not token:
         token = self.token

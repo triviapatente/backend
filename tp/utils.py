@@ -27,7 +27,7 @@ def doTransaction(transaction, **params):
         print traceback.format_exc()
         # se avvengono errori torno indietro all'ultimo savepoint (o all'inizio se non ci sono)
         db.session.rollback()
-        return False #se la funzione non ritorna niente non è andata a buon fine
+        raise e #se la funzione non ritorna niente non è andata a buon fine
     # per permettere il salvataggio in caso di savepoint il commit è fuori dal blocco try
     db.session.commit()
     db.session.commit() # non si sa perchè ne servano due in caso di flush
