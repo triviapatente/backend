@@ -27,12 +27,16 @@ class User(Base, CommonPK):
   def validate_email(self, key, value):
       if not validate_email(value):
           raise BadParameters(["email"])
+      if " " in value:
+          raise BadParameters(["email", "La email non deve contenere spazi"])
       return value
   @validates("username")
   def validate_username(self, key, value):
       min_length = app.config["USERNAME_MIN_CHARS"]
       if len(value) < min_length:
           raise BadParameters(["username"], "L'username deve contenere almeno 2 caratteri")
+      if " " in value:
+          raise BadParameters(["username", "L'username non deve contenere spazi"])
       return value
   #dati personali dell'utente
   name = Column(String)

@@ -54,7 +54,14 @@ class AuthHTTPTestCase(TPTestCase):
         response = register(self, "", "", "")
         assert response.status_code == 400
 
-        print "#6: Email non valida"
+        print "#6: No spazi nell'username"
+        response = register(self, "1 2", "sdf@sdf.it", "sdfdsfsdf")
+        assert response.status_code == 400
+        print "#7: No spazi nell'email"
+        response = register(self, "12", "sdf @sdf.it", "sdfdsfsdf")
+        assert response.status_code == 400
+
+        print "#8: Email non valida"
         response = register(self, "123", "123.it", "dfsdsdfvsv")
         assert response.status_code == 400
         response = register(self, "123", "123@.it", "dfsdsdfvsv")
@@ -62,12 +69,21 @@ class AuthHTTPTestCase(TPTestCase):
         response = register(self, "123", "@df.it", "dfsdsdfvsv")
         assert response.status_code == 400
 
-        print "#7: username non valido"
+        print "#9: username non valido"
         response = register(self, "12", "sdf@sdf.it", "sdfdsfsdf")
         assert response.status_code == 400
-        print "#7: password non valida"
+        print "#10: password non valida"
         response = register(self, "12asdsd", "sdf@sddf.it", "asd")
         assert response.status_code == 400
+
+        print "#11: Strip"
+        print "#11.1 username"
+        response = register(self, " token ", "sdf@sddf.it", "asd")
+        assert response.status_code == 403
+        print "#11.1 email"
+        response = register(self, "tokensad", " token@gmail.com ", "asd")
+        assert response.status_code == 403
+
 
     def test_login(self):
         #chiamata propedeutica
@@ -113,6 +129,14 @@ class AuthHTTPTestCase(TPTestCase):
         response2 = login(self, "user", "usesdfsdfr")
         assert response2.status_code == 200
         assert response.json.get("token") == response2.json.get("token")
+
+        print "#7: Strip"
+        print "#7.1 username"
+        response = login(self, " user ", "usesdfsdfr")
+        assert response.status_code == 200
+        print "#7.1 email"
+        response = login(self, " user@gmail.com ", "usesdfsdfr")
+        assert response.status_code == 200
 
     def test_changeName(self):
         token = register(self, "user", "user@gmail.com", "ussdfsdfer").json.get("token")
@@ -195,6 +219,7 @@ class AuthHTTPTestCase(TPTestCase):
         response = changePassword(self, "fjfjfjfjfj", "sdf", new_token)
         assert response.status_code == 400
 
+
     def test_request_new_password(self):
         #registrazione iniziale
         response = register(self, "user", "user@gmail.com", "dfsdvsv")
@@ -233,6 +258,16 @@ class AuthHTTPTestCase(TPTestCase):
         print "#3.1: usernameOrEmail"
         response = requestNewPassword(self, None)
         assert response.status_code == 400
+
+        print "#4: Strip"
+        print "#4.1 username"
+        username = " " + user.get("username") + " "
+        response = requestNewPassword(self, username)
+        assert response.status_code == 200
+        print "#4.1 email"
+        email = " " + user.get("email") + " "
+        response = requestNewPassword(self, email)
+        assert response.status_code == 200
 
     def test_change_password_webpage(self):
         #registrazione iniziale

@@ -26,7 +26,7 @@ def login():
     #ottengo i valori in input
     password = g.post.get("password")
     #ottengo l'user a partire dall'email o dall'username, e mi chiedo se c'è
-    user = getUserFromIdentifier(g.post.get("user"))
+    user = getUserFromIdentifier(g.post.get("user").strip())
     if not user:
         #se no, login fallito!
         raise LoginFailed()
@@ -50,8 +50,8 @@ def login():
 @needs_values("POST", "email", "username", "password")
 def register():
     #ottengo i valori in input
-    username = g.post.get("username")
-    email = g.post.get("email")
+    username = g.post.get("username").strip()
+    email = g.post.get("email").strip()
     password = g.post.get("password")
     #vedo se ci sono altri utenti che hanno lo stesso username o la stessa email
     u = getUserFromUsernameOrEmail(username, email)
@@ -128,7 +128,7 @@ def changePassword():
 @auth.route("/password/request", methods = ["POST"])
 @needs_values("POST", "usernameOrEmail")
 def requestNewPassword():
-    value = g.post.get("usernameOrEmail")
+    value = g.post.get("usernameOrEmail").strip()
     #check if email is present in db
     user = getUserFromIdentifier(value)
     if user is not None:
