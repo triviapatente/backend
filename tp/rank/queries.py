@@ -82,12 +82,15 @@ def search(query):
         #FROM public.user
         #WHERE score > a.score) as position
     #FROM public.user a
-    #WHERE username LIKE '%query%' LIMIT n
-    
+    #WHERE username ILIKE '%query%'
+    #AND CONCAT(name, " ", surname) LIKE '%query%'
+    #LIMIT n
+
     #numero di utenti max da ritornare
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
     position = getPositionJoin(User)
-    output = User.query.with_entities(User, position).filter(User.username.ilike(query)).limit(limit).all()
+    criteria = or_(User.username.ilike(query), func.concat(User.name, " ", User.surname).ilike(query))
+    output = User.query.with_entities(User, position).filter(criteria).limit(limit).all()
     return sanitizeRankResponse(output)
 
 
