@@ -288,11 +288,14 @@ def getNumberOfGames(user_A, user_B):
 def gameEnded(game):
     #prendo gli utenti della partita
     users = getUsersFromGame(game)
+    #costanti
+    numberOfRounds = app.config["NUMBER_OF_ROUNDS"]
+    numberOfQuestionsPerRound = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     #per ognuno di essi
     for user in users:
         #se non hanno finito l'ultimo round
-        last_round_answers = Question.query.filter(Question.user_id == user.id).join(Round).filter(Round.game_id == game.id).filter(Round.number == app.config["NUMBER_OF_ROUNDS"]).count()
-        if last_round_answers < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]:
+        last_round_answers = Question.query.filter(Question.user_id == user.id).join(Round).filter(Round.game_id == game.id).filter(Round.number == numberOfRounds).count()
+        if last_round_answers < numberOfQuestionsPerRound:
             #la partita non è finita
             return False
     #la partita è finita

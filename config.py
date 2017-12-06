@@ -74,7 +74,7 @@ NUMBER_OF_QUESTIONS_PER_ROUND = 4
 #numero di recent games per pagina
 RECENT_GAMES_PER_PAGE = 50
 #numero di round per partita
-NUMBER_OF_ROUNDS = 10
+NUMBER_OF_ROUNDS = 5
 #percorso dove vengono salvate le immagini dei quiz
 QUIZ_IMAGE_FOLDER = "images/"
 CATEGORY_IMAGE_FOLDER = "images/categories/"

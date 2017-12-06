@@ -120,20 +120,21 @@ class GameSocketTestCase(TPAuthTestCase):
         numberOfRounds = app.config["NUMBER_OF_ROUNDS"]
         print "#9: Dopo %d turni la partita finisce" % numberOfRounds
         #svolgo i turni
-        for i in range(1, numberOfRounds/2):
+        limit = (numberOfRounds / 2) + 1
+        for i in range(1, limit):
             #svolgo il turno con dealer opponent
             generateRound(self.game_id, (self.opponent_socket, True, self.opponent_token), (self.socket, True, self.token))
             #svolgo il turno con dealer user
             generateRound(self.game_id, (self.socket, True, self.token), (self.opponent_socket, True, self.opponent_token))
-        #ultimo round
-        generateRound(self.game_id, (self.opponent_socket, True, self.opponent_token), (self.socket, True, self.token))
-
+        
         #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
-        response = init_round(self.socket, self.game_id, self.token)
+        response = init_round(self.opponent_socket, self.game_id, self.token)
+        #chiamo due volte per consumare gli eventi 
+        response = init_round(self.opponent_socket, self.game_id, self.token)
         assert response.json.get("ended")
         partecipations = response.json.get("partecipations")
         assert partecipations
-        socket_response = self.opponent_socket.get_received()
+        socket_response = self.socket.get_received()
         assert socket_response.json.get("winner_id") == response.json.get("winner_id")
         # controllo che tutti i giocatori abbiano avuto un cambiamento nel punteggio
         for p in partecipations:
@@ -155,13 +156,16 @@ class GameSocketTestCase(TPAuthTestCase):
         #accetto la partita con opponent_socket
         init_round(self.opponent_socket, self.game_id, self.opponent_token)
         #svolgo i turni con risposte diverse per i giocatori
-        for i in range(0, numberOfRounds/2):
+        for i in range(0, limit):
             #svolgo il turno con dealer user
             generateRound(self.game_id, (self.socket, True, self.token), (self.opponent_socket, False, self.opponent_token))
-            #svolgo il turno con dealer opponent
-            generateRound(self.game_id, (self.opponent_socket, False, self.opponent_token), (self.socket, True, self.token))
+            if i != limit - 1:
+                #svolgo il turno con dealer opponent
+                generateRound(self.game_id, (self.opponent_socket, False, self.opponent_token), (self.socket, True, self.token))
         #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
-        response = init_round(self.socket, self.game_id, self.token)
+        response = init_round(self.opponent_socket, self.game_id, self.token)
+        #doppia chiamata per togliere gli eventi
+        response = init_round(self.opponent_socket, self.game_id, self.token)
         assert response.json.get("ended")
         partecipations = response.json.get("partecipations")
         assert partecipations

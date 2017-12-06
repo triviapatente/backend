@@ -36,7 +36,8 @@ def generateRound(game_id, *sockets):
     opponent_socket = sockets[1][0]
     dealer_token = sockets[0][2]
     opponent_token = sockets[1][2]
-    round_id = init_round(dealer_socket, game_id, dealer_token).json.get("round").get("id")
+    round = init_round(dealer_socket, game_id, dealer_token).json.get("round")
+    round_id = round.get("id")
     chosen_category_id = get_categories(dealer_socket, game_id, round_id, dealer_token).json.get("categories")[0].get("id")
     choose_category(dealer_socket, chosen_category_id, game_id, round_id, dealer_token)
     questions = get_questions(dealer_socket, game_id, round_id, dealer_token).json.get("questions")
@@ -47,3 +48,4 @@ def generateRound(game_id, *sockets):
         question_id = question.get("id")
         for (socket, socket_answer, token) in sockets:
             answer(socket, socket_answer, game_id, round_id, question_id, token)
+    
