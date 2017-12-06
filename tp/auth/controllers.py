@@ -130,7 +130,7 @@ def changePassword():
 def requestNewPassword():
     value = g.post.get("usernameOrEmail")
     #check if email is present in db
-    user = User.query.filter(or_(User.email == value, User.username == value)).first()
+    user = getUserFromIdentifier(value)
     if user is not None:
         #ottengo l'email_token dell'utente
         keychain = Keychain.query.filter(Keychain.user_id == user.id).first()

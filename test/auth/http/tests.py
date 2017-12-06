@@ -23,6 +23,14 @@ class AuthHTTPTestCase(TPTestCase):
         response = register(self, "123", "user@gmail.com", "dfsdsdfvsv")
         assert response.status_code == 403
 
+        print "#2.3: per username (case insensitive)"
+        response = register(self, "User", "12@gmail.com", "dfsdsdfvsv")
+        assert response.status_code == 403
+
+        print "#2.4: per email (case insensitive)"
+        response = register(self, "123", "User@gmail.com", "dfsdsdfvsv")
+        assert response.status_code == 403
+
         print "#3: Parametri mancanti"
 
         print "#3.1: username"
@@ -67,6 +75,11 @@ class AuthHTTPTestCase(TPTestCase):
 
         print "#1: Login corretto"
         response = login(self, "user", "usesdfsdfr")
+        assert response.status_code == 200
+        assert response.json.get("user") and response.json.get("token")
+
+        print "#1.1: Login corretto case insensitive"
+        response = login(self, "User", "usesdfsdfr")
         assert response.status_code == 200
         assert response.json.get("user") and response.json.get("token")
 
@@ -193,8 +206,20 @@ class AuthHTTPTestCase(TPTestCase):
         assert response.status_code == 200
         assert response.json.get("success") == True
 
+        print "#1.1 Username presente in db: case insensitive"
+        username = username.title()
+        response = requestNewPassword(self, username)
+        assert response.status_code == 200
+        assert response.json.get("success") == True
+
         print "#2: Email presente in db"
         email = user.get("email")
+        response = requestNewPassword(self, email)
+        assert response.status_code == 200
+        assert response.json.get("success") == True
+
+        print "#2.2 Email presente in db: case insensitive"
+        email = email.title()
         response = requestNewPassword(self, email)
         assert response.status_code == 200
         assert response.json.get("success") == True

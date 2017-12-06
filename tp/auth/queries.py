@@ -7,7 +7,7 @@ from tp import db
 
 # ritorna l'utente a partire dallo username o dalla email (##user_identifier)
 def getUserFromIdentifier(user_identifier):
-    return User.query.filter(or_(User.email == user_identifier, User.username == user_identifier)).first()
+    return User.query.filter(or_(func.lower(User.email) == func.lower(user_identifier), func.lower(User.username) == func.lower(user_identifier))).first()
 
 # ritorna il keychain dell'utente a partire dall'##id
 def getKeychain(id):
@@ -15,4 +15,4 @@ def getKeychain(id):
 
 # ritorna l'utente a partire dallo ##username o dalla ##email
 def getUserFromUsernameOrEmail(username, email):
-    return User.query.filter(or_(User.username == username, User.email == email)).first()
+    return User.query.filter(or_(func.lower(User.username) == func.lower(username), func.lower(User.email) == func.lower(email))).first()
