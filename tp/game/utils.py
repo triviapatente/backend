@@ -344,13 +344,21 @@ def getRecentGames(user):
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
     RECENT_GAMES_PER_PAGE = app.config["RECENT_GAMES_PER_PAGE"]
-    recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).order_by(Game.ended.asc(), Game.started.desc(), desc("my_turn"), Game.updatedAt.desc())
+    active_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).filter(Game.ended == False).order_by(desc("my_turn"), Game.updatedAt.desc()).all()
+    print "Active Games Length for", user.username, ": ", len(active_recent_games)
+    recent_games = []
+    recent_games += active_recent_games
+    if len(active_recent_games) < RECENT_GAMES_PER_PAGE:
+        limit = RECENT_GAMES_PER_PAGE - len(active_recent_games)
+        ended_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).filter(Game.ended == True).order_by(Game.updatedAt.desc()).limit(limit).all()
+        recent_games += ended_recent_games
     output = []
     for g in recent_games:
         game = g[0]
         game.my_turn = g[1]
         game.getOpponentForExport()
         output.append(game)
+    print "Recent Games Length for", user.username, ": ", len(output)
     return output
 
 #ottiene il numero del round corrente se non è stato ancora completato, altrimenti il successivo
