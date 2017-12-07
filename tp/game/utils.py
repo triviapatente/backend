@@ -344,7 +344,7 @@ def getRecentGames(user):
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
     RECENT_GAMES_PER_PAGE = app.config["RECENT_GAMES_PER_PAGE"]
-    active_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).filter(Game.ended == False).order_by(desc("my_turn"), Game.updatedAt.desc()).all()
+    active_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).filter(Game.ended == False).order_by(desc(Game.started), desc("my_turn"), Game.updatedAt.desc()).all()
     print "Active Games Length for", user.username, ": ", len(active_recent_games)
     recent_games = []
     recent_games += active_recent_games
