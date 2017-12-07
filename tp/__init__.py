@@ -76,17 +76,17 @@ def init(testing = False, ci = False):
     @socketio.on_error_default
     def handle_socket_error(error):
         response = None
+        event = request.event["message"]
         if issubclass(error.__class__, TPException):
             response = error.to_dict()
-            print "Socket Error %d: %s" % (error.status_code, error.message)
+            print "Socket Error %d (%s): %s" % (error.status_code, event, error.message)
         else:
             error = str(error)
             #internal server error
             response = {"error": error, "success": False, "status_code": 500}
-            print "Socket Error %s" % error
+            print "Socket Error %s (%s)" % (error, event)
         print "Traceback: %s" % traceback.format_exc(sys.exc_info())
 
-        event = request.event["message"]
         emit(event, response)
 
 
