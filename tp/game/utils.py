@@ -37,8 +37,6 @@ def sanitizeSuggestedUsers(users):
         output.append(user)
     return output
 
-def getLastOpponents():
-    pass#return User.query.join(Partecipation).filter(Partecipation.user_id)
 
 def getSuggestedUsers(user):
     output = []
@@ -227,40 +225,40 @@ def get_dealer(game, number):
 
 # funzione che cerca un accoppiamento all'interno del ##range per l'utente ##current_user
 # ##prevRange serve a evitare di considerare i range già considerati
-def searchInRange(prevRange, scoreRange, current_user):
+#def searchInRange(prevRange, scoreRange, current_user):
     #left_interval rappresenta a livello matematico: [current_user.score-range;current_user.score-prevRange]
-    left_interval = and_(User.score <= (current_user.score + scoreRange), User.score >= (current_user.score + prevRange))
+#    left_interval = and_(User.score <= (current_user.score + scoreRange), User.score >= (current_user.score + prevRange))
     #right_interval rappresenta a livello matematico: [current_user.score+prevRange;current_user.score+range]
-    right_interval = and_(User.score >= current_user.score - scoreRange, User.score <= current_user.score - prevRange)
+#    right_interval = and_(User.score >= current_user.score - scoreRange, User.score <= current_user.score - prevRange)
     #intervals_union rappresenta a livello matematico: ([current_user.score-range;current_user.score-prevRange] U [current_user.score+prevRange;current_user.score+range])
-    intervals_union = or_(left_interval, right_interval)
+#    intervals_union = or_(left_interval, right_interval)
     #ottengo gli utenti nell'intervallo che non sono me
-    allUsersInRange = User.query.filter(User.id != current_user.id).filter(intervals_union).all()
-    candidates = allUsersInRange
+#    allUsersInRange = User.query.filter(User.id != current_user.id).filter(intervals_union).all()
+#    candidates = allUsersInRange
     # vedo se ci sono users nel range
-    if allUsersInRange:
+#    if allUsersInRange:
         # ci sono, favorisco i giocatori con un numero di partite superiore alla media
         # calcolo il numero di partite per giocatore
-        users_games_count = getNumberOfActiveGames(allUsersInRange)
+#        users_games_count = getNumberOfActiveGames(allUsersInRange)
         # calcolo la media di partite
-        gamesAverage = sum(n for n in users_games_count.values()) / len(users_games_count)
+#        gamesAverage = sum(n for n in users_games_count.values()) / len(users_games_count)
         # trovo gli utenti sopra la media
-        userOverAverage = []
-        for user in allUsersInRange:
-            if users_games_count[user.username] > gamesAverage:
-                userOverAverage.append(user)
+#        userOverAverage = []
+#        for user in allUsersInRange:
+#            if users_games_count[user.username] > gamesAverage:
+#                userOverAverage.append(user)
         # se ci sono
-        if userOverAverage:
+#        if userOverAverage:
             # allora considero loro
-            candidates = userOverAverage
+#            candidates = userOverAverage
     # vedo se ci sono candidati (o in range o se possibile sopra la media di partite nel range)
-    if candidates:
+#    if candidates:
         # se ci sono ne scelgo uno a caso
-        index = randint(0,len(candidates)-1)
-        return candidates[index]
-    else:
+#        index = randint(0,len(candidates)-1)
+#        return candidates[index]
+#    else:
         # comunico che non è stato trovato un abbinamento nel range
-        return None
+#        return None
 
 # funzione che ritorna il numero di partite attive dei giocatori (##users)
 def getNumberOfActiveGames(users):

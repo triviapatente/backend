@@ -10,7 +10,7 @@ from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
 from sqlalchemy import or_, func
 from tp.rank.queries import getLastGameResultJoin
-from tp.game.utils import sanitizeSuggestedUsers, getSuggestedUsers, updateScore, searchInRange, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
+from tp.game.utils import sanitizeSuggestedUsers, getSuggestedUsers, updateScore, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
 from tp.base.utils import RoomType
 import events
 from events import RecentGameEvents
@@ -94,26 +94,7 @@ def leave_game():
 @game.route("/new/random", methods = ["POST"])
 @auth_required
 def randomSearch():
-    # definisco il numero di cicli massimo di ricerca
-    firstUser = User.query.order_by(User.score.desc()).first()
-    lastUser = User.query.order_by(User.score).first()
-    # massimo range in cui andare a cercare
-    maxRangeToCover = max(firstUser.score - g.user.score, g.user.score - firstUser.score)
-    #incremento del range, range di partenza
-    rangeIncrement, initialRange = app.config["RANGE_INCREMENT"], app.config["INITIAL_RANGE"]
-    #utente candidato
-    opponent = None
-    #il +1 serve nel caso in cui esistono tutti utenti con lo stesso punteggio (maxRangeToCover sarebbe 0)
-    scoreRange, prevRange = range(initialRange, maxRangeToCover + initialRange + 1, rangeIncrement), 0
-    #per ogni punteggio nello score
-    for entry in scoreRange:
-        #ottengo l'utente candidato nel sottorange
-        user = searchInRange(prevRange, entry, g.user)
-        #se lo trovo, lo prendo
-        if user:
-            opponent = user
-            break
-        prevRange = entry
+    opponent = User.query.filter(User.id != g.user.id).order_by(func.random()).first()
     #controllo se non ho trovato nessun utente
     if opponent is None:
         print "No opponent found."
