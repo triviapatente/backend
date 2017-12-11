@@ -45,7 +45,7 @@ def getTexts(spans):
 
 # get an html parser for the given ##url
 def getParser(url):
-    return BeautifulSoup(getHtml(url), 'html.parser')
+    return BeautifulSoup(getHtml(url), "html5lib")
 
 
 # Given an image ##url a path save the img in the choosen ##imgPath

@@ -23,6 +23,7 @@ def parseQuestionRow(question_row):
             image_url = image.find('a').find('img').get('src')
         except:
             None
-    question = utils.clean(question_row.find('td', { 'class' : 'quest' }).text)
+    question_text = question_row.find('td', { 'class' : 'quest' }).text.encode("utf-8")
+    question = utils.clean(question_text)
     answer = bool(utils.clean(question_row.find('td', { 'class' : 'risp' }).text) == 'V')
     return image_url, question, answer
