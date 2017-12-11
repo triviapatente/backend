@@ -10,7 +10,7 @@ from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
 from sqlalchemy import or_, func
 from tp.rank.queries import getLastGameResultJoin
-from tp.game.utils import sanitizeSuggestedUsers, getSuggestedUsers, updateScore, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames
+from tp.game.utils import *
 from tp.base.utils import RoomType
 import events
 from events import RecentGameEvents
@@ -52,7 +52,7 @@ def get_leave_score_decrement():
         raise NotAllowed()
     decrement = 0
     if game.started:
-        decrement = left_score_decrement(game)
+        decrement = left_score_decrement(g.user)
     return jsonify(success = True, decrement = decrement)
 
 @game.route("/leave", methods = ["POST"])
