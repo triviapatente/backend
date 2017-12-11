@@ -288,7 +288,4 @@ def round_details(data):
     if game.ended:
         #ottengo i risultati del gioco
         output["partecipations"] = getPartecipationFromGame(game)
-    else:
-        #ottengo il punteggio che otterrei se vincessi
-        output["score_increment"] = getScoreIncrementForWinning(game)
     return emit("round_details", output)

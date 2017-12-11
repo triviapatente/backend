@@ -10,7 +10,7 @@ from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed
 from sqlalchemy import or_, func
 from tp.rank.queries import getLastGameResultJoin
-from tp.game.utils import sanitizeSuggestedUsers, getSuggestedUsers, updateScore, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames, getScoreDecrementForLosing
+from tp.game.utils import sanitizeSuggestedUsers, getSuggestedUsers, updateScore, createGame, getUsersFromGame, getPartecipationFromGame, getRecentGames
 from tp.base.utils import RoomType
 import events
 from events import RecentGameEvents
@@ -52,7 +52,7 @@ def get_leave_score_decrement():
         raise NotAllowed()
     decrement = 0
     if game.started:
-        decrement = getScoreDecrementForLosing(game)
+        decrement = left_score_decrement(game)
     return jsonify(success = True, decrement = decrement)
 
 @game.route("/leave", methods = ["POST"])
@@ -80,7 +80,7 @@ def leave_game():
         db.session.add(game)
         db.session.commit()
         #modifico i punteggi degli utenti
-        updateScore(game)
+        updateScore(game, left = True)
         #ritorno le varie risposte
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         events.game_left(users, game, partecipations)

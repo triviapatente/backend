@@ -126,10 +126,10 @@ class GameSocketTestCase(TPAuthTestCase):
             generateRound(self.game_id, (self.opponent_socket, True, self.opponent_token), (self.socket, True, self.token))
             #svolgo il turno con dealer user
             generateRound(self.game_id, (self.socket, True, self.token), (self.opponent_socket, True, self.opponent_token))
-        
+
         #adesso provando ad accedere al round successivo dovrei ottenere l'update dei punteggi
         response = init_round(self.opponent_socket, self.game_id, self.token)
-        #chiamo due volte per consumare gli eventi 
+        #chiamo due volte per consumare gli eventi
         response = init_round(self.opponent_socket, self.game_id, self.token)
         assert response.json.get("ended")
         partecipations = response.json.get("partecipations")
@@ -478,13 +478,10 @@ class GameSocketTestCase(TPAuthTestCase):
         quizzes = response.json.get("quizzes")
         answers = response.json.get("answers")
         categories = response.json.get("categories")
-        score_increment = response.json.get("score_increment")
         assert len(users) == 2
         assert len(quizzes) == (NUMBER_OF_QUESTIONS_PER_ROUND * 2)
         assert len(answers) == len(quizzes) * len(users)
         assert len(categories) == (len(quizzes) / NUMBER_OF_QUESTIONS_PER_ROUND)
-        assert score_increment is not None
-        assert score_increment > 0
 
         print "#3: Dopo 3 round in cui io ho risposto a tutto, l'altro ha risposto a n domande su 4 del 3 (con n < 4)"
         print "#3.1: mi vengono ritornate NUMBER_OF_QUESTIONS_PER_ROUND * 3 round * 2 utenti"

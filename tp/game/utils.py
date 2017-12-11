@@ -54,23 +54,23 @@ class Score(Enum):
 
 # dato il risultato effettivo (##effective), quello previsto (##expected) e il coefficiente (##k)
 # ritorna l'incremento
-def score_increment(effective, expected, k):
-    return int(k * (effective - expected) + app.config["BONUS_SCORE"])
+#def score_increment(effective, expected, k):
+#    return int(k * (effective - expected) + app.config["BONUS_SCORE"])
 
 # calcola il fattore moltiplicativo per quella data partita, in funzione del numero di partite (##n_games) disputate tra i due giocatori
 # ##friendly_game definisce se la partita è un'amichevole ed influisce sul fattore moltiplicativo
-def k_factor(n_games, friendly_game):
-    min_k = app.config["MIN_MULTIPLIER_FACTOR"]
-    max_k = app.config["MAX_MULTIPLIER_FACTOR"]
-    if n_games > min_k:
-        n_games = max_k - min_k
-    return (max_k - n_games) / (1 + friendly_game)
+#def k_factor(n_games, friendly_game):
+#    min_k = app.config["MIN_MULTIPLIER_FACTOR"]
+#    max_k = app.config["MAX_MULTIPLIER_FACTOR"]
+#    if n_games > min_k:
+#        n_games = max_k - min_k
+#    return (max_k - n_games) / (1 + friendly_game)
 
 # funzione per calcolare la probabilità di vittoria di A dati:
 # ##score_A (punteggio del giocatore A), ##score_B (punteggio del giocatore B) ed il ##scoreRange di ricerca
 # in caso di ##friendly_game si fa tendere l'expected score a 0.5
-def expectedScore(score_A, score_B, scoreRange, friendly_game = False):
-    return 1 / ( 1 + 10**((score_B - score_A) /(scoreRange + 10000000 * friendly_game)))
+#def expectedScore(score_A, score_B, scoreRange, friendly_game = False):
+#    return 1 / ( 1 + 10**((score_B - score_A) /(scoreRange + 10000000 * friendly_game)))
 
 # funzione che ritorna l'utente con lo score più alto del ##game
 def getFirstUser(game, *columns):
@@ -87,66 +87,74 @@ def getLastUser(game, *columns):
     return query.join(Partecipation).filter(Partecipation.game_id == game.id).order_by(User.score).first()
 
 # funzione che dati gli ##users ricava il range di abbinamento
-def calculateGameRange(game):
-    distance = getFirstUser(game).score - getLastUser(game).score
-    gameRange = app.config["INITIAL_RANGE"]
-    rangeInc = app.config["RANGE_INCREMENT"]
-    while gameRange < distance:
-        gameRange = gameRange + rangeInc
-    return gameRange
+#def calculateGameRange(game):
+#    distance = getFirstUser(game).score - getLastUser(game).score
+#    gameRange = app.config["INITIAL_RANGE"]
+#    rangeInc = app.config["RANGE_INCREMENT"]
+#    while gameRange < distance:
+#        gameRange = gameRange + rangeInc
+#    return gameRange
+def get_number_of_correct_answers(user, game):
+    return Question.query.join(Quiz).join(Round).filter(Round.game_id == game.id, Question.user_id == user.id, Question.answer == Quiz.answer).count()
+
+def apply_zero_limit(user, increment):
+    if increment < 0 and user.score < abs(increment):
+        return - user.score
+    return increment
+
+def left_score_increment(user):
+    increment = app.config["SCORE_ON_LEFT_GAME"]
+    return apply_zero_limit(user, increment)
+def left_score_decrement(user):
+    decrement = -app.config["SCORE_ON_LEFT_GAME"]
+    return apply_zero_limit(user, decrement)
+
+def score_increment(user, userScore, opponentScore):
+    if userScore >= opponentScore:
+        return apply_zero_limit(user, userScore)
+    else:
+        return apply_zero_limit(user, userScore - opponentScore)
+
+def get_increments(game, user, opponent, left):
+    # creo un dictionary che contenga i parametri per l'update del punteggio
+    # TODO v2.0: adapt for more than 2 users
+    output = {}
+    if left:
+        output[user.id] = left_score_decrement(user)
+        output[opponent.id] = left_score_increment(user)
+        return output
+    else:
+        #ottengo il numero di risposte corrette nella partita per user
+        userScore = get_number_of_correct_answers(user, game)
+        #ottengo il numero di risposte corrette nella partita per opponent
+        opponentScore = get_number_of_correct_answers(opponent, game)
+
+        output[user.id] = score_increment(user, userScore, opponentScore)
+        output[opponent.id] = score_increment(opponent, opponentScore, userScore)
+        return output
 
 # funzione che aggiorna il punteggio di una partita (##game)
-def updateScore(game):
-    # prendo gli utenti di una partita
-    users = getUsersFromGame(game)
-    # calcolo lo score range
-    scoreRange = calculateGameRange(game)
-    # prendo il vincitore
-    winner = getWinner(game)
-    # creo un dictionary che contenga i parametri per l'update del punteggio
-    updateParams = {}
-    for user in users:
-        params = {}
-        params["effectiveResult"] = getEffectiveResult(user, winner)
-        params["expectedScore"] = getExpectedScoreForUser(user, users, scoreRange)
-        params["k_factor"] = getMultiplierFactorForUser(user, users)
-        updateParams[user] = params
+def updateScore(game, left = False):
+    user = g.user
+    opponent = getOpponentFrom(game)
+    increments = get_increments(game, user, opponent, left)
+
     # calcolo i nuovi punteggi
-    # params = {"users": users, "updateParams": {"effectiveResult": effectiveResult, "expectedScore": expectedScore, "k_factor": k_factor}}
     def newScores(**params):
-        users = params["users"]
         game_id = params["game_id"]
-        for user in users:
+        increments = params["increments"]
+        for user_id, increment in increments.items():
             # assegno ad ogni utente il suo nuovo punteggio
-            score_inc = score_increment(params["updateParams"][user]["effectiveResult"], params["updateParams"][user]["expectedScore"], params["updateParams"][user]["k_factor"])
-            print "Saving user %s score increment (%d).." % (user.username, score_inc)
+            user = User.query.get(user_id)
+            print "Saving user %s score increment (%d).." % (user.username, increment)
             entry = Partecipation.query.filter(Partecipation.user_id == user.id, Partecipation.game_id == game_id).first()
-            entry.score_increment = score_inc
+            entry.score_increment = increment
             db.session.add(entry)
-            user.score = user.score + score_inc
+            user.score = user.score + increment
             db.session.add(user)
-        return users
-    return doTransaction(newScores, **{"users": users, "updateParams": updateParams, "game_id": game.id})
+        return increments
+    return doTransaction(newScores, **{"increments": increments, "game_id": game.id})
 
-#funzione che ritorna lo score decrement che avrei io nel game, se lasciassi
-def getScoreDecrementForLosing(game):
-    users = getUsersFromGame(game)
-    opponents = [user for user in users if user.id != g.user.id]
-    #TODO: renderlo multiutente
-    winner = opponents[0]
-    return getScoreChangeWith(game, users, winner)
-
-#funzione che ritorna lo score increment che avrei io nel game, se vincessi
-def getScoreIncrementForWinning(game):
-    users = getUsersFromGame(game)
-    return getScoreChangeWith(game, users, g.user)
-#funzione generica che data una partita e un utente generico della stessa, ritorna il cambiamento di punteggio che riceverebbe quell'utente se vincesse
-def getScoreChangeWith(game, users, winner):
-    scoreRange = calculateGameRange(game)
-    effectiveResult = getEffectiveResult(g.user, winner)
-    expectedScore = getExpectedScoreForUser(g.user, users, scoreRange)
-    k_factor = getMultiplierFactorForUser(g.user, users)
-    return score_increment(effectiveResult, expectedScore, k_factor)
 
 # funzione che ritorna i record di Partecipation inerenti ad un ##game
 def getPartecipationFromGame(game):

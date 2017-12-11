@@ -52,7 +52,7 @@ MAIL_PASSWORD = "TriviaPatente1"
 
 INIT_DB = False
 TRAP_BAD_REQUEST_ERRORS = DEBUG
-DEFAULT_USER_SCORE = 800
+DEFAULT_USER_SCORE = 100
 
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -85,14 +85,16 @@ UPLOAD_FOLDER = "images/users/"
 #numero di risultati mostrati nella classifica italiana
 RESULTS_LIMIT_RANK_ITALY = 20
 #fattore moltiplicativo massimo e minimo
-MAX_MULTIPLIER_FACTOR = 100
-MIN_MULTIPLIER_FACTOR = 32
+#MAX_MULTIPLIER_FACTOR = 100
+#MIN_MULTIPLIER_FACTOR = 32
 #bonus di punteggio per partita giocata
-BONUS_SCORE = 10
+#BONUS_SCORE = 10
 #incremento di range ogni tentativo
-RANGE_INCREMENT = 50
+#RANGE_INCREMENT = 50
 #range iniziale
-INITIAL_RANGE = 200
+#INITIAL_RANGE = 200
+#numero di punti assegnati/tolti in caso di uscita dalla partita
+SCORE_ON_LEFT_GAME = 5
 #numero di messaggi nuovi mostrati ad ogni scroll
 MESSAGE_PER_SCROLL = 50
 #numero di divisioni dati nel chart delle statistiche
