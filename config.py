@@ -95,6 +95,10 @@ RESULTS_LIMIT_RANK_ITALY = 20
 #INITIAL_RANGE = 200
 #numero di punti assegnati/tolti in caso di uscita dalla partita
 SCORE_ON_LEFT_GAME = 5
+#terms and conditions url
+TERMS_URL = "http://www.pdf995.com/samples/pdf.pdf"
+#privacy policy url
+PRIVACY_POLICY_URL = "http://www.pdf995.com/samples/pdf.pdf"
 #numero di messaggi nuovi mostrati ad ogni scroll
 MESSAGE_PER_SCROLL = 50
 #numero di divisioni dati nel chart delle statistiche

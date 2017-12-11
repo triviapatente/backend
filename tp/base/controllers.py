@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint
 from tp import app, db
-from flask import g
+from flask import g, redirect
 from porting import getJSONModels
 from tp.exceptions import NotAllowed, BadParameters
 from tp.decorators import auth_required, needs_values
@@ -22,6 +22,16 @@ def obtainModels():
         raise NotAllowed()
     output = getJSONModels()
     return jsonify(output)
+
+@base.route("/terms", methods = ["GET"])
+def redirectToTerms():
+    url = app.config["TERMS_URL"]
+    return redirect(url)
+
+@base.route("/privacyPolicy", methods = ["GET"])
+def redirectToPrivacyPolicy():
+    url = app.config["PRIVACY_POLICY_URL"]
+    return redirect(url)
 
 #API usata per intercettare le richieste di contatto degli utenti
 @base.route("/contact", methods = ["POST"])
