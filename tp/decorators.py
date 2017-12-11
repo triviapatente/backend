@@ -2,14 +2,14 @@
 
 from flask import g, request, session
 from functools import wraps
-from tp import db
+from tp import db, app
 from time import time
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
 from tp.game.models import Game
 from tp.base.utils import roomName
-from tp.exceptions import MissingParameter, ChangeFailed, NotAllowed
+from tp.exceptions import MissingParameter, ChangeFailed, NotAllowed, MaxCharacters
 #decorator che serve per markare una api call in modo che avvenga un controllo sul token mandato dall'utente prima della sua esecuzione.
 #per metterlo in funzione basterà anteporre @auth_required alla stessa
 def auth_required(f):
@@ -40,6 +40,8 @@ def needs_values(method, *keys):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             missing = []
+            #contenitore valori troppo lunghi in caratteri
+            too_long = []
             #dove andare a prendere i parametri
             store = storeForMethod(method)
             #dove andare a mettere i parametri pescati
@@ -56,9 +58,15 @@ def needs_values(method, *keys):
                 if missing_on_dict or missing_on_array or empty_string:
                     missing.append(key)
                 else:
-                    output[key] = store[key]
+                    value = store.get(key)
+                    if isinstance(value, basestring) and len(value) > app.config["MAX_CHARS_FOR_FIELD"]:
+                        too_long.append(key)
+                    else:
+                        output[key] = store[key]
             #necessario perchè g non supporta cose del tipo g[a]
             setattr(g, outputKey, output)
+            if too_long:
+                raise MaxCharacters(too_long)
             if missing:
                 raise MissingParameter(missing)
             return f(*args, **kwargs)

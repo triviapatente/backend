@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 import json
 
-from tp import db
+from tp import db, app
 
 #la classe base è la classe su cui si appoggia ogni oggetto
 class Base(db.Model):
@@ -80,10 +80,11 @@ class CommonPK(db.Model):
     #questo è l'id, l'elemento che hanno in comune
     id =  Column(BigInteger, primary_key = True)
 
+MAX_CHARS = app.config["MAX_CHARS_FOR_FIELD"]
 #la classe feedback è usata per immagazzinare i feedback degli utenti
 class Feedback(Base, CommonPK):
     #contenuto del messaggio, TODO: controllare se funzionano le emoji
-    message = Column(String, nullable = False)
+    message = Column(String(MAX_CHARS), nullable = False)
     #utente che ha inviato il messaggio (può essere null in caso di messaggi anonimi)
     user_id = Column(BigInteger, ForeignKey("user.id"))
     user = relationship("User")

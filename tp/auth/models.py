@@ -18,10 +18,12 @@ from datetime import datetime
 
 import os
 
+MAX_CHARS = app.config["MAX_CHARS_FOR_FIELD"]
+
 class User(Base, CommonPK):
   #valori identificativi dell'utente, devono essere unici
-  username = Column(String, nullable = False, unique = True)
-  email = Column(String(250), nullable = False, unique = True)
+  username = Column(String(MAX_CHARS), nullable = False, unique = True)
+  email = Column(String(MAX_CHARS), nullable = False, unique = True)
 
   @validates("email")
   def validate_email(self, key, value):
@@ -39,8 +41,8 @@ class User(Base, CommonPK):
           raise BadParameters(["username", "L'username non deve contenere spazi"])
       return value
   #dati personali dell'utente
-  name = Column(String)
-  surname = Column(String)
+  name = Column(String(MAX_CHARS))
+  surname = Column(String(MAX_CHARS))
   #path dell'immagine
   image = Column(String)
   #data di nascita

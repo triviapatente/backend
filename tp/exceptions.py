@@ -40,6 +40,18 @@ class BadParameters(TPException):
             self.message = "Alcuni parametri della richiesta sono errati"
         self.parameters = parameters
 
+#eccezione chiamata quando un parametro richiesto eccede il massimo numero di caratteri
+class MaxCharacters(TPException):
+    status_code = 400 #bad request
+
+    def __init__(self, parameters, message = None):
+        TPException.__init__(self)
+        if message:
+            self.message = message
+        else:
+            self.message = "Massimo numero di caratteri raggiunto."
+        self.parameters = parameters
+
 #eccezione chiamata quando l'utente da inserire è già esistente
 class AlreadyRegisteredUser(TPException):
     status_code = 403 #unauthorized
