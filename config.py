@@ -97,8 +97,12 @@ RESULTS_LIMIT_RANK_ITALY = 20
 SCORE_ON_LEFT_GAME = 5
 #terms and conditions url
 TERMS_URL = "http://www.pdf995.com/samples/pdf.pdf"
+#terms and conditions last update
+TERMS_AND_CONDITIONS_LAST_UPDATE = datetime(2017, 12, 13, 00, 21).isoformat() #00:21 of 13/12/2017
 #privacy policy url
 PRIVACY_POLICY_URL = "http://www.pdf995.com/samples/pdf.pdf"
+#privacy policy last update
+PRIVACY_POLICY_LAST_UPDATE = datetime(2017, 12, 13, 00, 21).isoformat() #00:21 of 13/12/2017
 #url to android store
 ANDROID_STORE_URL = "http://www.android.com"
 #url to iOS store
