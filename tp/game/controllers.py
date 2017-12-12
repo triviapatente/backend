@@ -79,8 +79,10 @@ def leave_game():
         game.winner_id = opponent.id
         db.session.add(game)
         db.session.commit()
-        #modifico i punteggi degli utenti
-        updateScore(game, left = True)
+
+        if game.started:
+            #modifico i punteggi degli utenti
+            updateScore(game, left = True)
         #ritorno le varie risposte
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         events.game_left(users, game, partecipations)

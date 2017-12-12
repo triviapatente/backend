@@ -240,6 +240,7 @@ def answer(data):
     print "User %s answered to proposed question." % g.user.username, question, answer
     correct = (quiz.answer == question.answer)
     emit("answer", {"success": True, "correct_answer": correct})
+    events.user_answered(g.roomName, question, quiz)
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
         game.started = True
         db.session.add(game)
@@ -248,7 +249,6 @@ def answer(data):
         opponent_turn = isOpponentTurn(game)
         if opponent_turn is not None:
             RecentGameEvents.turn_changed(game, opponent_turn)
-    events.user_answered(g.roomName, question, quiz)
 
 @socketio.on("is_user_online")
 @ws_auth_required
