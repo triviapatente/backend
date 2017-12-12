@@ -27,7 +27,7 @@ def game_ended(room, game, partecipations):
     data = {"game": game.json, "winner_id": game.winner_id, "partecipations": partecipations}
     return (room, data)
 
-@event("game", action = EventActions.game_left)
+@event("user_left", action = EventActions.game_left)
 def game_left(room, game, partecipations):
     data = {"game": game.json, "user_id": g.user.id, "winner_id": game.winner_id, "partecipations": partecipations}
     return (room, data)
