@@ -23,6 +23,14 @@ def obtainModels():
     output = getJSONModels()
     return jsonify(output)
 
+@base.route("/store_page/ios", methods = ["GET"])
+def redirectToAppStore():
+    url = app.config["IOS_STORE_URL"]
+    return redirect(url)
+@base.route("/store_page/android", methods = ["GET"])
+def redirectToPlayStore():
+    url = app.config["ANDROID_STORE_URL"]
+    return redirect(url)
 @base.route("/terms", methods = ["GET"])
 def redirectToTerms():
     url = app.config["TERMS_URL"]
