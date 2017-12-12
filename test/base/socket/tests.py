@@ -31,6 +31,9 @@ class BaseSocketTestCase(TPAuthTestCase):
         print "#1: Successful global_infos"
         response = global_infos(self.socket, self.token)
         assert response.json.get("global_rank_position") is not None
+        print response.json.get("privacy_policy_last_update"), response.json.get("terms_and_conditions_last_update")
+        assert response.json.get("privacy_policy_last_update") is not None
+        assert response.json.get("terms_and_conditions_last_update") is not None
         #assert response.json.get("preferences") is not None
         #assert response.json.get("fb") is not None
         #TODO: assert response.json.get("friends_rank_position") is not None
