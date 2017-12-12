@@ -35,6 +35,7 @@ def event(name, action, preferences_key = None, needs_push = True):
 def send(name, user, data, preferences_key, needs_push):
     sockets = Socket.query.filter(Socket.user_id == user.id).all()
     for socket in sockets:
+        print "[SOCKET EVENT, name = %s, user = %s, sid = %s]" % (name, user.username, socket.socket_id)
         socketio.emit(name, data, room = socket.socket_id)
 #    if sockets:
 #        for socket in sockets:
