@@ -242,9 +242,11 @@ def answer(data):
     emit("answer", {"success": True, "correct_answer": correct})
     events.user_answered(g.roomName, question, quiz)
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
-        game.started = True
-        db.session.add(game)
-        db.session.commit()
+        number_of_round_answers = Question.query.filter(Question.round_id == round.id).count()
+        if number_of_round_answers == NUMBER_OF_QUESTIONS_PER_ROUND * 2:
+            game.started = True
+            db.session.add(game)
+            db.session.commit()
         events.round_ended(g.roomName, round)
         opponent_turn = isOpponentTurn(game)
         if opponent_turn is not None:

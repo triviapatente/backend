@@ -51,7 +51,10 @@ def get_leave_score_decrement():
     if g.user.id not in user_ids:
         raise NotAllowed()
     decrement = 0
-    if game.started:
+    myFirstTurnAnswers = numberOfAnswersForFirstRound(game, g.user)
+    myFirstTurn = myFirstTurnAnswers < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
+    print "First turn? ", myFirstTurnAnswers, myFirstTurn
+    if not myFirstTurn:
         decrement = left_score_decrement(g.user)
     return jsonify(success = True, decrement = decrement)
 
@@ -80,7 +83,11 @@ def leave_game():
         db.session.add(game)
         db.session.commit()
 
-        if game.started:
+        myFirstTurnAnswers = numberOfAnswersForFirstRound(game, g.user)
+        myFirstTurn = myFirstTurnAnswers < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
+        print "First turn? ", myFirstTurnAnswers, myFirstTurn
+
+        if not myFirstTurn:
             #modifico i punteggi degli utenti
             updateScore(game, left = True)
         #ritorno le varie risposte

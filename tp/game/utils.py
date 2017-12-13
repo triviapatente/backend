@@ -97,23 +97,16 @@ def getLastUser(game, *columns):
 def get_number_of_correct_answers(user, game):
     return Question.query.join(Quiz).join(Round).filter(Round.game_id == game.id, Question.user_id == user.id, Question.answer == Quiz.answer).count()
 
-def apply_zero_limit(user, increment):
-    if increment < 0 and user.score < abs(increment):
-        return - user.score
-    return increment
-
 def left_score_increment(user):
-    increment = app.config["SCORE_ON_LEFT_GAME"]
-    return apply_zero_limit(user, increment)
+    return app.config["SCORE_ON_LEFT_GAME"]
 def left_score_decrement(user):
-    decrement = -app.config["SCORE_ON_LEFT_GAME"]
-    return apply_zero_limit(user, decrement)
+    return -app.config["SCORE_ON_LEFT_GAME"]
 
 def score_increment(user, userScore, opponentScore):
     if userScore >= opponentScore:
-        return apply_zero_limit(user, userScore)
+        return userScore
     else:
-        return apply_zero_limit(user, userScore - opponentScore)
+        return userScore - opponentScore
 
 def get_increments(game, user, opponent, left):
     # creo un dictionary che contenga i parametri per l'update del punteggio
@@ -148,9 +141,9 @@ def updateScore(game, left = False):
             user = User.query.get(user_id)
             print "Saving user %s score increment (%d).." % (user.username, increment)
             entry = Partecipation.query.filter(Partecipation.user_id == user.id, Partecipation.game_id == game_id).first()
+            user.score = max(user.score + increment, 0)
             entry.score_increment = increment
             db.session.add(entry)
-            user.score = user.score + increment
             db.session.add(user)
         return increments
     return doTransaction(newScores, **{"increments": increments, "game_id": game.id})
@@ -425,7 +418,8 @@ def getRoundInfosTill(round_number, game):
         rounds.append(round)
         categories.append(category)
     return (rounds, categories)
-
+def numberOfAnswersForFirstRound(game, user):
+    return Question.query.join(Round).filter(Round.number == 1).filter(Question.user_id == user.id).filter(Round.game_id == game.id).count()
 def getMyAnswersTill(round_number, game):
     output = Question.query.join(Quiz).with_entities(Question, Quiz.answer).filter(Question.user_id == g.user.id).join(Round).filter(Round.game_id == game.id).filter(Round.number <= round_number).all()
     return [setRealAnswer(question, correct) for (question, correct) in output]
