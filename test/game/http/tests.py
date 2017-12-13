@@ -209,7 +209,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         first_game = self.create_bulk_game()
         init_round(self.socket, first_game, self.token)
         #il secondo game lo creo e faccio scorrere 1 turno fino ad arrivare al secondo turno dell'avversario
-        #Risultato sperato : my_turn = true, started = true (il prossimo turno il dealer sarò io!)
+        #Risultato sperato : my_turn = true, started = false (il prossimo turno il dealer sarò io!)
         second_game = self.create_bulk_game()
         round_id = self.process_round(self.socket, second_game, self.token)
         self.first_opponent_socket.get_received()
@@ -221,7 +221,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         self.first_opponent_socket.get_received()
         init_round(self.socket, second_game, self.token)
         #il terzo game lo creo, rispondo al primo round con l'avversario e ritorno al mio turno, scegliendo la categoria
-        #Risultato sperato : my_turn = true, started = true (categoria settata, posso agire!)
+        #Risultato sperato : my_turn = true, started = false (categoria settata, posso agire!)
         third_game = self.create_bulk_game()
         round_id = self.process_round(self.socket, third_game, self.token)
         self.first_opponent_socket.get_received()
@@ -237,7 +237,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         self.process_round(self.first_opponent_socket, fourth_game, self.first_opponent.get("token"), round_id)
         init_round(self.first_opponent_socket, fourth_game, self.first_opponent.get("token"))
         #il quinto game lo creo e rispondo a tutte le domande fino ad arrivare al turno dell'avversario
-        #Risultato sperato : my_turn = false, started = true (il prossimo turno è dell'avversario!)
+        #Risultato sperato : my_turn = false, started = false (il prossimo turno è dell'avversario!)
         fifth_game = self.create_bulk_game()
         round_id = self.process_round(self.socket, fifth_game, self.token)
         self.first_opponent_socket.get_received()
@@ -263,20 +263,20 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[1].get("my_turn") == True
         assert games[1].get("started") == True
 
-        print "#2.4: Il terzo game è quello con il turno dell'avversario"
-        assert games[2].get("id") == fifth_game
-        assert games[2].get("my_turn") == False
-        assert games[2].get("started") == True
+        print "#2.3: Il terzo game è il secondo con il turno dell'avversario"
+        assert games[2].get("id") == first_game
+        assert games[2].get("my_turn") == True
+        assert games[2].get("started") == False
 
-        print "#2.5: Il quarto game è il secondo con il turno dell'avversario"
-        assert games[3].get("id") == fourth_game
+        print "#2.4: Il quarto game è quello con il turno dell'avversario"
+        assert games[3].get("id") == fifth_game
         assert games[3].get("my_turn") == False
-        assert games[3].get("started") == True
+        assert games[3].get("started") == False
 
-        print "#2.3: Il quinto game è il terzo con il mio turno"
-        assert games[4].get("id") == first_game
-        assert games[4].get("my_turn") == True
-        assert games[4].get("started") == False
+        print "#2.5: Il quinto game è il terzo con il mio turno"
+        assert games[4].get("id") == fourth_game
+        assert games[4].get("my_turn") == False
+        assert games[4].get("started") == True
 
         print "#2.6: Il sesto game è quello finito"
         assert games[5].get("id") == sixth_game

@@ -53,7 +53,6 @@ def get_leave_score_decrement():
     decrement = 0
     myFirstTurnAnswers = numberOfAnswersForFirstRound(game, g.user)
     myFirstTurn = myFirstTurnAnswers < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
-    print "First turn? ", myFirstTurnAnswers, myFirstTurn
     if not myFirstTurn:
         decrement = left_score_decrement(g.user)
     return jsonify(success = True, decrement = decrement)
@@ -85,7 +84,6 @@ def leave_game():
 
         myFirstTurnAnswers = numberOfAnswersForFirstRound(game, g.user)
         myFirstTurn = myFirstTurnAnswers < app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
-        print "First turn? ", myFirstTurnAnswers, myFirstTurn
 
         if not myFirstTurn:
             #modifico i punteggi degli utenti
