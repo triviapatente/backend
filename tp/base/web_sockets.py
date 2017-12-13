@@ -2,12 +2,13 @@
 from flask import g, request
 from tp import socketio, db
 from tp.ws_decorators import ws_auth_required, filter_input_room
-from tp.base.utils import roomName, get_connection_values
+from tp.base.utils import roomName, get_connection_values, getInfosFromRoom
+from tp.events.models import *
 from tp.auth.utils import getUserFromRequest
 from tp.events.models import Socket
 from tp.decorators import needs_values
 from flask_socketio import emit, join_room, leave_room, rooms
-from flask import g
+from flask import g, request
 import events
 
 @socketio.on("join_room")
@@ -16,8 +17,14 @@ import events
 @filter_input_room
 def join_room_request(data):
     type = data.get("body").get("type")
-    join_room(g.roomName)
-    print "User %s joined room %s." % (g.user.username, g.roomName)
+    id = data.get("body").get("id")
+    participation = RoomParticipation.query.filter(RoomParticipation.socket_id == request.sid, RoomParticipation.game_id == id).first()
+    if not participation:
+        join_room(g.roomName)
+        participation = RoomParticipation(socket_id = request.sid, game_id = id)
+        db.session.add(participation)
+        db.session.commit()
+        print "User %s joined room %s." % (g.user.username, g.roomName)
     emit("join_room", {"success": True})
     events.user_joined(g.roomName)
     leave_rooms_for(type, g.roomName)
@@ -46,8 +53,11 @@ def leave_rooms_for(type, actual_room = None):
     for name in rooms():
         if name != actual_room and name.startswith(type):
             leave_room(name)
-            events.user_left(name)
+            (roomType, id) = getInfosFromRoom(name)
             print "User %s left room %s." % (g.user.username, name)
+            RoomParticipation.query.filter(RoomParticipation.socket_id == request.sid).filter(RoomParticipation.game_id == id).delete()
+            events.user_left(name)
+    db.session.commit()
 
 @socketio.on("disconnect")
 def disconnect():

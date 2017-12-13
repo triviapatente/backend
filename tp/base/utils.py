@@ -3,6 +3,7 @@ from flask import g
 from tp import app
 from tp.auth.models import User
 from tp.game.models import Partecipation
+from tp.events.models import *
 from tp.rank.queries import getUserPosition
 
 # enumeration of room type
@@ -29,7 +30,7 @@ def getInfosFromRoom(id):
 def getUsersFromRoom(type, game_id, check_for_user = False):
     #unico caso al momento, ma in caso di riutilizzo del sistema room ci saranno altri casi
     if type == RoomType.game.value:
-        query = User.query.join(Partecipation).filter(Partecipation.game_id == game_id)
+        query = User.query.join(Socket).join(RoomParticipation).filter(RoomParticipation.game_id == game_id)
         if check_for_user:
             query.filter(User.id == g.user.id)
         return query.all()

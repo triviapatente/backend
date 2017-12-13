@@ -85,7 +85,7 @@ def authenticate(socket = False):
         #lancio un errore Forbidden
         raise Forbidden()
     elif socket == True:
-        s = Socket.query.filter(Socket.user_id == user.id).filter(Socket.socket_id == request.sid).first()
+        s = Socket.query.filter(Socket.socket_id == request.sid).first()
         if s is None:
             s = Socket(user_id = user.id, socket_id = request.sid)
             db.session.add(s)

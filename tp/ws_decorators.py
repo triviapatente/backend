@@ -17,13 +17,18 @@ def filter_input_room(f):
         body = params.get("body")
         id = body.get("id")
         type = body.get("type")
-        output = getUsersFromRoom(type, id, True)
-        #se l'id non è settato, mi viene ritornato un valore diverso da none se la room ha un nome sensato, se l'id è settato invece, mi deve ritornare un array con length > 0
-        if (id is None and output is not None) or output:
-            g.roomName = roomName(id, type)
+        if type != "game":
+            raise NotAllowed()
+        elif id is None:
             return f(*args, **kwargs)
         else:
-            raise NotAllowed()
+            partecipation = Partecipation.query.filter(Partecipation.user_id == g.user.id, Partecipation.game_id == id).first()
+            #se l'id non è settato, mi viene ritornato un valore diverso da none se la room ha un nome sensato, se l'id è settato invece, mi deve ritornare un array con length > 0
+            if partecipation is not None:
+                g.roomName = roomName(id, "game")
+                return f(*args, **kwargs)
+            else:
+                raise NotAllowed()
     return decorated_function
 
 #funzione che controlla che l'utente sia nella room giusta per effettuare la richiesta

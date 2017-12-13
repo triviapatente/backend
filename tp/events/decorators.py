@@ -20,10 +20,8 @@ def event(name, action, preferences_key = None, needs_push = True):
             #users è una stanza
             if isinstance(users, basestring):
                 users = getUsersFromRoomID(users)
-            elif isinstance(users, list) and isinstance(users[0], basestring):
-                users = [u for u in getUsersFromRoomID(r) for r in users]
             if not users:
-                return (users, data, include_self, preferences_key, needs_push)
+                return (users, data, preferences_key, needs_push)
             #elimino il currentuser
             users = [u for u in users if u.id != g.user.id]
             for user in users:
