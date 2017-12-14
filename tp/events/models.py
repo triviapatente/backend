@@ -23,6 +23,8 @@ class Socket(Base):
     user = relationship(User)
     #socket id della connessione
     socket_id = Column(String, primary_key = True, nullable = False)
+    participations = relationship("RoomParticipation", cascade="all, delete-orphan")
+
 
 class RoomParticipation(Base):
     #utente collegato
