@@ -5,4 +5,4 @@ from tp.events.utils import EventActions
 @event("message", action = EventActions.create, preferences_key = "notification_message")
 def send_message(room, message):
     data = {"message": message.json}
-    return (room, data)
+    return (room, data, None)

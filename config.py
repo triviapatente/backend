@@ -39,6 +39,7 @@ PUBLIC_INFOS = {
     "webservice type": "REST",
     "last_run": datetime.now(pytz.utc)
 }
+FIREBASE_API_KEY = "AAAAohpGZ3o:APA91bF-D2q76LSTEZgQrfLofk3MLJOvXXdp96wI9WpiZ8TGjZLzCnQ8m0TC-jXMyaddYXIQydGIqJ9bk7cE9wMDvKg4XD2g7nJXHqrCoruH5OwBPwRPq8tIYD6oqzHIW8SjVTN9FVLL"
 #mail config
 #NOTE: temporaneo, quando compriamo il dominio è da cambiare
 EMAIL_SENDER = "support@triviapatente.it"

@@ -13,7 +13,7 @@ from tp.exceptions import NotAllowed
 from distutils.util import strtobool
 from tp.base.utils import roomName
 from tp.events.utils import getUsersFromRoomID
-from tp.events.models import Socket
+from tp.events.models import Socket, RoomParticipation
 from tp.rank.queries import getRank
 
 #metodo transazionale per la creazione di una partita
@@ -399,16 +399,8 @@ def isOpponentOnline(game):
     return isUserOnline(game.id, opponent.id)
 
 def isUserOnline(game_id, user_id):
-    socket = Socket.query.filter(Socket.user_id == user_id).first()
-    if not socket:
-        print "isUserOnline: user not connected to socket"
-        #l'utente non è connesso al socket
-        return False
-    room = roomName(game_id, "game")
-    rooms = socketio.server.rooms(socket.socket_id)
-    isInRoom = room in rooms
-    print "isUserOnline: is user in", room, isInRoom
-    return isInRoom
+    participation = RoomParticipation.query.join(Socket).filter(RoomParticipation.game_id == game_id, Socket.user_id == user_id).first()
+    return participation is not None
 
 def getRoundInfosTill(round_number, game):
     output = Round.query.join(Category).with_entities(Round, Category).filter(Round.number <= round_number).filter(Round.game_id == game.id).all()

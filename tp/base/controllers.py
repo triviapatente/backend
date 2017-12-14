@@ -7,6 +7,7 @@ from tp.exceptions import NotAllowed, BadParameters
 from tp.decorators import auth_required, needs_values
 from tp.base.models import Feedback
 from sqlalchemy import exc
+from tp.events.models import Installation
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
 
@@ -35,6 +36,21 @@ def redirectToPlayStore():
 def redirectToTerms():
     url = app.config["TERMS_URL"]
     return redirect(url)
+
+@base.route("/registerForPush", methods = ["POST"])
+@needs_values("POST", "token", "deviceId", "os")
+@auth_required
+def registerForPush():
+    token = g.post.get("token")
+    device_id = g.post.get("deviceId")
+    os = g.post.get("os")
+    installation = Installation.query.filter(Installation.device_id == device_id, Installation.os == os).first()
+    if not installation:
+        installation = Installation(user_id = g.user.id, device_id = device_id, os = os, token = token)
+    installation.token = token
+    db.session.add(installation)
+    db.session.commit()
+    return jsonify(success = True)
 
 @base.route("/privacyPolicy", methods = ["GET"])
 def redirectToPrivacyPolicy():

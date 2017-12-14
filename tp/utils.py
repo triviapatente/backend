@@ -30,7 +30,7 @@ def doTransaction(transaction, **params):
         raise e #se la funzione non ritorna niente non è andata a buon fine
     # per permettere il salvataggio in caso di savepoint il commit è fuori dal blocco try
     db.session.commit()
-    db.session.commit() # non si sa perchè ne servano due in caso di flush
+    db.session.commit()
     if output:
         return output # permetto di ricevere il return se questo è presente
     return True

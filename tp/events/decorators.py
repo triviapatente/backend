@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
 from flask_socketio import emit
-from models import Socket
+from models import *
 from flask import g
 from utils import getUsersFromRoomID
 from functools import wraps
-from tp import socketio
+from tp import socketio, app
 from tp.preferences.models import Preferences
+from pyfcm import FCMNotification
 
-def event(name, action, preferences_key = None, needs_push = True):
+pushService = FCMNotification(api_key = app.config["FIREBASE_API_KEY"])
+
+def event(name, action, preferences_key = None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            (users, data) = f(*args, **kwargs)
+            (users, data, push_infos) = f(*args, **kwargs)
             if not users:
                 return None
             data["action"] = action.value
@@ -21,33 +24,29 @@ def event(name, action, preferences_key = None, needs_push = True):
             if isinstance(users, basestring):
                 users = getUsersFromRoomID(users)
             if not users:
-                return (users, data, preferences_key, needs_push)
+                return (users, data, preferences_key)
             #elimino il currentuser
             users = [u for u in users if u.id != g.user.id]
             for user in users:
-                send(name, user, data, preferences_key, needs_push)
-            return (users, data, preferences_key, needs_push)
+                send_socket_message(name, user, data)
+            if push_infos:
+                send_push_message(users, push_infos)
+            return (users, data, preferences_key)
         return decorated_function
     return decorator
 
-def send(name, user, data, preferences_key, needs_push):
+def send_socket_message(name, user, data):
     sockets = Socket.query.filter(Socket.user_id == user.id).all()
     for socket in sockets:
         print "[SOCKET EVENT, name = %s, user = %s, sid = %s]" % (name, user.username, socket.socket_id)
         socketio.emit(name, data, room = socket.socket_id)
-#    if sockets:
-#        for socket in sockets:
-#            print "[SOCKET EVENT, name = %s, user = %d, sid = %s]" % (name, user.id, socket.socket_id), data
-#            socketio.emit(name, data, room = socket.socket_id)
 
-#    elif needs_push:
-#        if preferences_key:
-#            preferences = Preferences.query.filter(Preferences.user_id == user.id).first()
-#            if preferences[preferences_key]:
-#                print "[PUSH EVENT, name = %s, user = %d]" % (name, user.id), data
-#                #TODO: send push
-#                pass
-#        else:
-#            print "[PUSH EVENT, name = %s, user = %d]" % (name, user.id), data
-#            #TODO: send push
-#            pass
+def send_push_message(users, params):
+    user_ids = [u.id for u in users]
+    installations = Installation.query.filter(Installation.user_id.in_(user_ids)).all()
+    device_tokens = [i.token for i in installations]
+    print "Sending push to...", device_tokens
+    title = "TriviaPatente"
+    body = params["message"]
+    result = pushService.notify_multiple_devices(registration_ids = device_tokens, message_title = title, message_body = body, data_message = params)
+    print "[PUSH EVENT, result:]", result
