@@ -2,6 +2,7 @@
 from tp.events.utils import EventActions
 from tp.events.decorators import event
 from flask import g
+from tp.base.utils import jsonifyDates
 from tp.game.utils import isRoundEnded, get_round_infos, getOpponentFrom
 
 @event("user_answered", action = EventActions.create)
@@ -36,10 +37,7 @@ def game_left(room, game, partecipations):
 def new_game(game):
     opponent = getOpponentFrom(game)
     data = {"game": game.json, "user": g.user.json}
-    json = game.json
-    json["createdAt"] = str(json["createdAt"])
-    json["updatedAt"] = str(json["updatedAt"])
-    push_infos = {"game": json, "message": "%s ti ha sfidato a una partita! Fagli vedere chi è il più in gamba!" % opponent.username}
+    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(opponent.json), "message": "%s ti ha sfidato a una partita! Fagli vedere chi è il più in gamba!" % opponent.username}
     return ([opponent], data, push_infos)
 
 class RecentGameEvents:
@@ -60,7 +58,6 @@ class RecentGameEvents:
         game.setOpponent(opponent)
         data = {"game": game.json}
         return ([opponent], data, None)
-
     @staticmethod
     @event("recent_game", action = EventActions.update)
     def turn_changed(game, my_turn):
@@ -68,8 +65,5 @@ class RecentGameEvents:
         game.setOpponent(opponent)
         game.my_turn = my_turn
         data = {"game": game.json}
-        json = game.json
-        json["createdAt"] = str(json["createdAt"])
-        json["updatedAt"] = str(json["updatedAt"])
-        push_infos = {"game": json, "message": "Partita con %s: è il tuo turno!" % opponent.username}
+        push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(opponent.json), "message": "Partita con %s: è il tuo turno!" % opponent.username}
         return ([opponent], data, push_infos)

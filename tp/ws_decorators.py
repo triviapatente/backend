@@ -5,6 +5,7 @@ from functools import wraps
 from tp import db
 from flask_socketio import rooms
 from tp.game.models import Partecipation
+from tp.events.models import RoomParticipation
 from tp.exceptions import ChangeFailed, NotAllowed
 from tp.auth.utils import authenticate
 from tp.base.utils import roomName, getUsersFromRoom, RoomType
@@ -42,7 +43,7 @@ def check_in_room(type, key):
             room = roomName(id, type)
             if type != RoomType.game:
                 raise NotAllowed()
-            partecipation = Partecipation.query.filter(Partecipation.user_id == g.user.id, Partecipation.game_id == id).first()
+            partecipation = RoomParticipation.query.filter(RoomParticipation.socket_id == request.sid, RoomParticipation.game_id == id).first()
             if not partecipation:
                 raise NotAllowed()
             g.roomName = room

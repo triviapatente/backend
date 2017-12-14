@@ -30,5 +30,6 @@ class RoomParticipation(Base):
     #utente collegato
     game_id = Column(Integer, ForeignKey("game.id"), primary_key = True, nullable = False)
     game = relationship(Game)
+    user_id = Column(Integer, ForeignKey("user.id"), primary_key = True, nullable = False)
     #socket id della connessione
-    socket_id = Column(String, ForeignKey("socket.socket_id"), primary_key = True, nullable = False)
+    socket_id = Column(String, ForeignKey("socket.socket_id"), nullable = False)

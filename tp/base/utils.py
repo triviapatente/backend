@@ -24,6 +24,10 @@ def getInfosFromRoom(id):
         return (RoomType.__members__.get(type), id)
     return (None, None)
 
+def jsonifyDates(json):
+    json["createdAt"] = str(json["createdAt"])
+    json["updatedAt"] = str(json["updatedAt"])
+    return json
 #ottiene gli utenti di una room in base al tipo
 #se la room non è conosciuta ritorna None
 #se check_for_user è True ritorna solo il mio utente, se è presente nella room

@@ -18,13 +18,13 @@ import events
 def join_room_request(data):
     type = data.get("body").get("type")
     id = data.get("body").get("id")
-    leave_rooms_for(type)
     participation = RoomParticipation.query.filter(RoomParticipation.socket_id == request.sid, RoomParticipation.game_id == id).first()
     if not participation:
-        participation = RoomParticipation(socket_id = request.sid, game_id = id)
+        participation = RoomParticipation(socket_id = request.sid, game_id = id, user_id = g.user.id)
         db.session.add(participation)
         db.session.commit()
         print "User %s joined room %s." % (g.user.username, g.roomName)
+    leave_rooms(exceptGameId = id)
     emit("join_room", {"success": True})
     events.user_joined(g.roomName)
 
@@ -43,19 +43,23 @@ def get_global_infos(data):
 def leave_room_request(data):
     #tipo di room (room di gioco, per esempio)
     type = data.get("body").get("type")
-    leave_rooms_for(type)
+    leave_rooms()
     emit("leave_room", {"success": True})
 
+def leaveRoomsQuery(exceptGameId):
+    query = RoomParticipation.query.filter(RoomParticipation.user_id == g.user.id)
+    if exceptGameId:
+        query = query.filter(RoomParticipation.game_id != exceptGameId)
+    return query
 
 #elimina l'utente da tutte le room di un tipo (type), tranne la room di riferimento (actual_room)
-def leave_rooms_for(type):
-    query = RoomParticipation.query.filter(RoomParticipation.socket_id == request.sid)
-    joinedRooms = query.all()
+def leave_rooms(exceptGameId = None):
+    joinedRooms = leaveRoomsQuery(exceptGameId).all()
     for room in joinedRooms:
         name = "game_%s" % room.game_id
         print "User %s left room %s" % (g.user.username, name)
         events.user_left(name)
-    query.delete()
+    leaveRoomsQuery(exceptGameId).delete()
     db.session.commit()
 
 @socketio.on("disconnect")
