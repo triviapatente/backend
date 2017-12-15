@@ -248,6 +248,7 @@ def answer(data):
     #rispondo anche dicendo se ho dato la risposta giusta o sbagliata
     print "User %s answered to proposed question." % g.user.username, question, answer
     correct = (quiz.answer == question.answer)
+    opponent_turn = isOpponentTurn(game)
     emit("answer", {"success": True, "correct_answer": correct})
     events.user_answered(g.roomName, question, quiz)
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
@@ -257,7 +258,6 @@ def answer(data):
             db.session.add(game)
             db.session.commit()
         events.round_ended(g.roomName, round)
-        opponent_turn = isOpponentTurn(game)
         if opponent_turn is not None:
             RecentGameEvents.turn_changed(game, opponent_turn)
 
