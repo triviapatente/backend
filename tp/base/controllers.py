@@ -46,8 +46,9 @@ def registerForPush():
     os = g.post.get("os")
     installation = Installation.query.filter(Installation.device_id == device_id, Installation.os == os).first()
     if not installation:
-        installation = Installation(user_id = g.user.id, device_id = device_id, os = os, token = token)
+        installation = Installation(device_id = device_id, os = os, token = token)
     installation.token = token
+    installation.user_id = g.user.id
     db.session.add(installation)
     db.session.commit()
     return jsonify(success = True)
