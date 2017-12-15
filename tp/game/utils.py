@@ -324,6 +324,14 @@ def numberOfAnswersFor(user_id, round_id):
 def getCorrectAnswers(game):
     return User.query.with_entities(User.id.label("user_id"), func.count(Question.answer).label("number_of_correct_answer")).join(Question).join(Quiz, Question.quiz_id == Quiz.id).join(Round, Question.round_id == Round.id).filter(and_(Quiz.answer == Question.answer, Round.game_id == game.id)).group_by(User.id).all()
 
+def getNumberOfTotalAnswersForCategory(category, game, opponent):
+    ids = [g.user.id, opponent.id]
+    return Question.query.with_entities(func.count(Question.quiz_id)).join(Quiz).filter(category.id == Quiz.category_id, Question.user_id.in_(ids))
+def getNumberOfTotalAnswersForQuiz(quiz, game, opponent):
+    ids = [g.user.id, opponent.id]
+    return Question.query.with_entities(func.count(Question.quiz_id)).filter(Question.quiz_id == quiz.id, Question.user_id.in_(ids))
+
+
 #obtain recent games
 #TODO: add time range
 def getRecentGames(user):

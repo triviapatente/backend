@@ -6,12 +6,13 @@ from tp.auth.social.facebook.utils import FBManager
 from tp.auth.models import *
 from tp.events.models import Socket
 from tp.preferences.models import *
-from tp.exceptions import Forbidden
+from tp.exceptions import Forbidden, NotAllowed
 from tp.stats.queries import getCategoryPercentages
 from tp.preferences.queries import getPreferencesFromUser
 from tp.auth.social.facebook.utils import getFBTokenInfosFromUser
 #chiave associata al token negli header http di ogni richiesta (il valore è deciso qui)
 TOKEN_KEY = 'tp-session-token'
+DEVICE_ID_KEY = 'tp-device-id'
 #chiamata che a partire da una richiesta ritorna il token.
 #centralizzata, cosi la si può usare dappertutto
 def tokenFromRequest(socket):
@@ -21,9 +22,16 @@ def tokenFromRequest(socket):
             session[TOKEN_KEY] = token
             return token
         except:
-            return session[TOKEN_KEY]
+            return session.get(TOKEN_KEY)
     else:
         return request.headers.get(TOKEN_KEY)
+def deviceIdFromRequest():
+    try:
+        deviceId = request.event["args"][0][DEVICE_ID_KEY]
+        session[DEVICE_ID_KEY] = deviceId
+        return token
+    except:
+        return session.get(DEVICE_ID_KEY)
 
 def createUser(username = None, email = None, name = None, surname = None, birth = None, password = None, image = None):
     user = User(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
@@ -83,13 +91,19 @@ def authenticate(socket = False):
     if user is None:
         print "No user associated with token, forbidden!"
         #lancio un errore Forbidden
-        raise Forbidden()
+        raise NotAllowed()
     elif socket == True:
-        s = Socket.query.filter(Socket.socket_id == request.sid).first()
+        deviceId = deviceIdFromRequest()
+        if deviceId is None:
+            raise Forbidden()
+        s = Socket.query.filter(Socket.device_id == deviceId).first()
         if s is None:
-            s = Socket(user_id = user.id, socket_id = request.sid)
-            db.session.add(s)
-            db.session.commit()
+            s = Socket(device_id = deviceId)
+        s.user_id = user.id
+        s.socket_id = request.sid
+        db.session.add(s)
+        db.session.commit()
+        g.deviceId = deviceId
 
     print "User %s associated with token." % user.username
     #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente

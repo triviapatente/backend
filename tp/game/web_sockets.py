@@ -12,7 +12,7 @@ from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 from tp.base.utils import RoomType
 from tp.exceptions import NotAllowed, ChangeFailed
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, asc
 import events
 from events import RecentGameEvents
 
@@ -129,13 +129,20 @@ def get_random_categories(data):
     #se non ci sono
     if len(proposed) == 0:
         ids = Round.query.filter(Round.game_id == game.id).join(Category).with_entities(Category.id).all()
+        opponent = getOpponentFrom(game)
         #le genero random
-        proposed = Category.query.filter(~Category.id.in_(ids)).order_by(func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"]).all()
+        proposed = Category.query.with_entities(Category, getNumberOfTotalAnswersForCategory(Category, game, opponent).label("total_answers"))
+        if len(ids) != 0:
+            proposed = proposed.filter(~Category.id.in_(ids))
+        proposed = proposed.order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"]).all()
+
+        print proposed
         #e le aggiungo come proposed in db
-        for candidate in proposed:
+        for (candidate, totalAnswers) in proposed:
             c = ProposedCategory(round_id = round.id, category_id = candidate.id)
             db.session.add(c)
         db.session.commit()
+        proposed = [cat for (cat, number) in proposed]
     #dopodichè, rispondo
     proposed = sorted([p.json for p in proposed], key = lambda cat: cat.get("id"))
     print "User %s got proposed categories." % g.user.username, proposed
@@ -166,10 +173,12 @@ def choose_category(data):
     #aggiorno la categoria e salvo in db
     round.cat_id = category.id
     db.session.add(round)
+    opponent = getOpponentFrom(game)
     # genero le domande random, pescando da quelle della categoria richiesta
-    proposed = Quiz.query.filter(Quiz.category_id == category.id).order_by(func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"])
+    proposed = Quiz.query.with_entities(Quiz, getNumberOfTotalAnswersForQuiz(Quiz, game, opponent).label("total_answers")).filter(Quiz.category_id == category.id).order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]).all()
+    print proposed
     #e le aggiungo come questions in db
-    for candidate in proposed:
+    for (candidate, totalAnswers) in proposed:
         q = ProposedQuestion(round_id = round.id, quiz_id = candidate.id)
         db.session.add(q)
     db.session.commit()

@@ -43,7 +43,7 @@ def check_in_room(type, key):
             room = roomName(id, type)
             if type != RoomType.game:
                 raise NotAllowed()
-            partecipation = RoomParticipation.query.filter(RoomParticipation.socket_id == request.sid, RoomParticipation.game_id == id).first()
+            partecipation = RoomParticipation.query.filter(RoomParticipation.device_id == g.deviceId, RoomParticipation.game_id == id).first()
             if not partecipation:
                 raise NotAllowed()
             g.roomName = room

@@ -6,6 +6,8 @@ import tempfile
 from unittest import TestCase
 from flask import json
 from tp import app, db, socketio
+import string
+from random import *
 from test.base.socket.api import global_infos
 from test.auth.http.api import register
 class TPTestCase(TestCase):
@@ -35,7 +37,9 @@ def get_test_client():
 
 def get_socket_client():
     socket_client = socketio.test_client(app)
+    socket_client.deviceId = "".join(choice(string.ascii_letters + string.digits) for x in range(randint(10, 15)))
     socket_client.get_received = fake_socket_request(socket_client)
+    socket_client.emit = fake_socket_emit(socket_client)
     return socket_client
 #metodo che ritorna uno specifico metodo di app con delle modifiche
 
@@ -70,7 +74,12 @@ def fake_request(test_client, fn):
             pass
         return response
     return request
-
+def fake_socket_emit(socket):
+    oldmethod = socket.emit
+    def emit(name, values):
+        values["tp-device-id"] = socket.deviceId
+        return oldmethod(name, values)
+    return emit
 def fake_socket_request(socket):
     oldmethod = socket.get_received
     def get_received(index = 0):

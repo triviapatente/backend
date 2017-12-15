@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
+from sqlalchemy import UniqueConstraint
 from tp.base.models import Base, CommonPK
 from tp.game.models import Game
 from tp.auth.models import User
@@ -22,9 +23,9 @@ class Socket(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
     user = relationship(User)
     #socket id della connessione
-    socket_id = Column(String, primary_key = True, nullable = False)
+    device_id = Column(String, primary_key = True, nullable = False)
+    socket_id = Column(String, nullable = False)
     participations = relationship("RoomParticipation", cascade="all, delete-orphan")
-
 
 class RoomParticipation(Base):
     #utente collegato
@@ -32,4 +33,5 @@ class RoomParticipation(Base):
     game = relationship(Game)
     user_id = Column(Integer, ForeignKey("user.id"), primary_key = True, nullable = False)
     #socket id della connessione
-    socket_id = Column(String, ForeignKey("socket.socket_id"), nullable = False)
+    device_id = Column(String, ForeignKey("socket.device_id"), primary_key = True, nullable = False)
+    socket = relationship(Socket)
