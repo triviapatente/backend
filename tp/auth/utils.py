@@ -91,11 +91,11 @@ def authenticate(socket = False):
     if user is None:
         print "No user associated with token, forbidden!"
         #lancio un errore Forbidden
-        raise NotAllowed()
+        raise Forbidden()
     elif socket == True:
         deviceId = deviceIdFromRequest()
         if deviceId is None:
-            raise Forbidden()
+            raise NotAllowed()
         s = Socket.query.filter(Socket.device_id == deviceId).first()
         if s is None:
             s = Socket(device_id = deviceId)
