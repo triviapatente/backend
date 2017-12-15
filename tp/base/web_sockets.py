@@ -16,14 +16,14 @@ import events
 @needs_values("SOCKET", "id", "type")
 @filter_input_room
 def join_room_request(data):
-    type = data.get("body").get("type")
-    id = data.get("body").get("id")
-    leave_rooms()
-    participation = RoomParticipation(game_id = id, user_id = g.user.id, device_id = g.deviceId)
+    room_type = g.params.get("type")
+    room_id = g.params.get("id")
+    participation = RoomParticipation(game_id = room_id, user_id = g.user.id, device_id = g.deviceId)
     db.session.add(participation)
     db.session.commit()
     print "User %s joined room %s. (deviceId = %s)" % (g.user.username, g.roomName, g.deviceId)
     emit("join_room", {"success": True})
+    leave_rooms(exceptId = room_id)
     events.user_joined(g.roomName)
 
 
@@ -37,21 +37,22 @@ def get_global_infos(data):
 @socketio.on("leave_room")
 @ws_auth_required
 @needs_values("SOCKET", "type")
-@filter_input_room
 def leave_room_request(data):
     #tipo di room (room di gioco, per esempio)
-    type = data.get("body").get("type")
     leave_rooms()
     emit("leave_room", {"success": True})
 
-def leaveRoomsQuery():
-    return RoomParticipation.query.filter(RoomParticipation.device_id == g.deviceId)
+def leaveRoomsQuery(exceptId):
+    query = RoomParticipation.query.filter(RoomParticipation.device_id == g.deviceId)
+    if exceptId:
+        query = query.filter(RoomParticipation.game_id != exceptId)
+    return query
 
 #elimina l'utente da tutte le room di un tipo (type), tranne la room di riferimento (actual_room)
-def leave_rooms():
-    joinedRooms = leaveRoomsQuery().all()
+def leave_rooms(exceptId = None):
+    joinedRooms = leaveRoomsQuery(exceptId).all()
     roomIds = [room.game_id for room in joinedRooms]
-    leaveRoomsQuery().delete()
+    leaveRoomsQuery(exceptId).delete()
     db.session.commit()
     for game_id in roomIds:
         name = "game_%s" % game_id

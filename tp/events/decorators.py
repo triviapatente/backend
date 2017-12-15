@@ -45,8 +45,9 @@ def send_push_message(users, params):
     user_ids = [u.id for u in users]
     installations = Installation.query.filter(Installation.user_id.in_(user_ids)).all()
     device_tokens = [i.token for i in installations]
-    print "Sending push to...", device_tokens
-    title = "TriviaPatente"
-    body = params["message"]
-    result = pushService.notify_multiple_devices(registration_ids = device_tokens, message_title = title, message_body = body, data_message = params)
-    print "[PUSH EVENT, result:]", result
+    if len(device_tokens) != 0:
+        print "Sending push to...", device_tokens
+        title = "TriviaPatente"
+        body = params["message"]
+        result = pushService.notify_multiple_devices(registration_ids = device_tokens, message_title = title, message_body = body, data_message = params)
+        print "[PUSH EVENT, result:]", result

@@ -14,36 +14,36 @@ def filter_input_room(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         #parametri della richiesta socket
-        params = request.event["args"][0]
-        body = params.get("body")
-        id = body.get("id")
-        type = body.get("type")
-        if type != "game":
+        room_id = g.params.get("id")
+        room_type = g.params.get("type")
+        print "Filtering input room %s_%s" % (room_type, room_id)
+        if room_type != "game":
             raise NotAllowed()
-        elif id is None:
+        elif room_id is None:
             return f(*args, **kwargs)
         else:
-            partecipation = Partecipation.query.filter(Partecipation.user_id == g.user.id, Partecipation.game_id == id).first()
-            print "game_id", id
+            partecipation = Partecipation.query.filter(Partecipation.user_id == g.user.id, Partecipation.game_id == room_id).first()
+            print "game_id", room_id
             print "partecipation", partecipation
             #se l'id non è settato, mi viene ritornato un valore diverso da none se la room ha un nome sensato, se l'id è settato invece, mi deve ritornare un array con length > 0
             if partecipation is not None:
-                g.roomName = roomName(id, "game")
+                g.roomName = roomName(room_id, "game")
                 return f(*args, **kwargs)
             else:
                 raise NotAllowed()
     return decorated_function
 
 #funzione che controlla che l'utente sia nella room giusta per effettuare la richiesta
-def check_in_room(type, key):
+def check_in_room(room_type, key):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            id = g.params[key]
-            room = roomName(id, type)
-            if type != RoomType.game:
+            room_id = g.params[key]
+            room = roomName(room_id, room_type)
+            print room, room_id
+            if room_type != RoomType.game:
                 raise NotAllowed()
-            partecipation = RoomParticipation.query.filter(RoomParticipation.device_id == g.deviceId, RoomParticipation.game_id == id).first()
+            partecipation = RoomParticipation.query.filter(RoomParticipation.device_id == g.deviceId, RoomParticipation.game_id == room_id).first()
             if not partecipation:
                 raise NotAllowed()
             g.roomName = room
