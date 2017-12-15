@@ -18,9 +18,11 @@ import events
 def join_room_request(data):
     room_type = g.params.get("type")
     room_id = g.params.get("id")
-    participation = RoomParticipation(game_id = room_id, user_id = g.user.id, device_id = g.deviceId)
-    db.session.add(participation)
-    db.session.commit()
+    participation = RoomParticipation.query.filter(RoomParticipation.game_id == room_id, RoomParticipation.user_id == g.user.id, RoomParticipation.device_id == g.deviceId).first()
+    if not participation:
+        participation = RoomParticipation(game_id = room_id, user_id = g.user.id, device_id = g.deviceId)
+        db.session.add(participation)
+        db.session.commit()
     print "User %s joined room %s. (deviceId = %s)" % (g.user.username, g.roomName, g.deviceId)
     emit("join_room", {"success": True})
     leave_rooms(exceptId = room_id)
@@ -37,6 +39,7 @@ def get_global_infos(data):
 @socketio.on("leave_room")
 @ws_auth_required
 @needs_values("SOCKET", "type")
+@filter_input_room
 def leave_room_request(data):
     #tipo di room (room di gioco, per esempio)
     leave_rooms()
