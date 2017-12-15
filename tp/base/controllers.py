@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint
 from tp import app, db
-from flask import g, redirect
+from flask import g, redirect, request
 from porting import getJSONModels
 from tp.exceptions import NotAllowed, BadParameters
 from tp.decorators import auth_required, needs_values
@@ -34,7 +34,8 @@ def redirectToPlayStore():
     return redirect(url)
 @base.route("/terms", methods = ["GET"])
 def redirectToTerms():
-    url = app.config["TERMS_URL"]
+    path = app.config["TERMS_PATH"]
+    url = request.host_url + path
     return redirect(url)
 
 @base.route("/registerForPush", methods = ["POST"])

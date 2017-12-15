@@ -100,13 +100,13 @@ RESULTS_LIMIT_RANK_ITALY = 20
 #numero di punti assegnati/tolti in caso di uscita dalla partita
 SCORE_ON_LEFT_GAME = 5
 #terms and conditions url
-TERMS_URL = "http://www.pdf995.com/samples/pdf.pdf"
+TERMS_PATH = "static/pdf/TriviaPatente Terms And Conditions.pdf"
 #terms and conditions last update
-TERMS_AND_CONDITIONS_LAST_UPDATE = datetime(2017, 12, 13, 00, 21) #00:21 of 13/12/2017
+TERMS_AND_CONDITIONS_LAST_UPDATE = datetime(2017, 12, 15, 00, 22) #00:22 of 16/12/2017
 #privacy policy url
-PRIVACY_POLICY_URL = "http://www.pdf995.com/samples/pdf.pdf"
+PRIVACY_POLICY_URL = "https://www.iubenda.com/privacy-policy/8283872"
 #privacy policy last update
-PRIVACY_POLICY_LAST_UPDATE = datetime(2017, 12, 13, 00, 21) #00:21 of 13/12/2017
+PRIVACY_POLICY_LAST_UPDATE = datetime(2017, 12, 15, 00, 22) #00:22 of 16/12/2017
 #url to android store
 ANDROID_STORE_URL = "http://www.android.com"
 #url to iOS store
