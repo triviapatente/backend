@@ -301,7 +301,7 @@ def gameEnded(game):
     return True
 
 # metodo che setta il winner del ##game
-def setWinner(game):
+def getWinner(game):
     #prendo per ogni utente il numero di risposte corrette per gli utenti nella partita
     correctAnswers = getCorrectAnswers(game)
     #trovo il vincitore
@@ -310,19 +310,23 @@ def setWinner(game):
         return None
     if len(correctAnswers) == 1:
         #solo il primo ha risposto ad almeno una domanda correttamente --> vittoria
-        return User.query.filter_by(id = correctAnswers[0][0]).first()
-    if correctAnswers[0][1] == correctAnswers[1][1]:
+        return User.query.get(id = correctAnswers[0][0])
+    (firstUserId, firstScore) = correctAnswers[0]
+    (secondUserId, secondScore) = correctAnswers[1]
+    if firstScore == secondScore:
         #si tratta di un pareggio
-       return None
+        return None
+    elif firstScore > secondScore:
+        return User.query.get(firstUserId)
     else:
-       return User.query.filter_by(id = correctAnswers[0][0]).first()
+        return User.query.get(secondUserId)
 
 def numberOfAnswersFor(user_id, round_id):
     return Question.query.filter(Question.user_id == user_id).join(Round).filter(Round.id == round_id).count()
 
 # metodo che calcola il numero di risposte corrette per ogni giocatore in un ##game
 def getCorrectAnswers(game):
-    return User.query.with_entities(User.id.label("user_id"), func.count(Question.answer).label("number_of_correct_answer")).join(Question).join(Quiz, Question.quiz_id == Quiz.id).join(Round, Question.round_id == Round.id).filter(and_(Quiz.answer == Question.answer, Round.game_id == game.id)).group_by(User.id).all()
+    return User.query.with_entities(User.id, func.count(Question.answer).label("number_of_correct_answer")).join(Partecipation, Partecipation.user_id == User.id).join(Question).join(Quiz, Question.quiz_id == Quiz.id).join(Round, Question.round_id == Round.id).filter(Quiz.answer == Question.answer, Round.game_id == game.id, Partecipation.game_id == game.id).group_by(User.id).all()
 
 def getNumberOfTotalAnswersForCategory(category, game, opponent):
     ids = [g.user.id, opponent.id]

@@ -38,7 +38,7 @@ def init_round(data):
         endedNow = not game.ended
         if endedNow:
             game.ended = True
-            winner = setWinner(game)
+            winner = getWinner(game)
             if winner is not None:
                 game.winner_id = winner.id
             db.session.add(game)
