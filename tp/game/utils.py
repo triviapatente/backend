@@ -350,7 +350,7 @@ def getRecentGames(user):
     #FROM question
     #WHERE question.round_id = a.id AND question.user_id = user.id) != 0)
     question_number = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
-    my_turn = db.session.query(a).with_entities(func.count(a.id) != 0).filter(a.game_id == Game.id).filter(or_(Game.ended == True, and_(or_(a.cat_id != None, a.dealer_id == user.id), questions < question_number))).label("my_turn")
+    my_turn = db.session.query(a).with_entities(func.count(a.id) != 0).filter(a.game_id == Game.id).filter(or_(Game.ended == True, and_(or_(a.cat_id != None, a.dealer_id == user.id, a.creator_id == user.id), questions < question_number))).label("my_turn")
     #SELECT game.*, my_turn AS my_turn
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
