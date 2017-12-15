@@ -33,6 +33,9 @@ CSRF_SESSION_KEY = "dssovnjaeknbjkrebnwdvlknfvbkndfbl"
 # Secret key for signing cookies
 SECRET_KEY = "dvkljmdklvmvdkjVSDLjmvlfsnv.kmvsdvsdlvn"
 
+SSL_CERT_PATH = "/etc/ssl/tp_certs/www.triviapatente.it_ssl_certificate.cer"
+SSL_PRIVATE_KEY_PATH = "/etc/ssl/tp_certs/www.triviapatente.it_private_key.key"
+
 PUBLIC_INFOS = {
     "name": "TriviaPatente Webservice",
     "version": 0.9,
