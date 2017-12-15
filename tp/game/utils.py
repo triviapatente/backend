@@ -310,7 +310,7 @@ def getWinner(game):
         return None
     if len(correctAnswers) == 1:
         #solo il primo ha risposto ad almeno una domanda correttamente --> vittoria
-        return User.query.get(id = correctAnswers[0][0])
+        return User.query.get(correctAnswers[0][0])
     (firstUserId, firstScore) = correctAnswers[0]
     (secondUserId, secondScore) = correctAnswers[1]
     if firstScore == secondScore:
