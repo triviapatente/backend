@@ -43,13 +43,13 @@ FIREBASE_API_KEY = "AAAAohpGZ3o:APA91bF-D2q76LSTEZgQrfLofk3MLJOvXXdp96wI9WpiZ8TG
 #mail config
 #NOTE: temporaneo, quando compriamo il dominio è da cambiare
 EMAIL_SENDER = "support@triviapatente.it"
-MAIL_SERVER = "smtp.gmail.com"
-MAIL_PORT = 465
-MAIL_USE_SSL = True
-#MAIL_USE_TLS : default False
+MAIL_SERVER = "smtp.1and1.it"
+MAIL_PORT = 587
+#MAIL_USE_SSL = True
+MAIL_USE_TLS = True
 #MAIL_DEBUG : default app.debug
-MAIL_USERNAME = "triviapatente@gmail.com"
-MAIL_PASSWORD = "TriviaPatente1"
+MAIL_USERNAME = "support@triviapatente.it"
+MAIL_PASSWORD = "ne4-JUN-aD2-sE2"
 
 INIT_DB = False
 TRAP_BAD_REQUEST_ERRORS = DEBUG
