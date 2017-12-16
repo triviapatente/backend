@@ -2,6 +2,9 @@
 #!/usr/bin/python
 import sys
 
+import eventlet
+
+eventlet.monkey_patch()
 reload(sys)
 sys.setdefaultencoding('utf8')
 
