@@ -183,6 +183,7 @@ def choose_category(data):
         db.session.add(q)
     db.session.commit()
     db.session.commit()
+    opponent = getOpponentFrom(game)
 
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
@@ -191,6 +192,7 @@ def choose_category(data):
 
     opponent_turn = isOpponentTurn(game)
     if opponent_turn != previous_opponent_turn:
+        events.your_turn(game, opponent)
         RecentGameEvents.turn_changed(game, opponent_turn)
 
 @socketio.on("get_questions")
