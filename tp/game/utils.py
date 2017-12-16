@@ -27,6 +27,11 @@ def createGame(opponents):
     p = Partecipation(user = g.user)
     new_game.users.append(p)
     db.session.add(new_game)
+    round = Round(game = new_game, number = 1)
+    #genero il dealer
+    round.dealer_id = g.user.id
+    #lo salvo in db
+    db.session.add(round)
     return new_game
 
 def sanitizeSuggestedUsers(users):
