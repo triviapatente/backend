@@ -20,11 +20,15 @@ from tp import app, socketio
 
 debug = app.config["DEBUG"]
 port = app.config["PORT"]
-context = None
+host = "0.0.0.0"
 if debug == False:
-    context = (app.config["SSL_CERT_PATH"], app.config["SSL_PRIVATE_KEY_PATH"])
+    certfile = app.config["SSL_CERT_PATH"]
+    keyfile = app.config["SSL_PRIVATE_KEY_PATH"]
+    socketio.run(app, host = host, port = port, debug = debug, certfile = certfile, keyfile = keyfile)
+else:
+    socketio.run(app, host = host, port = port, debug = debug)
+
 
 print 'Running the service..'
-socketio.run(app, host = '0.0.0.0', port = port, debug = debug, ssl_context=context)
 
 call(["fuser", "-k", "%d/tcp" % port])
