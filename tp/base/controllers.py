@@ -45,6 +45,8 @@ def registerForPush():
     token = g.post.get("token")
     device_id = g.post.get("deviceId")
     os = g.post.get("os")
+    Installation.query.filter(Installation.token == token, Installation.os == os).delete()
+    db.session.commit()
     installation = Installation.query.filter(Installation.device_id == device_id, Installation.os == os).first()
     if not installation:
         installation = Installation(device_id = device_id, os = os, token = token)
