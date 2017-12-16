@@ -1,5 +1,6 @@
 pip install greenlet
 pip install gevent
+pip install gevent-websocket
 pip install flask-sqlalchemy
 pip install Enum34
 pip install pytz
