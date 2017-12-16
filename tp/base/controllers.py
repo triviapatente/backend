@@ -54,6 +54,14 @@ def registerForPush():
     db.session.commit()
     return jsonify(success = True)
 
+@base.route("/unregisterForPush", methods = ["POST"])
+@needs_values("POST", "deviceId", "os")
+def unregisterForPush():
+    device_id = g.post.get("deviceId")
+    os = g.post.get("os")
+    Installation.query.filter(Installation.device_id == device_id, Installation.os == os).delete()
+    db.session.commit()
+    return jsonify(success = True)
 @base.route("/privacyPolicy", methods = ["GET"])
 def redirectToPrivacyPolicy():
     url = app.config["PRIVACY_POLICY_URL"]
