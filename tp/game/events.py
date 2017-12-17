@@ -32,7 +32,7 @@ def game_ended(room, game, partecipations):
 def your_turn(game, opponent):
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(opponent.json), "message": "Partita con %s: è il tuo turno!" % opponent.username}
     return ([opponent], {}, push_infos)
-    
+
 @event("user_left_game", action = EventActions.game_left)
 def game_left(room, game, partecipations):
     data = {"game": game.json, "user_id": g.user.id, "winner_id": game.winner_id, "partecipations": partecipations, "annulled": not game.started}
@@ -70,4 +70,4 @@ class RecentGameEvents:
         game.setOpponent(opponent)
         game.my_turn = my_turn
         data = {"game": game.json}
-        return ([opponent], data, push_infos)
+        return ([opponent], data, None)
