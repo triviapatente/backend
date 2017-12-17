@@ -59,7 +59,7 @@ def init(testing = False, ci = False):
     # Define the database object which is imported
     # by modules and controllers
     db = SQLAlchemy(app)
-    socketio = SocketIO(app, json = json)
+    socketio = SocketIO(app, json = json, engineio_logger = True)
     mail = Mail()
     mail.init_app(app)
 
