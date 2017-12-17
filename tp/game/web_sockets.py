@@ -61,6 +61,8 @@ def init_round(data):
     if next_number > NUMBER_OF_ROUNDS:
         opponent = getOpponentFrom(game)
         return emit("init_round", {"success": True, "waiting": "game", "waiting_for": opponent})
+    #ottengo il round di riferimento
+    round = Round.query.filter(Round.game_id == game.id, Round.number == next_number).first()
     #caso in cui ho completato il secondo round (di cui son sicuramente dealer), ma l'avversario è ancora fermo all'1
     if next_number > 3:
         #ottengo gli utenti del match
@@ -69,9 +71,7 @@ def init_round(data):
         answered_count = Round.query.filter(Round.number == next_number - 3).filter(Round.game_id == game.id).join(Question).count()
         if answered_count != len(users) * NUMBER_OF_QUESTIONS_PER_ROUND:
             opponent = getOpponentFrom(game)
-            return emit("init_round", {"success": True, "waiting": "game", "waiting_for": opponent})
-    #ottengo il round di riferimento
-    round = Round.query.filter(Round.game_id == game.id, Round.number == next_number).first()
+            return emit("init_round", {"success": True, "waiting": "game", "waiting_for": opponent, "round": round.json})
     need_new_round = round is None
     #se è nullo
     if need_new_round:
