@@ -80,11 +80,11 @@ class CommonPK(db.Model):
     #questo è l'id, l'elemento che hanno in comune
     id =  Column(BigInteger, primary_key = True)
 
-MAX_CHARS = app.config["MAX_CHARS_FOR_FIELD"]
+MAX_FEEDBACK_CHARS_FOR_FIELD = app.config["MAX_FEEDBACK_CHARS_FOR_FIELD"]
 #la classe feedback è usata per immagazzinare i feedback degli utenti
 class Feedback(Base, CommonPK):
     #contenuto del messaggio, TODO: controllare se funzionano le emoji
-    message = Column(String(MAX_CHARS), nullable = False)
+    message = Column(String(MAX_FEEDBACK_CHARS_FOR_FIELD), nullable = False)
     #utente che ha inviato il messaggio (può essere null in caso di messaggi anonimi)
     user_id = Column(BigInteger, ForeignKey("user.id"))
     user = relationship("User")
