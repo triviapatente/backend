@@ -1,5 +1,6 @@
 {% extends "forgot_password/layout.html" %}
 {% block body %}
+    <script type="text/javascript" src="{{request.url_root +  url_for('static', filename='js/change_password.js')[1:] }}"></script>
     <center><p class="lead text-white content">Da questa pagina potrai cambiare la password smarrita per l'account <b>{{user.username}}</b>, come hai richiesto.</p></center>
 <center>
         {% if success != null %}
@@ -42,7 +43,7 @@
             </div>
             <input type="hidden" name="token" value="{{token}}"/>
         <div class="button-area">
-            <input class="btn btn-primary submit" id="submit" type="submit" value="Reimposta password"/>
+            <input class="btn btn-primary submit" id="submit" type="submit" value="Reimposta password" disabled/>
         </div>
     </form>
 </center>
