@@ -394,8 +394,7 @@ def getNextRoundNumber(game):
     return getNextRoundNumberFor(game, g.user)
 
 def getOpponentFrom(game):
-    partecipation = Partecipation.query.filter(Partecipation.game_id == game.id).filter(Partecipation.user_id != g.user.id).first()
-    return User.get(partecipation.user_id)
+    return User.query.join(Partecipation).filter(Partecipation.game_id == game.id).filter(Partecipation.user_id != g.user.id).first()
 
 def isOpponentTurn(game):
     opponent = getOpponentFrom(game)
