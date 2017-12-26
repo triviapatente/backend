@@ -25,8 +25,10 @@ def category_chosen(room, category):
 
 @event("game", action = EventActions.destroy)
 def game_ended(room, game, partecipations):
+    message = game.getGameResultPushMessage()
+    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
     data = {"game": game.json, "winner_id": game.winner_id, "partecipations": partecipations}
-    return (room, data, None)
+    return (room, data, push_infos)
 
 @event("your_turn", action = EventActions.update)
 def your_turn(game, opponent):
@@ -35,8 +37,10 @@ def your_turn(game, opponent):
 
 @event("user_left_game", action = EventActions.game_left)
 def game_left(room, game, partecipations):
-    data = {"game": game.json, "user_id": g.user.id, "winner_id": game.winner_id, "partecipations": partecipations, "annulled": not game.started}
-    return (room, data, None)
+    message = game.getGameLeftPushMessage()
+    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
+    data = {"game": game.json, "user_id": g.user.id, "winner_id": game.winner_id, "partecipations": partecipations, "annulled": game.isAnnulled()}
+    return (room, data, push_infos)
 
 @event("game", action = EventActions.create)
 def new_game(game):

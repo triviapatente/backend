@@ -45,7 +45,24 @@ class Game(Base, CommonPK):
           self.opponent_username = opponent.username
           self.opponent_name = opponent.name
           self.opponent_surname = opponent.surname
-
+  def isAnnulled(self):
+      return not self.started
+  def getGameLeftPushMessage(self):
+      suffix = ""
+      if self.isAnnulled():
+          suffix = "annullata dall'avversario!"
+      else:
+          suffix = "resa dell'avversario!"
+      return "Partita con %s: %s" % (g.user.username, suffix)
+  def getGameResultPushMessage(self):
+      suffix = ""
+      if self.winner_id == g.user.id:
+          suffix = "hai perso!"
+      elif self.winner_id is None:
+          suffix = "pareggio!"
+      else:
+          suffix = "hai vinto!"
+      return "Partita con %s: %s" % (g.user.username, suffix)
 
 
 #rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte
