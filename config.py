@@ -34,6 +34,7 @@ CSRF_SESSION_KEY = "dssovnjaeknbjkrebnwdvlknfvbkndfbl"
 SECRET_KEY = "dvkljmdklvmvdkjVSDLjmvlfsnv.kmvsdvsdlvn"
 
 SSL_CERT_PATH = "/etc/ssl/tp_certs/www.triviapatente.it_ssl_certificate.cer"
+SSL_CERT_CHAIN_PATH = "/etc/ssl/tp_certs/triviapatente.it_ssl_certificate_INTERMEDIATE.cer"
 SSL_PRIVATE_KEY_PATH = "/etc/ssl/tp_certs/www.triviapatente.it_private_key.key"
 
 PUBLIC_INFOS = {

@@ -29,6 +29,29 @@ def track_time(f):
         print "[%s] Elapsed time: %f" % (f.__name__, elapsed_time)
         return output
     return decorated_function
+#decorator che trimma ogni valore e se dopo il trim corrisponde alla stringa vuota, li setta a null se allowEmptyString = False
+#se il valore è null lo fa passare
+def trim_values(method, allowEmptyString, *keys):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            #dove andare a prendere i parametri
+            store = storeForMethod(method)
+            #dove andare a mettere i parametri pescati
+            outputKey = outputKeyForMethod(method)
+            #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente
+            output = {}
+            for key in keys:
+                value = store.get(key).strip()
+                if value is not None and not allowEmptyString and len(value) == 0:
+                    value = None
+                output[key] = value
+            #necessario perchè g non supporta cose del tipo g[a]
+            setattr(g, outputKey, output)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
 
 #decorator che serve per controllare prima di un api call se esistono i parametri passati come argomento
 #*keys è scritto cosi semplicemente perchè è il modo di python di gestire i varargs.

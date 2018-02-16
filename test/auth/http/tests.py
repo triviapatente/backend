@@ -145,12 +145,36 @@ class AuthHTTPTestCase(TPTestCase):
         response = changeName(self, "name", token)
         assert response.status_code == 200 and response.json.get("user").get("name") == "name"
 
+        print "#2: Cambio di nome: trimming spazi"
+        response = changeName(self, "   name     ", token)
+        assert response.status_code == 200 and response.json.get("user").get("name") == "name"
+
+        print "#3: Cambio di nome: stringa vuota"
+        response = changeName(self, "", token)
+        assert response.status_code == 200 and response.json.get("user").get("name") is None
+
+        print "#4: Cambio di nome: stringa solo spazi"
+        response = changeName(self, "  ", token)
+        assert response.status_code == 200 and response.json.get("user").get("name") is None
+
     def test_changeSurname(self):
         token = register(self, "user", "user@gmail.com", "sdfsdfsdfssf").json.get("token")
 
         print "#1: Cambio di cognome effettuato"
         response = changeSurname(self, "surname", token)
         assert response.status_code == 200 and response.json.get("user").get("surname") == "surname"
+
+        print "#2: Cambio di cognome: trimming spazi"
+        response = changeSurname(self, "   surname     ", token)
+        assert response.status_code == 200 and response.json.get("user").get("surname") == "surname"
+
+        print "#3: Cambio di cognome: stringa vuota"
+        response = changeSurname(self, "", token)
+        assert response.status_code == 200 and response.json.get("user").get("surname") is None
+
+        print "#4: Cambio di cognome: stringa solo spazi"
+        response = changeSurname(self, "  ", token)
+        assert response.status_code == 200 and response.json.get("user").get("surname") is None
 
     def test_changeImage(self):
         token = register(self, "user", "user@gmail.com", "sdfdsfsdf").json.get("token")

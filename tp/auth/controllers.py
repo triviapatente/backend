@@ -6,7 +6,7 @@ from tp.auth.queries import *
 from tp.auth.models import *
 from sqlalchemy import or_
 from tp.exceptions import *
-from tp.decorators import auth_required, needs_values
+from tp.decorators import auth_required, needs_values, trim_values
 from tp.preferences.models import *
 from tp.utils import *
 from tp.auth.utils import createUser, createFBUser, obtainFacebookToken, linkUserToFB
@@ -191,8 +191,12 @@ def forgotPasswordWebPageResult():
 #api per il cambio del nome (##name)
 @account.route("/name/edit", methods = ["POST"])
 @auth_required
+@trim_values("POST", False, "name")
 def changeName():
-    g.user.name = request.form.get("name")
+    name = request.form.get("name").strip()
+    if len(name) == 0:
+        name = None;
+    g.user.name = name
     db.session.add(g.user)
     db.session.commit()
     print "User %d change name to: %s." % (g.user.id, g.user.name)
@@ -201,8 +205,12 @@ def changeName():
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
 @auth_required
+@trim_values("POST", False, "surname")
 def changeSurname():
-    g.user.surname = request.form.get("surname")
+    surname = request.form.get("surname").strip()
+    if len(surname) == 0:
+        surname = None;
+    g.user.surname = surname
     db.session.add(g.user)
     db.session.commit()
     print "User %d change surname to: %s" % (g.user.id, g.user.surname)
