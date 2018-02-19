@@ -250,7 +250,7 @@ def getUserImage(id):
     if not user:
         raise NotAllowed()
     elif user.image:
-        return send_file("../" + user.image)
+        return send_file("../" + user.image, add_etags=False)
     else:
         return ""
 
