@@ -130,14 +130,14 @@ def recent_games():
 def getQuizImage(id):
     image = Image.query.filter(Image.id == id).first()
     if image:
-        return send_file(image.imagePath)
+        return send_file(image.imagePath, add_etags=False)
     raise NotAllowed()
 
 @category.route("/image/<int:id>", methods = ["GET"])
 def getCategoryImage(id):
     category = Category.query.filter(Category.id == id).first()
     if category:
-        return send_file(category.imagePath)
+        return send_file(category.imagePath, add_etags=False)
     raise NotAllowed()
 
 @game.route("/users/suggested", methods = ["GET"])

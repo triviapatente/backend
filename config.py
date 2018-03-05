@@ -2,7 +2,7 @@
 
 import os, pytz
 from datetime import datetime
-
+from datetime import timedelta
 # Statement for enabling the development environment
 DEBUG = True
 
@@ -22,9 +22,11 @@ SQLALCHEMY_TEST_DATABASE_URI = 'postgresql://ted:ted@localhost:5432/triviapatent
 # incoming requests using one and performing background
 # operations using the other.
 THREADS_PER_PAGE = 2
-
 # Enable protection agains *Cross-site Request Forgery (CSRF)*
 CSRF_ENABLED     = True
+
+#max age for files
+SEND_FILE_MAX_AGE_DEFAULT = 60 * 10 #10 minutes
 
 # Use a secure, unique and absolutely secret key for
 # signing the data.
