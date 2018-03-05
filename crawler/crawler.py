@@ -17,6 +17,7 @@ def getCategories(session, seed, bUrl, imgPath = '/images'):
     baseUrl = bUrl
     # Categories and relative links extraction
     categories =  routines.crawlPage(seed, 'div', 'content')
+    malformedQuestions = 0
     # For each pair category - link
     for name, link in categories.items():
         # Create record
@@ -30,24 +31,34 @@ def getCategories(session, seed, bUrl, imgPath = '/images'):
         session.add(category)
         session.commit()
         #print 'Crawling the above category..'
-        getGroups(session, link, int(category.id), imgPath)
+        malformedQuestions += getGroups(session, link, int(category.id), imgPath)
         #print 'Saved all the quizzes of the category'
+    print "Overall malformed questions: %d" % (malformedQuestions)
+
 
 # get Groups from ##link of the category to continue the crawler and go to extract the quizzes
 # ##session is the ORM connected to the db, ##category_id is the id of the category, ##imgPath where to save images
 def getGroups(session, link, category_id, imgPath):
+    malformedQuestions = 0
     groupsLinks = utils.getLinks(utils.getAllAnchors(utils.getContainer(baseUrl + link, 'div', 'content')))
     for link in groupsLinks:
         # Get question rows
         questionsRows = routines.getQuestions(baseUrl + link, 'quests')
-        getQuestions(session, questionsRows, category_id, imgPath)
-
+        malformedQuestions += getQuestions(session, questionsRows, category_id, imgPath)
+    print "Malformed questions: %d" % (malformedQuestions)
+    if malformedQuestions > 0:
+        print "Warning: you have to correct them manually!"
+    return malformedQuestions
 # get Questions from ##questionsRows, which is the set of all the rows of the group table and put them into ##session
 # ##session is the ORM connected to the db, ##category_id is the id of the category, ##imgPath where to save images
 def getQuestions(session, questionsRows, category_id, imgPath):
+    malformedQuestions = 0
     #Get out quizzes
     for row in questionsRows:
         image_url, question, answer = routines.parseQuestionRow(row)
+        if question[:1].islower():
+            malformedQuestions += 1
+            print "Malformed question found: %s" % question
         # Downloading image if not already done
         #print 'Downloading next image if necessary..'
         image_id = getImage(session, image_url, imgPath)
@@ -55,6 +66,7 @@ def getQuestions(session, questionsRows, category_id, imgPath):
         question = Quiz(question = question, answer = answer, image_id = image_id, category_id = category_id)
         #print 'Saving next quiz..'
         session.add(question)
+    return malformedQuestions
 
 # get Image from ##image_url, if not already present in the database, and return the id. Returns none if some errors occured.
 # ##session the ORM connected to the db, ##imgPath where to save the image if necessary
