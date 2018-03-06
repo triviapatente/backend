@@ -253,25 +253,21 @@ class AuthHTTPTestCase(TPTestCase):
         username = user.get("username")
         response = requestNewPassword(self, username)
         assert response.status_code == 200
-        assert response.json.get("success") == True
 
         print "#1.1 Username presente in db: case insensitive"
         username = username.title()
         response = requestNewPassword(self, username)
         assert response.status_code == 200
-        assert response.json.get("success") == True
 
         print "#2: Email presente in db"
         email = user.get("email")
         response = requestNewPassword(self, email)
         assert response.status_code == 200
-        assert response.json.get("success") == True
 
         print "#2.2 Email presente in db: case insensitive"
         email = email.title()
         response = requestNewPassword(self, email)
         assert response.status_code == 200
-        assert response.json.get("success") == True
 
         print "#2: Username/email non presente in db"
         username = "dsfsdfsdf"

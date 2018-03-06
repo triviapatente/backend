@@ -182,7 +182,7 @@ def forgotPasswordWebPageResult():
         db.session.add(keychain)
         db.session.commit()
     else:
-        raise Forbidden()
+        raise NotAllowed()
     #return page with confirmation
     return {"success": success, "user": g.user}
 

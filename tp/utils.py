@@ -8,8 +8,10 @@ from flask import g, request
 import traceback
 
 
-
-
+def merge_dicts(x, y):
+    z = x.copy()
+    z.update(y)
+    return z
 # routine per le transazioni in db, riceve come parametro una funzione ##transaction che contiene le operazioni della transazione
 # in ##params sono contenuti i parametri da passare alla funzione (sono un dizionario)
 def doTransaction(transaction, **params):

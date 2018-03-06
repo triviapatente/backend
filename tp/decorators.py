@@ -9,6 +9,7 @@ from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
 from tp.game.models import Game
 from tp.base.utils import roomName
+from tp.utils import merge_dicts
 from tp.exceptions import TPException, MissingParameter, ChangeFailed, NotAllowed, MaxCharacters
 #decorator che serve per markare una api call in modo che avvenga un controllo sul token mandato dall'utente prima della sua esecuzione.
 #per metterlo in funzione basterà anteporre @auth_required alla stessa
@@ -26,12 +27,15 @@ def webpage(template, **defaultParams):
         def decorated_function(*args, **kwargs):
             try:
                 output = f(*args, **kwargs)
-                output += defaultParams
+                output = merge_dicts(output, defaultParams)
                 return render_template(template, **output), 200
-            except Exception, e:
-                return render_template(template, error = str(e), **defaultParams), 400
             except TPException, e:
-                return render_template(template, error = e.message, **defaultParams), e.status_code
+                defaultParams["error"] = e.message
+                return render_template(template, **defaultParams), e.status_code
+            except Exception, e:
+                defaultParams["error"] = str(e)
+                return render_template(template, **defaultParams), 400
+
         return decorated_function
     return decorator
 
