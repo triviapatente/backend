@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import g, request, session
+from flask import g, request, session, render_template
 from functools import wraps
 from tp import db, app
 from time import time
@@ -9,7 +9,7 @@ from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
 from tp.game.models import Game
 from tp.base.utils import roomName
-from tp.exceptions import MissingParameter, ChangeFailed, NotAllowed, MaxCharacters
+from tp.exceptions import TPException, MissingParameter, ChangeFailed, NotAllowed, MaxCharacters
 #decorator che serve per markare una api call in modo che avvenga un controllo sul token mandato dall'utente prima della sua esecuzione.
 #per metterlo in funzione basterà anteporre @auth_required alla stessa
 def auth_required(f):
@@ -19,6 +19,21 @@ def auth_required(f):
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         return f(*args, **kwargs)
     return decorated_function
+
+def webpage(template, **defaultParams):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            try:
+                output = f(*args, **kwargs)
+                output += defaultParams
+                return render_template(template, **output), 200
+            except Exception, e:
+                return render_template(template, error = str(e), **defaultParams), 400
+            except TPException, e:
+                return render_template(template, error = e.message, **defaultParams), e.status_code
+        return decorated_function
+    return decorator
 
 def track_time(f):
     @wraps(f)

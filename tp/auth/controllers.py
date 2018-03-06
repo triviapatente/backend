@@ -6,7 +6,7 @@ from tp.auth.queries import *
 from tp.auth.models import *
 from sqlalchemy import or_
 from tp.exceptions import *
-from tp.decorators import auth_required, needs_values, trim_values
+from tp.decorators import auth_required, needs_values, trim_values, webpage
 from tp.preferences.models import *
 from tp.utils import *
 from tp.auth.utils import createUser, createFBUser, obtainFacebookToken, linkUserToFB
@@ -153,6 +153,7 @@ def requestNewPassword():
 #    return render_template("forgot_password/email.html")
 #richiesta che viene chiamata quando l'utente preme il bottone 'Cambia password' nella mail. Provvede a mostrare la pagina per cambiare password
 @auth.route("/password/change_from_email", methods = ["GET"])
+@webpage("forgot_password/change.html", passwordMinChars = app.config["PASSWORD_MIN_CHARS"])
 @needs_values("GET", "token")
 def forgotPasswordWebPage():
     token = g.query.get("token")
@@ -161,10 +162,11 @@ def forgotPasswordWebPage():
     if g.user is None:
         raise Forbidden()
     #present web page
-    return render_template("forgot_password/change.html", token = token, user = g.user)
+    return {"token": token, "user": g.user}
 
 #richiesta che viene chiamata quando l'utente cambia effettivamente la password da web. Cambia la password e mostra l'esito
 @auth.route("/password/change_from_email", methods = ["POST"])
+@webpage("forgot_password/change.html", passwordMinChars = app.config["PASSWORD_MIN_CHARS"])
 @needs_values("POST", "token", "password")
 def forgotPasswordWebPageResult():
     password = g.post.get("password")
@@ -172,7 +174,6 @@ def forgotPasswordWebPageResult():
     #decript token and retrieve user_id
     g.user = Keychain.verify_auth_token(token, nonce_key = "change_password_nonce")
     success = g.user is not None
-    status_code = None
     if success:
         #change password of user_id to 'password'
         keychain = Keychain.query.filter(Keychain.user_id == g.user.id).first()
@@ -180,11 +181,10 @@ def forgotPasswordWebPageResult():
         keychain.renew_change_password_nonce()
         db.session.add(keychain)
         db.session.commit()
-        status_code = 200
     else:
-        status_code = 403
+        raise Forbidden()
     #return page with confirmation
-    return render_template("forgot_password/change.html", success = success, user = g.user), status_code
+    return {"success": success, "user": g.user}
 
 
 #api(s) per le modifiche

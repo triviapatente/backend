@@ -5,7 +5,7 @@ function checkPasswords() {
 function checkPasswordInput() {
     var password = $("#password").val();
     var confirmPassword = $("#confirm-password").val();
-    if(password == confirmPassword)
+    if(password == confirmPassword && password.length >= passwordMinChars)
         $("#submit").removeAttr("disabled");
     else
         $("#submit").attr("disabled", true);
