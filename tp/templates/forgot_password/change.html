@@ -1,5 +1,6 @@
 {% extends "forgot_password/layout.html" %}
 {% block body %}
+    <link rel="stylesheet" href="{{request.url_root +  url_for('static', filename='assets/bootstrap/css/bootstrap.min.css')[1:] }}">
     <script type="text/javascript">
         var passwordMinChars = {{ passwordMinChars }};
     </script>

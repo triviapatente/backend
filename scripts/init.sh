@@ -2,6 +2,7 @@ apt-get -qqy update
 apt-get -qqy install postgresql python-psycopg2
 apt-get -qqy install python-flask python-sqlalchemy
 apt-get -qqy install python-pip
+apt-get install -y libxml2-dev libxslt1-dev zlib1g-dev
 apt-get install libevent-dev
 apt-get install python-all-dev
 #aggiungo l'utente ted con la password già inserita (e crittata)

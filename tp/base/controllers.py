@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, render_template
 from tp import app, db
 from flask import g, redirect, request
 from porting import getJSONModels
@@ -8,6 +8,8 @@ from tp.decorators import auth_required, needs_values
 from tp.base.models import Feedback
 from sqlalchemy import exc
 from tp.events.models import Installation
+from premailer import transform
+import jinja2
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
 
@@ -15,6 +17,14 @@ base = Blueprint("base", __name__, url_prefix = "/ws")
 def welcome():
     output = app.config["PUBLIC_INFOS"]
     return jsonify(output)
+@base.route("/generateTemplates", methods = ["GET"])
+def generateTemplates():
+    if app.config["DEBUG"] is False:
+        raise Forbidden()
+    text = transform(render_template("forgot_password/email.html", token = "{{token}}"))
+    with open('tp/templates/generated/email.html', 'w') as output_file:
+        output_file.write(text)
+    return jsonify(success = True)
 
 @base.route("/models", methods = ["GET"])
 def obtainModels():

@@ -141,7 +141,7 @@ def requestNewPassword():
             subject = "Richiesta cambiamento password",
             recipients = [user.email]
         )
-        email.html = render_template("forgot_password/email.html", token = token)
+        email.html = render_template("generated/email.html", token = token).replace("%7B%7Btoken%7D%7D", token)
         if not app.config["TESTING"]:
             mail.send(email)
         return jsonify(success = True)
