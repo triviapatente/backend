@@ -1,19 +1,23 @@
 {% extends "forgot_password/layout.html" %}
 {% block body %}
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
+<link rel="stylesheet" href="{{request.url_root +  url_for('static', filename='assets/bootstrap/css/bootstrap.light.css')[1:] }}">
 <style>
     .mail-content {
         padding-left: 10% !important;
         padding-right: 10% !important;
+        font-size: 12px !important;
     }
-    p, h2  {
+    .mail-disclaimer {
+        font-size: 10px !important;
+    }
+    p, h2, span  {
         font-family: 'Open Sans', Helvetica, Arial, sans-serif !important;
     }
 </style>
-<link rel="stylesheet" href="{{request.url_root +  url_for('static', filename='assets/bootstrap/css/bootstrap.light.css')[1:] }}">
-<p class="lead text-white content mail-content">Il nostro sistema ha ricevuto una richiesta di reset della password. Se sei stato tu procedi premendo il bottone sottostante. Se non hai inviato la richiesta in questione, non devi fare altro che ignorare questa mail, e la tua password rimarrà invariata.</p>
+<div class="lead text-white content mail-content">Il nostro sistema ha ricevuto una richiesta di reset della password. Se sei stato tu procedi premendo il bottone sottostante. Se non hai inviato la richiesta in questione, non devi fare altro che ignorare questa mail, e la tua password rimarrà invariata.</div>
 <div class="button-area">
     <a class="btn btn-primary submit" href="{{request.url_root + url_for('auth.forgotPasswordWebPage', token = token)[1:]}}" role="button">Reimposta password</a>
 </div>
-<center><p class="lead small text-white mail-disclaimer">Questa email è stata generata automaticamente dai nostri sistemi.</p></center>
+<center><span class="lead small text-white mail-disclaimer">Questa email è stata generata automaticamente dai nostri sistemi.</span></center>
 {% endblock %}
