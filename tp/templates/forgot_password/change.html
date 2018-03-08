@@ -1,10 +1,10 @@
 {% extends "forgot_password/layout.html" %}
 {% block body %}
-    <link rel="stylesheet" href="{{request.url_root +  url_for('static', filename='assets/bootstrap/css/bootstrap.min.css')[1:] }}">
+    <link rel="stylesheet" href="https://triviapatente.it:8000{{url_for('static', filename='assets/bootstrap/css/bootstrap.min.css')}}">
     <script type="text/javascript">
         var passwordMinChars = {{ passwordMinChars }};
     </script>
-    <script type="text/javascript" src="{{request.url_root +  url_for('static', filename='js/change_password.js')[1:] }}"></script>
+    <script type="text/javascript" src="https://triviapatente.it:8000{{url_for('static', filename='js/change_password.js')}}"></script>
     <center>
         <p class="lead text-white content">
         {% if user != null %}
