@@ -3,7 +3,7 @@ from flask import request, jsonify, Blueprint, render_template
 from tp import app, db
 from flask import g, redirect, request
 from porting import getJSONModels
-from tp.exceptions import NotAllowed, BadParameters, Forbidden
+from tp.exceptions import NotAllowed, BadParameters
 from tp.decorators import auth_required, needs_values
 from tp.base.models import Feedback
 from sqlalchemy import exc
@@ -20,7 +20,7 @@ def welcome():
 @base.route("/generateTemplates", methods = ["GET"])
 def generateTemplates():
     if app.config["DEBUG"] is False:
-        raise Forbidden()
+        raise NotAllowed()
     text = transform(render_template("forgot_password/email.html", token = "{{token}}"))
     with open('tp/templates/generated/email.html', 'w') as output_file:
         output_file.write(text)
