@@ -23,7 +23,7 @@ def category_chosen(room, category):
     data = {"category": category.json, "user": g.user.json}
     return (room, data, None)
 
-@event("game", action = EventActions.destroy)
+@event("game_ended", action = EventActions.destroy)
 def game_ended(room, game, partecipations):
     message = game.getGameResultPushMessage()
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
