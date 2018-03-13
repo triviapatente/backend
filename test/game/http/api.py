@@ -58,7 +58,10 @@ def get_trainings(self, token = None):
 def get_training(self, id, token = None):
     if not token:
         token = self.token
-    return self.app.get("/training/%d", id)
+    path = ""
+    if id is not None:
+        path = "%d" % id
+    return self.app.get("/training/%s" % path, token = token)
 def answer_training(self, answers, token = None):
     if not token:
         token = self.token

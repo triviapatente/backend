@@ -2,7 +2,7 @@
 
 from api import *
 from test.shared import TPAuthTestCase, get_socket_client
-from tp.game.models import Game, Partecipation
+from tp.game.models import Game, Partecipation, Quiz, Training, TrainingAnswer
 from test.auth.http.api import register
 from test.base.socket.api import join_room
 from test.game.socket.api import *
@@ -348,9 +348,41 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = search_user(self, None)
         assert response.status_code == 400
 
+    def test_get_training(self):
+        dumb_crawler()
+        limit = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+        quizzes = Quiz.query.limit(limit)
+        t = Training(user_id = self.user.get("id"))
+        db.session.add(t)
+        db.session.commit()
+        for quiz in quizzes:
+            a = TrainingAnswer(training_id = t.id, answer = quiz.answer, quiz_id = quiz.id)
+            db.session.add(a)
+        db.session.commit()
+
+        print "#1.1: Risposta successfull"
+        response = get_training(self, t.id)
+        assert response.status_code == 200
+
+        print "#1.2: Numero di domande corrette"
+        assert len(response.json.get("questions")) == app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+
+        print "#1.3: Utente non autorizzato"
+        response = get_training(self, t.id, self.first_opponent.get("token"))
+        assert response.status_code == 403
+
+        print "#2. Training inesistente"
+        response = get_training(self, 234)
+        assert response.status_code == 403
+
+        print "#3: Parametri mancanti"
+        print "#3: training"
+        response = get_training(self, None)
+        assert response.status_code == 404
+
     def test_get_training_questions(self):
         dumb_crawler()
-        
+
         print "#1.1: Risposta successfull, random = True"
         response = get_training_questions(self, True)
         assert response.status_code == 200
