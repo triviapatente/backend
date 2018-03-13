@@ -92,7 +92,7 @@ def init(testing = False, ci = False):
 
     from tp.auth.controllers import auth, account, info, fb
     from tp.base.controllers import base
-    from tp.game.controllers import game, quiz, category
+    from tp.game.controllers import game, quiz, category, training
     from tp.message.controllers import message
     from tp.preferences.controllers import preferences
     from tp.purchases.controllers import shop
@@ -106,7 +106,7 @@ def init(testing = False, ci = False):
     app.register_blueprint(game)
     app.register_blueprint(quiz)
     app.register_blueprint(category)
-    #app.register_blueprint(message)
+    app.register_blueprint(training)
     #app.register_blueprint(preferences)
     app.register_blueprint(account)
     #app.register_blueprint(info)
@@ -140,21 +140,9 @@ def init(testing = False, ci = False):
 
     from sqlalchemy.ext.compiler import compiles
     #this line make droptable to be in cascade mode for postgresql
-    @compiles(DropTable, "postgresql")
-    def _compile_drop_table(element, compiler, **kwargs):
-        return compiler.visit_drop_table(element) + " CASCADE"
-
-    #db.engine.execute(DropTable(Round.__table__))
-    #db.engine.execute(CreateTable(Round.__table__))
-    #db.engine.execute(DropTable(Game.__table__))
-    #db.engine.execute(CreateTable(Game.__table__))
-    #db.engine.execute(DropTable(Question.__table__))
-    #db.engine.execute(CreateTable(Question.__table__))
-    #db.engine.execute(DropTable(Invite.__table__))
-    #db.engine.execute(CreateTable(Invite.__table__))
-    #db.engine.execute(DropTable(Partecipation))
-    #db.engine.execute(CreateTable(Partecipation))
-    #end migration
+    #@compiles(DropTable, "postgresql")
+    #def _compile_drop_table(element, compiler, **kwargs):
+    #    return compiler.visit_drop_table(element) + " CASCADE"
 
     # This will create the database file using SQLAlchemy
     db.create_all()

@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db, socketio
-from tp.game.models import Game, Round, Partecipation, Question, Quiz, Category, ProposedQuestion
+from tp.game.models import Game, Round, Partecipation, LastTrainingAnswer, TrainingAnswer, Question, Quiz, Category, ProposedQuestion, Training
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import label
 from sqlalchemy import func, desc
 from random import randint
 from flask import g
 from tp.utils import doTransaction
 from tp.exceptions import NotAllowed
 from distutils.util import strtobool
-from tp.base.utils import roomName
-from tp.events.utils import getUsersFromRoomID
 from tp.events.models import Socket, RoomParticipation
 from tp.rank.queries import getRank
 
@@ -34,6 +33,20 @@ def createGame(opponents):
     db.session.add(round)
     return new_game
 
+def createTraining(answers):
+    new_training = Training(user = g.user)
+    for (quiz, answer) in answers:
+        if not isinstance(answer, bool):
+            answer = None
+        q = TrainingAnswer(quiz_id = quiz, answer = answer)
+        new_training.answers.append(q)
+        lastQ = LastTrainingAnswer.query.filter(LastTrainingAnswer.quiz_id == quiz, LastTrainingAnswer.user_id == g.user.id).first()
+        if not lastQ:
+            lastQ = LastTrainingAnswer(user = g.user, quiz_id = quiz)
+        db.session.add(lastQ)
+    db.session.add(new_training)
+    return new_training
+
 def sanitizeSuggestedUsers(users):
     output = []
     for (user, last_game_winner) in users:
@@ -42,6 +55,80 @@ def sanitizeSuggestedUsers(users):
         output.append(user)
     return output
 
+def getQuestionsOfTraining(id):
+    questions = TrainingAnswer.query.with_entities(TrainingAnswer, quiz.answer.label("correct_answer")).join(Quiz).filter(TrainingAnswer.training_id == id).all()
+    output = []
+    for (question, correct_answer) in questions:
+        question.correct_answer = correctAnswer
+        output.append(question)
+    return output
+
+def getTrainings():
+    #SELECT training.*,
+    #        (SELECT count(traininganswer.*)
+    #         FROM traininganswer
+    #         RIGHT JOIN quiz
+    #            ON traininganswer.quiz_id = quiz.id
+    #            AND traininganswer.answer != quiz.answer
+    #         WHERE traininganswer.training_id = training.id) AS errors
+    #FROM training
+    #WHERE training.user_id = 2;
+    errorQuery = db.session.query(func.count(Quiz.id)).outerjoin(TrainingAnswer, and_(TrainingAnswer.answer != Quiz.answer, TrainingAnswer.quiz_id == Quiz.id)).filter(TrainingAnswer.training_id == Training.id).label("numberOfErrors")
+    trainings = Training.query.with_entities(Training, errorQuery).filter(Training.user_id == g.user.id).all()
+    output = []
+    for (training, errors) in trainings:
+        training.numberOfErrors = errors
+        output.append(training)
+    return output
+def getTrainingStats(trainings = None):
+    if trainings is None:
+        trainings = getTrainings()
+    TOTAL = app.config["TRAINING_STATS_TOTAL"]
+    CORRECT = app.config["TRAINING_STATS_NO_ERRORS"]
+    ERRORS_12 = app.config["TRAINING_STATS_1_2_ERRORS"]
+    ERRORS_34 = app.config["TRAINING_STATS_3_4_ERRORS"]
+    ERRORS_MORE = app.config["TRAINING_STATS_MORE_ERRORS"]
+    output = {TOTAL: len(trainings), CORRECT: 0, ERRORS_12: 0, ERRORS_34: 0, ERRORS_MORE: 0}
+    for training in trainings:
+        if training.numberOfErrors == 0:
+            output[CORRECT] += 1
+        elif training.numberOfErrors <= 2:
+            output[ERRORS_12] += 1
+        elif training.numberOfErrors <= 4:
+            output[ERRORS_34] += 1
+        elif training.numberOfErrors > 4: #just to clarify that we are not handling null values
+            output[ERRORS_MORE] += 1
+    return output
+
+def generateRandomQuestionsForTraining(number):
+    return Quiz.query.order_by(func.random()).limit(number).all();
+def generateUserQuestionsForTraining(number):
+    #SELECT *
+    #FROM quiz
+    #WHERE EXISTS (SELECT 1
+    #              FROM lasttraininganswer
+    #               WHERE answer != quiz.answer
+    #               AND user_id = 2
+    #               AND quiz_id = quiz.id)
+    #       OR NOT EXISTS (SELECT 1
+    #                      FROM traininganswer
+    #                      JOIN training ON training.id = traininganswer.training_id
+    #                      WHERE traininganswer.quiz_id = quiz.id
+    #                      AND training.user_id = 2
+    #                       AND traininganswer.answer IS NOT NULL))
+    #LIMIT 40
+    firstSubQuery = LastTrainingAnswer.query.filter(LastTrainingAnswer.quiz_id == Quiz.id, LastTrainingAnswer.answer != Quiz.answer, LastTrainingAnswer.user_id == g.user.id)
+    secondSubQuery = TrainingAnswer.query.join(Training).filter(TrainingAnswer.quiz_id == Quiz.id, TrainingAnswer.answer != None, Training.user_id == g.user.id)
+    output = Quiz.query.filter(or_(firstSubQuery.exists(), ~secondSubQuery.exists())).order_by(func.random()).limit(number).all()
+    if len(output) < number:
+        return generateRandomQuestionsForTraining(number)
+    return output
+def generateQuestionsForTraining(random):
+    number = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+    if random is True:
+        return generateRandomQuestionsForTraining(number)
+    else:
+        return generateUserQuestionsForTraining(number)
 
 def getSuggestedUsers(user):
     output = []

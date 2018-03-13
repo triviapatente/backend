@@ -16,6 +16,7 @@ import events
 from events import RecentGameEvents
 
 game = Blueprint("game", __name__, url_prefix = "/game")
+training = Blueprint("training", __name__, url_prefix = "/training")
 quiz = Blueprint("quiz", __name__, url_prefix = "/quiz")
 category = Blueprint("category", __name__, url_prefix = "/category")
 
@@ -157,3 +158,46 @@ def search_user():
     matches = User.query.with_entities(User, getLastGameResultJoin(User)).filter(User.id != g.user.id).filter(criteria).limit(limit).all()
     output = sanitizeSuggestedUsers(matches)
     return jsonify(success = True, users = output)
+
+
+@training.route("/all", methods = ["GET"])
+@auth_required
+def get_trainings():
+    trainings = getTrainings()
+    stats = getTrainingStats(trainings)
+    return jsonify(success = True, trainings = trainings, stats = stats)
+
+@training.route("/<int:id>", methods = ["GET"])
+@auth_required
+def get_training(id):
+    training = Training.query.filter(Training.id == id).filter(Training.user_id == g.user.id).first()
+    if training:
+        questions = getQuestionsOfTraining(id)
+        return jsonify(success = True, questions = questions)
+    else:
+        raise NotAllowed()
+
+@training.route("/new", methods = ["GET"])
+@needs_values("GET", "random")
+@auth_required
+def get_training_questions():
+    needsRandom = g.query.get("random")
+    questions = generateQuestionsForTraining(needsRandom)
+    return jsonify(success = True, questions = questions)
+
+@training.route("/new", methods = ["POST"])
+@needs_values("POST", "answers")
+@auth_required
+def answer_training():
+    answers = g.post.get("answers")
+    requiredNumber = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+    if len(answers) != requiredNumber:
+        raise BadParameters("Non ci sono 40 domande!")
+    quiz_ids = answers.keys()
+    if len(quiz_ids) != len(set(quiz_ids)):
+        raise BadParameters("Ci sono domande duplicate")
+    training = doTransaction(createTraining, answers = answers)
+    if training:
+        return jsonify(success = True)
+    else:
+        raise ChangeFailed()

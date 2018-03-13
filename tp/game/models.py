@@ -142,3 +142,24 @@ class ProposedQuestion(Base):
   quiz_id = Column(BigInteger, ForeignKey("quiz.id"), nullable = False, primary_key = True)
   #turno in cui è stata proposta
   round_id = Column(BigInteger, ForeignKey("round.id"), nullable = False, primary_key = True)
+#allenamento singolo di un utente
+class Training(Base, CommonPK):
+    #utente che ha effettuato l'allenamento
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable = False)
+    user = relationship("User")
+    answers = relationship("TrainingAnswer", back_populates = "training")
+    export_properties = ["numberOfErrors"]
+#risposta singola di un'allenamento di un'utente
+class TrainingAnswer(Base):
+    training_id = Column(BigInteger, ForeignKey("training.id"), nullable = False, primary_key = True)
+    training = relationship("Training")
+    quiz_id = Column(BigInteger, ForeignKey("quiz.id"), nullable = False, primary_key = True)
+    quiz = relationship("Quiz")
+    answer = Column(Boolean, nullable = True)
+    export_properties = ["correct_answer"]
+class LastTrainingAnswer(Base):
+    quiz_id = Column(BigInteger, ForeignKey("quiz.id"), nullable = False, primary_key = True)
+    quiz = relationship("Quiz")
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable = False, primary_key = True)
+    user = relationship("User")
+    answer = Column(Boolean, nullable = True)

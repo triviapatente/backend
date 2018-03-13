@@ -25,6 +25,7 @@ THREADS_PER_PAGE = 2
 # Enable protection agains *Cross-site Request Forgery (CSRF)*
 CSRF_ENABLED     = True
 
+NUMBER_OF_QUESTIONS_FOR_TRAINING = 40
 #max age for files
 SEND_FILE_MAX_AGE_DEFAULT = 60 * 10 #10 minutes
 
@@ -119,3 +120,9 @@ IOS_STORE_URL = "http://www.apple.com"
 MESSAGE_PER_SCROLL = 50
 #numero di divisioni dati nel chart delle statistiche
 NUMBER_OF_CHART_DIVISORS = 15
+#stringhe json statistiche allenamento
+TRAINING_STATS_TOTAL = "total"
+TRAINING_STATS_NO_ERRORS = "correct"
+TRAINING_STATS_1_2_ERRORS = "1_2errors"
+TRAINING_STATS_3_4_ERRORS = "3_4errors"
+TRAINING_STATS_MORE_ERRORS = "more_errors"

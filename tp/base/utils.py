@@ -2,6 +2,7 @@
 from flask import g
 from tp import app
 from tp.auth.models import User
+from tp.game.utils import getTrainingStats
 from tp.game.models import Partecipation
 from tp.events.models import *
 from tp.rank.queries import getUserPosition
@@ -53,6 +54,7 @@ def get_connection_values(user):
     output["global_rank_position"] = getUserPosition(user)
     output["privacy_policy_last_update"] = app.config["PRIVACY_POLICY_LAST_UPDATE"]
     output["terms_and_conditions_last_update"] = app.config["TERMS_AND_CONDITIONS_LAST_UPDATE"]
+    output["training_stats"] = getTrainingStats()
     #output["stats"] = getCategoryPercentages(user)
     #output["preferences"] = getPreferencesFromUser(user)
     #output["fb"] = getFBTokenInfosFromUser(user)
