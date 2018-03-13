@@ -40,3 +40,26 @@ def search_user(self, query, token = None):
     if query:
         url += "?query=%s" % query
     return self.app.get(url, token = token)
+
+def get_training_questions(self, random, token = None):
+    if not token:
+        token = self.token
+    query = ""
+    if random is not None:
+        query = "?random=%r" % random
+
+    return self.app.get("/training/new%s" % query, token = token)
+
+def get_trainings(self, token = None):
+    if not token:
+        token = self.token
+    return self.app.get("/training/", token = token)
+
+def get_training(self, id, token = None):
+    if not token:
+        token = self.token
+    return self.app.get("/training/%d", id)
+def answer_training(self, answers, token = None):
+    if not token:
+        token = self.token
+    return self.app.post("/training/new", token = token, data = {"answers": answers})

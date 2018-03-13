@@ -8,7 +8,7 @@ from test.base.socket.api import join_room
 from test.game.socket.api import *
 from test.game.socket.utils import dumb_crawler
 from test.base.socket.api import global_infos
-from tp import db
+from tp import db, app
 class GameHTTPTestCase(TPAuthTestCase):
     first_opponent = None
     second_opponent = None
@@ -347,3 +347,23 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#3.1: query"
         response = search_user(self, None)
         assert response.status_code == 400
+
+    def test_get_training_questions(self):
+        dumb_crawler()
+        
+        print "#1.1: Risposta successfull, random = True"
+        response = get_training_questions(self, True)
+        assert response.status_code == 200
+
+        print "#1.1: Risposta successfull, random = False"
+        response = get_training_questions(self, False)
+        assert response.status_code == 200
+
+        print "#2: 40 domande"
+        assert len(response.json.get("questions")) == app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+
+        print "#3: Parametri mancanti"
+        print "#3: random"
+        response = get_training_questions(self, None)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 400
