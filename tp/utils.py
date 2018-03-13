@@ -58,6 +58,8 @@ def storeForMethod(method):
             return {}
     elif method == "GET":
         return request.args
+    elif method == "JSON":
+        return request.json
     return None
 
 #metodo che a partire da un tipo di richiesta ritorna il nome della chiave in cui andare a mettere i parametri una volta presi dal decorator, dentro g
@@ -70,10 +72,13 @@ def outputKeyForMethod(method):
         return "params"
     elif method == "GET":
         return "query"
+    elif method == "JSON":
+        return "json"
     return None
 
 def getAllRequestParams():
     stores = []
+    if hasattr(request, "json") and request.json: stores.append(request.json)
     if hasattr(request, "event") and request.event and request.event.get("args"): stores.append(request.event.get("args")[0].get("body"))
     if hasattr(request, "form") and request.form: stores.append(request.form)
     if hasattr(request, "args") and request.args: stores.append(request.args)
