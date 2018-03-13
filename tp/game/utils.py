@@ -35,7 +35,7 @@ def createGame(opponents):
 
 def createTraining(answers):
     new_training = Training(user = g.user)
-    for (quiz, answer) in answers:
+    for (quiz, answer) in answers.items():
         if not isinstance(answer, bool):
             answer = None
         q = TrainingAnswer(quiz_id = quiz, answer = answer)

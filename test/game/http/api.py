@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from flask import json
 
 def new_game(self, opponent_id, token = None):
     if not token:
@@ -65,4 +66,4 @@ def get_training(self, id, token = None):
 def answer_training(self, answers, token = None):
     if not token:
         token = self.token
-    return self.app.post("/training/new", token = token, data = {"answers": answers})
+    return self.app.post("/training/new", token = token, data = json.dumps(dict(answers = answers)), content_type='application/json')

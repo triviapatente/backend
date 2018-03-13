@@ -7,7 +7,7 @@ from tp.utils import doTransaction
 from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values, check_game_not_ended
 from tp.ws_decorators import check_in_room
-from tp.exceptions import ChangeFailed, NotAllowed
+from tp.exceptions import ChangeFailed, NotAllowed, BadParameters
 from sqlalchemy import or_, func
 from tp.rank.queries import getLastGameResultJoin
 from tp.game.utils import *
@@ -186,18 +186,19 @@ def get_training_questions():
     return jsonify(success = True, questions = questions)
 
 @training.route("/new", methods = ["POST"])
-@needs_values("POST", "answers")
+@needs_values("JSON", "answers")
 @auth_required
 def answer_training():
-    answers = g.post.get("answers")
+    answers = g.json.get("answers")
     requiredNumber = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
     if len(answers) != requiredNumber:
         raise BadParameters("Non ci sono 40 domande!")
     quiz_ids = answers.keys()
-    if len(quiz_ids) != len(set(quiz_ids)):
-        raise BadParameters("Ci sono domande duplicate")
+    quizzesCount = Quiz.query.filter(Quiz.id.in_(quiz_ids)).count()
+    if quizzesCount != requiredNumber:
+        raise BadParameters("Alcuni quiz non esistono in db!")
     training = doTransaction(createTraining, answers = answers)
     if training:
-        return jsonify(success = True)
+        return jsonify(success = True, training = training)
     else:
-        raise ChangeFailed()
+        raise ChangeFailed

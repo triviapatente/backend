@@ -349,6 +349,43 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = search_user(self, None)
         assert response.status_code == 400
 
+    def test_training_answer(self):
+        dumb_crawler()
+        questions = get_training_questions(self, True).json.get("questions")
+        input = {}
+        for question in questions:
+            input[question.get("id")] = question.get("answer")
+        print "#1.1: Risposta successfull"
+        response = answer_training(self, input)
+        assert response.status_code == 200
+
+        print "#1.2: Ritorno il training creato"
+        assert response.json.get("training") is not None
+        assert response.json.get("training").get("id") is not None
+
+        print "#1.3: Nelle stats viene registrato un nuovo training completo e senza errori"
+        response = get_trainings(self)
+        assert response.json.get("stats").get(app.config["TRAINING_STATS_NO_ERRORS"]) == 1
+        assert response.json.get("stats").get(app.config["TRAINING_STATS_TOTAL"]) == 1
+        assert len(response.json.get("trainings")) == 1
+
+        print "#2 Parametro invalido"
+        print "#2.1 Numero sbagliato di answer"
+        response = answer_training(self, {1: True})
+        assert response.status_code == 400
+
+        print "#2.2 Alcuni quiz non esistono"
+        newInput = input
+        del newInput[questions[0].get("id")]
+        newInput[-1] = True
+        response = answer_training(self, newInput)
+        assert response.status_code == 400
+
+        print "#3: Parametri mancanti"
+        print "#3: answers"
+        response = answer_training(self, None)
+        assert response.status_code == 400
+
     def test_get_training(self):
         dumb_crawler()
         id = dumb_training(self.user.get("id"), 0)
