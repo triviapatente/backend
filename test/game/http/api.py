@@ -53,7 +53,7 @@ def get_training_questions(self, random, token = None):
 def get_trainings(self, token = None):
     if not token:
         token = self.token
-    return self.app.get("/training/", token = token)
+    return self.app.get("/training/all", token = token)
 
 def get_training(self, id, token = None):
     if not token:

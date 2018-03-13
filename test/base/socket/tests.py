@@ -2,6 +2,7 @@
 
 from test.shared import TPAuthTestCase
 from api import *
+from tp import app
 from test.game.http.api import new_game
 from test.auth.http.api import register
 from test.shared import get_socket_client
@@ -33,6 +34,12 @@ class BaseSocketTestCase(TPAuthTestCase):
         assert response.json.get("global_rank_position") is not None
         print response.json.get("privacy_policy_last_update"), response.json.get("terms_and_conditions_last_update")
         assert response.json.get("privacy_policy_last_update") is not None
+        assert response.json.get("training_stats") is not None
+        assert response.json.get("training_stats").get(app.config["TRAINING_STATS_TOTAL"]) is not None
+        assert response.json.get("training_stats").get(app.config["TRAINING_STATS_NO_ERRORS"]) is not None
+        assert response.json.get("training_stats").get(app.config["TRAINING_STATS_1_2_ERRORS"]) is not None
+        assert response.json.get("training_stats").get(app.config["TRAINING_STATS_3_4_ERRORS"]) is not None
+        assert response.json.get("training_stats").get(app.config["TRAINING_STATS_MORE_ERRORS"]) is not None
         assert response.json.get("terms_and_conditions_last_update") is not None
         #assert response.json.get("preferences") is not None
         #assert response.json.get("fb") is not None

@@ -2,8 +2,9 @@
 
 from api import *
 from test.shared import TPAuthTestCase, get_socket_client
-from tp.game.models import Game, Partecipation, Quiz, Training, TrainingAnswer
+from tp.game.models import Game, Partecipation
 from test.auth.http.api import register
+from test.game.http.utils import dumb_training
 from test.base.socket.api import join_room
 from test.game.socket.api import *
 from test.game.socket.utils import dumb_crawler
@@ -350,25 +351,17 @@ class GameHTTPTestCase(TPAuthTestCase):
 
     def test_get_training(self):
         dumb_crawler()
-        limit = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
-        quizzes = Quiz.query.limit(limit)
-        t = Training(user_id = self.user.get("id"))
-        db.session.add(t)
-        db.session.commit()
-        for quiz in quizzes:
-            a = TrainingAnswer(training_id = t.id, answer = quiz.answer, quiz_id = quiz.id)
-            db.session.add(a)
-        db.session.commit()
+        id = dumb_training(self.user.get("id"), 0)
 
         print "#1.1: Risposta successfull"
-        response = get_training(self, t.id)
+        response = get_training(self, id)
         assert response.status_code == 200
 
         print "#1.2: Numero di domande corrette"
         assert len(response.json.get("questions")) == app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
 
         print "#1.3: Utente non autorizzato"
-        response = get_training(self, t.id, self.first_opponent.get("token"))
+        response = get_training(self, id, self.first_opponent.get("token"))
         assert response.status_code == 403
 
         print "#2. Training inesistente"
@@ -379,6 +372,44 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#3: training"
         response = get_training(self, None)
         assert response.status_code == 404
+
+    def test_get_trainings_and_stats(self):
+        dumb_crawler()
+        user_id = self.user.get("id")
+        dumb_training(user_id, 0)
+        dumb_training(user_id, 0)
+        dumb_training(user_id, 1)
+        dumb_training(user_id, 4)
+        dumb_training(user_id, 3)
+        dumb_training(user_id, 5)
+        dumb_training(user_id, 6)
+        dumb_training(user_id, 7)
+
+        print "#1.1: Risposta successfull"
+        response = get_trainings(self)
+        assert response.status_code == 200
+
+        print "#2.1: Lunghezza lista di training corretta"
+        assert len(response.json.get("trainings")) == 8
+
+        print "#2.2: Stats"
+        stats = response.json.get("stats")
+
+        print "#2.2.1: Stats: count training corretto"
+        assert stats.get(app.config["TRAINING_STATS_TOTAL"]) == 8
+
+        print "#2.2.2: Stats: no_errors corretto"
+        assert stats.get(app.config["TRAINING_STATS_NO_ERRORS"]) == 2
+
+        print "#2.2.3: Stats: 12_errors corretto"
+        assert stats.get(app.config["TRAINING_STATS_1_2_ERRORS"]) == 1
+
+        print "#2.2.4: Stats: 34_errors corretto"
+        assert stats.get(app.config["TRAINING_STATS_3_4_ERRORS"]) == 2
+
+        print "#2.2.4: Stats: more_errors corretto"
+        assert stats.get(app.config["TRAINING_STATS_MORE_ERRORS"]) == 3
+
 
     def test_get_training_questions(self):
         dumb_crawler()
