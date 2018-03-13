@@ -56,10 +56,10 @@ def sanitizeSuggestedUsers(users):
     return output
 
 def getQuestionsOfTraining(id):
-    questions = TrainingAnswer.query.with_entities(TrainingAnswer, Quiz.answer.label("correct_answer")).join(Quiz).filter(TrainingAnswer.training_id == id).all()
+    questions = Quiz.query.with_entities(Quiz, TrainingAnswer.answer.label("my_answer")).join(TrainingAnswer).filter(TrainingAnswer.training_id == id).all()
     output = []
-    for (question, correct_answer) in questions:
-        question.correct_answer = correct_answer
+    for (question, my_answer) in questions:
+        question.my_answer = my_answer
         output.append(question)
     return output
 
