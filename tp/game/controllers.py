@@ -193,7 +193,7 @@ def answer_training():
     requiredNumber = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
     if len(answers) != requiredNumber:
         raise BadParameters("Non ci sono 40 domande!")
-    quiz_ids = answers.keys()
+    quiz_ids = [long(k) for k in answers.keys()]
     quizzesCount = Quiz.query.filter(Quiz.id.in_(quiz_ids)).count()
     if quizzesCount != requiredNumber:
         raise BadParameters("Alcuni quiz non esistono in db!")

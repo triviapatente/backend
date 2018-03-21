@@ -376,8 +376,8 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         print "#2.2 Alcuni quiz non esistono"
         newInput = input
-        del newInput[questions[0].get("id")]
-        newInput[-1] = True
+        del newInput["%s" % questions[0].get("id")]
+        newInput["%s" % -1] = True
         response = answer_training(self, newInput)
         assert response.status_code == 400
 

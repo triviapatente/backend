@@ -66,4 +66,7 @@ def get_training(self, id, token = None):
 def answer_training(self, answers, token = None):
     if not token:
         token = self.token
+    if answers is not None:
+        for (quiz_id, answer) in answers.items():
+            answers["%s" % quiz_id] = answers.pop(quiz_id)
     return self.app.post("/training/new", token = token, data = json.dumps(dict(answers = answers)), content_type='application/json')
