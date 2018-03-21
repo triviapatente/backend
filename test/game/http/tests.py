@@ -403,9 +403,14 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.status_code == 200
 
         print "#1.2: Numero di domande corrette"
-        assert len(response.json.get("questions")) == app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+        questions = response.json.get("questions")
+        assert len(questions) == app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
 
-        print "#1.3: Utente non autorizzato"
+        print "#1.3: Le domande hanno category_name"
+        for item in questions:
+            assert item.get("category_name") is not None
+
+        print "#1.4: Utente non autorizzato"
         response = get_training(self, id, self.first_opponent.get("token"))
         assert response.status_code == 403
 
@@ -468,7 +473,13 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.status_code == 200
 
         print "#2: 40 domande"
-        assert len(response.json.get("questions")) == app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+        questions = response.json.get("questions")
+        assert len(questions) == app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+
+        print "#2.1: Tutte le domande hanno category_name"
+        for item in questions:
+            assert item.get("category_name") is not None
+
 
         print "#3: Parametri mancanti"
         print "#3: random"

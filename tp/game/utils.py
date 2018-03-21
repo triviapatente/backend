@@ -57,10 +57,11 @@ def sanitizeSuggestedUsers(users):
     return output
 
 def getQuestionsOfTraining(id):
-    questions = Quiz.query.with_entities(Quiz, TrainingAnswer.answer.label("my_answer")).join(TrainingAnswer).filter(TrainingAnswer.training_id == id).all()
+    questions = Quiz.query.with_entities(Quiz, Category.name, TrainingAnswer.answer.label("my_answer")).join(Category).join(TrainingAnswer).filter(TrainingAnswer.training_id == id).all()
     output = []
-    for (question, my_answer) in questions:
+    for (question, catName, my_answer) in questions:
         question.my_answer = my_answer
+        question.category_name = catName
         output.append(question)
     return output
 def getErrorsForTraining(t):
@@ -103,7 +104,7 @@ def getTrainingStats(trainings = None):
     return output
 
 def generateRandomQuestionsForTraining(number):
-    return Quiz.query.order_by(func.random()).limit(number).all();
+    return Quiz.query.with_entities(Quiz, Category.name).join(Category).order_by(func.random()).limit(number).all();
 def generateUserQuestionsForTraining(number):
     #SELECT *
     #FROM quiz
@@ -121,16 +122,22 @@ def generateUserQuestionsForTraining(number):
     #LIMIT 40
     firstSubQuery = LastTrainingAnswer.query.filter(LastTrainingAnswer.quiz_id == Quiz.id, LastTrainingAnswer.answer != Quiz.answer, LastTrainingAnswer.user_id == g.user.id)
     secondSubQuery = TrainingAnswer.query.join(Training).filter(TrainingAnswer.quiz_id == Quiz.id, TrainingAnswer.answer != None, Training.user_id == g.user.id)
-    output = Quiz.query.filter(or_(firstSubQuery.exists(), ~secondSubQuery.exists())).order_by(func.random()).limit(number).all()
+    output = Quiz.query.with_entities(Quiz, Category.name).join(Category).filter(or_(firstSubQuery.exists(), ~secondSubQuery.exists())).order_by(func.random()).limit(number).all()
     if len(output) < number:
         return generateRandomQuestionsForTraining(number)
     return output
 def generateQuestionsForTraining(random):
     number = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
+    output = []
     if random is True:
-        return generateRandomQuestionsForTraining(number)
+        output = generateRandomQuestionsForTraining(number)
     else:
-        return generateUserQuestionsForTraining(number)
+        output = generateUserQuestionsForTraining(number)
+    items = []
+    for (quiz, catName) in output:
+        quiz.category_name = catName
+        items.append(quiz)
+    return items
 
 def getSuggestedUsers(user):
     output = []
