@@ -369,6 +369,14 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert response.json.get("stats").get(app.config["TRAINING_STATS_TOTAL"]) == 1
         assert len(response.json.get("trainings")) == 1
 
+        print "#1.4: Le risposte a None sono accettate dal server"
+        key = input.keys()[0]
+        input[key] = None;
+        response = answer_training(self, input)
+        assert response.status_code == 200
+        print(response.json.get("training"))
+        assert response.json.get("training").get("numberOfErrors") == 1 #segnandomi la risposta a None, mi ha fatto sbagliare la prima domanda
+
         print "#2 Parametro invalido"
         print "#2.1 Numero sbagliato di answer"
         response = answer_training(self, {1: True})

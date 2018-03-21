@@ -43,6 +43,7 @@ def createTraining(answers):
         lastQ = LastTrainingAnswer.query.filter(LastTrainingAnswer.quiz_id == quiz, LastTrainingAnswer.user_id == g.user.id).first()
         if not lastQ:
             lastQ = LastTrainingAnswer(user = g.user, quiz_id = quiz)
+        lastQ.answer = answer
         db.session.add(lastQ)
     db.session.add(new_training)
     return new_training
@@ -62,7 +63,8 @@ def getQuestionsOfTraining(id):
         question.my_answer = my_answer
         output.append(question)
     return output
-
+def getErrorsForTraining(t):
+    return db.session.query(func.count(Quiz.id)).outerjoin(TrainingAnswer, and_(or_(TrainingAnswer.answer != Quiz.answer, TrainingAnswer.answer == None), TrainingAnswer.quiz_id == Quiz.id)).filter(TrainingAnswer.training_id == t.id)
 def getTrainings():
     #SELECT training.*,
     #        (SELECT count(traininganswer.*)
@@ -73,7 +75,7 @@ def getTrainings():
     #         WHERE traininganswer.training_id = training.id) AS errors
     #FROM training
     #WHERE training.user_id = 2;
-    errorQuery = db.session.query(func.count(Quiz.id)).outerjoin(TrainingAnswer, and_(TrainingAnswer.answer != Quiz.answer, TrainingAnswer.quiz_id == Quiz.id)).filter(TrainingAnswer.training_id == Training.id).label("numberOfErrors")
+    errorQuery = getErrorsForTraining(Training).label("numberOfErrors")
     trainings = Training.query.with_entities(Training, errorQuery).filter(Training.user_id == g.user.id).all()
     output = []
     for (training, errors) in trainings:

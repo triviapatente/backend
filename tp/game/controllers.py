@@ -199,6 +199,7 @@ def answer_training():
         raise BadParameters("Alcuni quiz non esistono in db!")
     training = doTransaction(createTraining, answers = answers)
     if training:
+        training.numberOfErrors = getErrorsForTraining(training).scalar()
         return jsonify(success = True, training = training)
     else:
         raise ChangeFailed
