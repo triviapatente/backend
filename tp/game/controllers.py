@@ -189,10 +189,16 @@ def get_training_questions():
 @needs_values("JSON", "answers")
 @auth_required
 def answer_training():
+    if g.json is None:
+        raise BadParameters("Risposte mancanti")
     answers = g.json.get("answers")
     requiredNumber = app.config["NUMBER_OF_QUESTIONS_FOR_TRAINING"]
     if len(answers) != requiredNumber:
         raise BadParameters("Non ci sono 40 domande!")
+    for (key, item) in answers.items():
+        index = item.get("index")
+        if not isinstance(key, basestring) or not isinstance(index, int):
+            raise BadParameters("Input formattato male")
     quiz_ids = [long(k) for k in answers.keys()]
     quizzesCount = Quiz.query.filter(Quiz.id.in_(quiz_ids)).count()
     if quizzesCount != requiredNumber:

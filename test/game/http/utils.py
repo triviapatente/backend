@@ -12,7 +12,7 @@ def dumb_training(user_id, numberOfErrors):
         answer = quiz.answer
         if i < numberOfErrors:
             answer = not answer
-        a = TrainingAnswer(training_id = training.id, answer = answer, quiz_id = quiz.id)
+        a = TrainingAnswer(training_id = training.id, answer = answer, quiz_id = quiz.id, order_index = i)
         db.session.add(a)
         i += 1
     db.session.commit()

@@ -353,8 +353,10 @@ class GameHTTPTestCase(TPAuthTestCase):
         dumb_crawler()
         questions = get_training_questions(self, True).json.get("questions")
         input = {}
+        index = 0
         for question in questions:
-            input[question.get("id")] = question.get("answer")
+            input[question.get("id")] = {"answer": question.get("answer"), "index": index}
+            index += 1
         print "#1.1: Risposta successfull"
         response = answer_training(self, input)
         assert response.status_code == 200
@@ -371,7 +373,7 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         print "#1.4: Le risposte a None sono accettate dal server"
         key = input.keys()[0]
-        input[key] = None;
+        input[key]["answer"] = None;
         response = answer_training(self, input)
         assert response.status_code == 200
         print(response.json.get("training"))
@@ -384,8 +386,10 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         print "#2.2 Alcuni quiz non esistono"
         newInput = input
-        del newInput["%s" % questions[0].get("id")]
-        newInput["%s" % -1] = True
+        oldKey = "%s" % questions[0].get("id")
+        newKey = "%s" % -1
+        newInput[newKey] = newInput[oldKey]
+        del newInput[oldKey]
         response = answer_training(self, newInput)
         assert response.status_code == 400
 
@@ -409,8 +413,15 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#1.3: Le domande hanno category_name"
         for item in questions:
             assert item.get("category_name") is not None
+            assert item.get("order_index") is not None
 
-        print "#1.4: Utente non autorizzato"
+        print "#1.4: Le domande sono in ordine"
+        i = 0
+        for item in questions:
+            assert item.get("order_index") == i
+            i += 1
+
+        print "#1.5: Utente non autorizzato"
         response = get_training(self, id, self.first_opponent.get("token"))
         assert response.status_code == 403
 

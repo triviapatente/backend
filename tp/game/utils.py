@@ -6,7 +6,7 @@ from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import label
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, asc
 from random import randint
 from flask import g
 from tp.utils import doTransaction
@@ -35,10 +35,12 @@ def createGame(opponents):
 
 def createTraining(answers):
     new_training = Training(user = g.user)
-    for (quiz, answer) in answers.items():
+    for (quiz, item) in answers.items():
+        answer = item.get("answer")
+        index = item.get("index")
         if not isinstance(answer, bool):
             answer = None
-        q = TrainingAnswer(quiz_id = quiz, answer = answer)
+        q = TrainingAnswer(quiz_id = long(quiz), answer = answer, order_index = index)
         new_training.answers.append(q)
         lastQ = LastTrainingAnswer.query.filter(LastTrainingAnswer.quiz_id == quiz, LastTrainingAnswer.user_id == g.user.id).first()
         if not lastQ:
@@ -57,11 +59,12 @@ def sanitizeSuggestedUsers(users):
     return output
 
 def getQuestionsOfTraining(id):
-    questions = Quiz.query.with_entities(Quiz, Category.name, TrainingAnswer.answer.label("my_answer")).join(Category).join(TrainingAnswer).filter(TrainingAnswer.training_id == id).all()
+    questions = Quiz.query.with_entities(Quiz, Category.name, TrainingAnswer.answer.label("my_answer"), TrainingAnswer.order_index.label("order_index")).join(Category).join(TrainingAnswer).filter(TrainingAnswer.training_id == id).order_by(asc("order_index")).all()
     output = []
-    for (question, catName, my_answer) in questions:
+    for (question, catName, my_answer, order_index) in questions:
         question.my_answer = my_answer
         question.category_name = catName
+        question.order_index = order_index
         output.append(question)
     return output
 def getErrorsForTraining(t):

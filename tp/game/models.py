@@ -93,7 +93,7 @@ class Quiz(Base, CommonPK):
   category_id = Column(BigInteger, ForeignKey("category.id"), nullable = False)
   category = relationship("Category")
 
-  export_properties = ["answered_correctly", "my_answer", "round_id", "category_name"]
+  export_properties = ["answered_correctly", "my_answer", "round_id", "category_name", "order_index"]
 
 
 
@@ -156,6 +156,7 @@ class TrainingAnswer(Base):
     quiz_id = Column(BigInteger, ForeignKey("quiz.id"), nullable = False, primary_key = True)
     quiz = relationship("Quiz")
     answer = Column(Boolean, nullable = True)
+    order_index = Column(Integer, nullable = False)
     export_properties = ["correct_answer"]
 class LastTrainingAnswer(Base):
     quiz_id = Column(BigInteger, ForeignKey("quiz.id"), nullable = False, primary_key = True)
