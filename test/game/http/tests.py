@@ -412,7 +412,7 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         print "#1.3: Le domande hanno category_name"
         for item in questions:
-            assert item.get("category_name") is not None
+            assert "category_hint" in item #hint is null on testing
             assert item.get("order_index") is not None
 
         print "#1.4: Le domande sono in ordine"
@@ -489,7 +489,7 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         print "#2.1: Tutte le domande hanno category_name"
         for item in questions:
-            assert item.get("category_name") is not None
+            assert "category_hint" in item #hint is null on testing
 
 
         print "#3: Parametri mancanti"

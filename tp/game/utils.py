@@ -59,11 +59,11 @@ def sanitizeSuggestedUsers(users):
     return output
 
 def getQuestionsOfTraining(id):
-    questions = Quiz.query.with_entities(Quiz, Category.name, TrainingAnswer.answer.label("my_answer"), TrainingAnswer.order_index.label("order_index")).join(Category).join(TrainingAnswer).filter(TrainingAnswer.training_id == id).order_by(asc("order_index")).all()
+    questions = Quiz.query.with_entities(Quiz, Category.hint, TrainingAnswer.answer.label("my_answer"), TrainingAnswer.order_index.label("order_index")).join(Category).join(TrainingAnswer).filter(TrainingAnswer.training_id == id).order_by(asc("order_index")).all()
     output = []
-    for (question, catName, my_answer, order_index) in questions:
+    for (question, catHint, my_answer, order_index) in questions:
         question.my_answer = my_answer
-        question.category_name = catName
+        question.category_hint = catHint
         question.order_index = order_index
         output.append(question)
     return output
@@ -107,7 +107,7 @@ def getTrainingStats(trainings = None):
     return output
 
 def generateRandomQuestionsForTraining(number):
-    return Quiz.query.with_entities(Quiz, Category.name).join(Category).order_by(func.random()).limit(number).all();
+    return Quiz.query.with_entities(Quiz, Category.hint).join(Category).order_by(func.random()).limit(number).all();
 def generateUserQuestionsForTraining(number):
     #SELECT *
     #FROM quiz
@@ -125,7 +125,7 @@ def generateUserQuestionsForTraining(number):
     #LIMIT 40
     firstSubQuery = LastTrainingAnswer.query.filter(LastTrainingAnswer.quiz_id == Quiz.id, LastTrainingAnswer.answer != Quiz.answer, LastTrainingAnswer.user_id == g.user.id)
     secondSubQuery = TrainingAnswer.query.join(Training).filter(TrainingAnswer.quiz_id == Quiz.id, TrainingAnswer.answer != None, Training.user_id == g.user.id)
-    output = Quiz.query.with_entities(Quiz, Category.name).join(Category).filter(or_(firstSubQuery.exists(), ~secondSubQuery.exists())).order_by(func.random()).limit(number).all()
+    output = Quiz.query.with_entities(Quiz, Category.hint).join(Category).filter(or_(firstSubQuery.exists(), ~secondSubQuery.exists())).order_by(func.random()).limit(number).all()
     if len(output) < number:
         return generateRandomQuestionsForTraining(number)
     return output
@@ -137,8 +137,8 @@ def generateQuestionsForTraining(random):
     else:
         output = generateUserQuestionsForTraining(number)
     items = []
-    for (quiz, catName) in output:
-        quiz.category_name = catName
+    for (quiz, catHint) in output:
+        quiz.category_hint = catHint
         items.append(quiz)
     return items
 
