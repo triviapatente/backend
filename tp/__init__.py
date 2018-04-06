@@ -113,7 +113,7 @@ def init(testing = False, ci = False):
     #app.register_blueprint(fb)
     #app.register_blueprint(shop)
     app.register_blueprint(rank)
-    #app.register_blueprint(stats)
+    app.register_blueprint(stats)
 
 
     # Add websockets

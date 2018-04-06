@@ -17,4 +17,4 @@ from rank.http.tests import *
 #from preferences.http.tests import *
 
 #from purchases.http.tests import *
-#from stats.http.tests import *
+from stats.http.tests import *

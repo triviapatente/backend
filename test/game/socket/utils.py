@@ -13,7 +13,7 @@ def dumb_crawler():
             # risposta corretta è sempre quella vera per semplificare il test delle vittorie
             q = Quiz(category_id = c.id, question = "Quiz %d della categoria %d" % (n, i), answer = True)
             db.session.add(q)
-        db.session.commit()
+    db.session.commit()
 
 #funzione che genera una categoria
 def generate_random_category():
@@ -48,4 +48,3 @@ def generateRound(game_id, *sockets):
         question_id = question.get("id")
         for (socket, socket_answer, token) in sockets:
             answer(socket, socket_answer, game_id, round_id, question_id, token)
-    

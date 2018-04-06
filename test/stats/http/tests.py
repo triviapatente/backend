@@ -4,41 +4,42 @@ from test.game.socket.utils import dumb_crawler
 from test.game.http.api import new_game
 from test.auth.http.api import register
 from test.shared import TPAuthTestCase
-from tp import db
+from sqlalchemy.orm import sessionmaker
+from flask.ext.sqlalchemy import SQLAlchemy
+from tp import app, db
 from api import *
 class StatsHTTPTestCase(TPAuthTestCase):
     quiz_1 = None
     quiz_2 = None
     quiz_3 = None
     quiz_4 = None
+    cats_count = None
 
     def setUp(self):
+        db.session.close()
         super(StatsHTTPTestCase, self).setUp()
         dumb_crawler()
-        cat1 = db.session.query(Category).filter(Category.id == 1).one()
-        cat2 = db.session.query(Category).filter(Category.id == 2).one()
+
         self.quiz_1 = db.session.query(Quiz).filter(Quiz.category_id == 1).first()
         self.quiz_2 = db.session.query(Quiz).filter(Quiz.category_id == 1).all()[1]
         self.quiz_3 = db.session.query(Quiz).filter(Quiz.category_id == 2).first()
         self.quiz_4 = db.session.query(Quiz).filter(Quiz.category_id == 2).all()[1]
         #Getting rid of the object out of session errors
-        db.session.expunge(cat1)
-        db.session.expunge(cat2)
+        #db.session.expunge(cat1)
+        #db.session.expunge(cat2)
         db.session.expunge(self.quiz_1)
         db.session.expunge(self.quiz_2)
         db.session.expunge(self.quiz_3)
         db.session.expunge(self.quiz_4)
 
         user_id = self.user.get("id")
-        opponent_user_id = register(self, "a", "a@a.it", "sdfsdfsdfsdf").json.get("user").get("id")
+        opponent_user_id = register(self, "asad", "a@a.it", "sdfsdfsdfsdf").json.get("user").get("id")
         game_id = new_game(self, opponent_user_id).json.get("game").get("id")
-        r1 = Round(number = 1, dealer_id = user_id, game_id = game_id, cat_id = 1)
+        r1 = Round.query.filter(Round.number == 1).filter(Round.game_id == game_id).one()
         r2 = Round(number = 2, dealer_id = user_id, game_id = game_id, cat_id = 2)
-        db.session.add(r1)
         db.session.add(r2)
 
         db.session.commit()
-
         q1 = Question(round_id = r1.id, user_id = user_id, quiz_id = self.quiz_1.id, answer = not self.quiz_1.answer) #SBAGLIATO
         q2 = Question(round_id = r1.id, user_id = user_id, quiz_id = self.quiz_2.id, answer = self.quiz_2.answer) #GIUSTO
         q3 = Question(round_id = r1.id, user_id = user_id, quiz_id = self.quiz_3.id, answer = not self.quiz_3.answer) #SBAGLIATO
@@ -56,9 +57,9 @@ class StatsHTTPTestCase(TPAuthTestCase):
         db.session.commit()
         db.session.add(q5)
         db.session.commit()
+        self.cats_count = Category.query.count()
 
-
-    def test_get_categories(self):
+    def test_obtain_categories(self):
         print "#1 Risposta successful"
         response = get_categories(self)
         assert response.json.get("success") == True
@@ -66,9 +67,9 @@ class StatsHTTPTestCase(TPAuthTestCase):
         print "#2 Le categorie ci sono e sono tutte"
         categories = response.json.get("categories")
         assert categories != None
-        assert len(categories) == Category.query.count()
+        assert len(categories) == self.cats_count
 
-    def test_get_progresses(self):
+    def test_obtain_progresses(self):
         print "#1 Risposta successful"
         response_cat_1 = get_info(self, 1)
         assert response_cat_1.json.get("success") == True
@@ -105,7 +106,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         assert last_progress == 50
 
 
-    def test_get_wrong_answers(self):
+    def test_obtain_wrong_answers(self):
         print "#1 Risposta successful"
         response_cat_1 = get_info(self, 1)
         assert response_cat_1.json.get("success") == True

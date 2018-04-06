@@ -10,18 +10,18 @@ stats = Blueprint("stats", __name__, url_prefix = "/stats")
 
 @stats.route("/detail/", methods = ["GET"])
 @auth_required
-def get_general_info():
+def obtain_general_infos():
     output = getCategoryInfo(None)
     return jsonify(output)
 
 @stats.route("/detail/<int:category_id>", methods = ["GET"])
 @auth_required
 @fetch_models(category_id = Category)
-def get_info(category_id):
+def obtain_category_infos(category_id):
     output = getCategoryInfo(category_id)
     return jsonify(output)
 
 @stats.route("/categories", methods = ["GET"])
-def get_categories():
+def obtain_categories():
     categories = Category.query.all()
     return jsonify(success = True, categories = categories)
