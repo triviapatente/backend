@@ -105,7 +105,7 @@ def leave_game():
 def randomSearch():
     limitMinutes = app.config["LIMIT_MINUTES_TO_BE_CONSIDERED_ONLINE"]
     limitDate = datetime.utcnow() - timedelta(minutes=limitMinutes)
-    opponent = User.query.join(Socket, Socket.user_id == User.id).filter(Socket.updatedAt >= limitDate).order_by(func.random()).first()
+    opponent = User.query.join(Socket, Socket.user_id == User.id).filter(User.id != g.user.id).filter(Socket.updatedAt >= limitDate).order_by(func.random()).first()
     if not opponent:
         print "About to search offline opponent..."
         opponent = User.query.filter(User.id != g.user.id).order_by(func.random()).first()
