@@ -14,6 +14,7 @@ from tp.game.utils import *
 from tp.base.utils import RoomType
 import events
 from events import RecentGameEvents
+from datetime import datetime, timedelta
 
 game = Blueprint("game", __name__, url_prefix = "/game")
 training = Blueprint("training", __name__, url_prefix = "/training")
@@ -102,7 +103,14 @@ def leave_game():
 @game.route("/new/random", methods = ["POST"])
 @auth_required
 def randomSearch():
-    opponent = User.query.filter(User.id != g.user.id).order_by(func.random()).first()
+    limitMinutes = app.config["LIMIT_MINUTES_TO_BE_CONSIDERED_ONLINE"]
+    limitDate = datetime.utcnow() - timedelta(minutes=limitMinutes)
+    opponent = User.query.join(Socket, Socket.user_id == User.id).filter(Socket.updatedAt >= limitDate).order_by(func.random()).first()
+    if not opponent:
+        print "About to search offline opponent..."
+        opponent = User.query.filter(User.id != g.user.id).order_by(func.random()).first()
+    else:
+        print "Online opponent found!"
     #controllo se non ho trovato nessun utente
     if opponent is None:
         print "No opponent found."
