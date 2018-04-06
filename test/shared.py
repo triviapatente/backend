@@ -17,6 +17,8 @@ class TPTestCase(TestCase):
         #il db è inizializzato a ogni test
         db.drop_all()
         db.create_all()
+        db.session.close()
+
 
 class TPAuthTestCase(TPTestCase):
     def setUp(self, socket = False):

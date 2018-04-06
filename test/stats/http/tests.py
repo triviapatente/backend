@@ -16,7 +16,6 @@ class StatsHTTPTestCase(TPAuthTestCase):
     cats_count = None
 
     def setUp(self):
-        db.session.close()
         super(StatsHTTPTestCase, self).setUp()
         dumb_crawler()
 
