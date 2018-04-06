@@ -444,6 +444,9 @@ def getNumberOfTotalAnswersForQuiz(quiz, game, opponent):
 #TODO: add time range
 def getRecentGames(user):
     a = aliased(Round, name = "a")
+    b = aliased(Round, name = "b")
+    c = aliased(Round, name = "c")
+    d = aliased(Round, name = "d")
     #(SELECT count(question.round_id) AS count_1
     #FROM question, round AS a
     #WHERE question.round_id = a.id AND question.user_id = user.id)
@@ -455,22 +458,27 @@ def getRecentGames(user):
     #WHERE question.round_id = a.id AND question.user_id = user.id) != 0)
     question_number = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     my_turn = db.session.query(a).with_entities(func.count(a.id) != 0).filter(a.game_id == Game.id).filter(or_(Game.ended == True, and_(or_(a.cat_id != None, a.dealer_id == user.id), questions < question_number))).label("my_turn")
+    answerCount = db.session.query(func.count(Question.quiz_id)).join(b, b.id == Question.round_id).filter(b.game_id == Game.id, Question.user_id == g.user.id).as_scalar()
+    myScore = db.session.query(func.count(Question.quiz_id)).join(c, c.id == Question.round_id).join(Quiz, Quiz.id == Question.quiz_id).filter(c.game_id == Game.id, Question.user_id == g.user.id, Question.answer == Quiz.answer).as_scalar()
+    opponentScore = db.session.query(func.count(Question.quiz_id)).join(d, d.id == Question.round_id).filter(d.game_id == Game.id, Question.user_id == g.user.id).filter(Question.user_id != g.user.id, Question.answer == Quiz.answer).as_scalar()
     #SELECT game.*, my_turn AS my_turn
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
     RECENT_GAMES_PER_PAGE = app.config["RECENT_GAMES_PER_PAGE"]
-    active_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).filter(Game.ended == False).order_by(desc("my_turn"), Game.updatedAt.desc()).all()
+    active_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn, answerCount, myScore, opponentScore).filter(Game.ended == False).order_by(desc("my_turn"), Game.updatedAt.desc()).all()
     print "Active Games Length for", user.username, ": ", len(active_recent_games)
     recent_games = []
     recent_games += active_recent_games
     if len(active_recent_games) < RECENT_GAMES_PER_PAGE:
         limit = RECENT_GAMES_PER_PAGE - len(active_recent_games)
-        ended_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn).filter(Game.ended == True).order_by(Game.updatedAt.desc()).limit(limit).all()
+        ended_recent_games = db.session.query(Game).join(Partecipation).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn, answerCount, myScore, opponentScore).filter(Game.ended == True).order_by(Game.updatedAt.desc()).limit(limit).all()
         recent_games += ended_recent_games
     output = []
-    for g in recent_games:
-        game = g[0]
-        game.my_turn = g[1]
+    for game, my_turn, answer_count, my_score, opponent_score in recent_games:
+        game.my_turn = my_turn
+        game.answer_count = answer_count
+        game.my_score = my_score
+        game.opponent_score = opponent_score
         game.getOpponentForExport()
         output.append(game)
     print "Recent Games Length for", user.username, ": ", len(output)

@@ -28,7 +28,7 @@ class Game(Base, CommonPK):
   #il gioco è iniziato? ovvero tutti gli inviti son stati accettati?
   started = Column(Boolean, default = False)
 
-  export_properties = ["my_turn", "opponent_id", "opponent_username", "opponent_image", "opponent_name", "opponent_surname", "question"]
+  export_properties = ["answer_count", "opponent_score", "my_score", "my_turn", "opponent_id", "opponent_username", "opponent_image", "opponent_name", "opponent_surname", "question"]
   #ottiene l'utente avversario all'utente userToExclude e lo inserisce nel modello per la serializzazione
   def getOpponentForExport(self, userToExclude = None):
       #ho fatto il controllo qui e non direttamente nell'intestazione del metodo perchè i valori di default vengono interpretati a livello di bootstrap, e quindi g sarebbe fuori dall'application/request context
