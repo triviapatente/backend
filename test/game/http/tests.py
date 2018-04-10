@@ -205,6 +205,9 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         dumb_crawler()
 
+        question_number = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
+        overall_question_number_per_user = question_number * app.config["NUMBER_OF_ROUNDS"]
+
         #il primo game lo creo, inizializzo il round e non rispondo: è il mio turno
         #Risultato sperato : my_turn = true, started = false
         first_game = self.create_bulk_game()
@@ -258,7 +261,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[0].get("id") == third_game
         assert games[0].get("my_turn") == True
         assert games[0].get("started") == True
-        assert games[0].get("answer_count") == 4
+        assert games[0].get("remaining_answers_count") == overall_question_number_per_user - 4
         assert games[0].get("my_score") is not None
         assert games[0].get("opponent_score") is not None
 
@@ -266,7 +269,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[1].get("id") == second_game
         assert games[1].get("my_turn") == True
         assert games[1].get("started") == True
-        assert games[1].get("answer_count") == 8
+        assert games[1].get("remaining_answers_count") == overall_question_number_per_user - 8
         assert games[1].get("my_score") is not None
         assert games[1].get("opponent_score") is not None
 
@@ -274,7 +277,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[2].get("id") == first_game
         assert games[2].get("my_turn") == True
         assert games[2].get("started") == False
-        assert games[2].get("answer_count") == 0
+        assert games[2].get("remaining_answers_count") == overall_question_number_per_user
         assert games[2].get("my_score") is not None
         assert games[2].get("opponent_score") is not None
 
@@ -282,7 +285,7 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[3].get("id") == fifth_game
         assert games[3].get("my_turn") == False
         assert games[3].get("started") == False
-        assert games[3].get("answer_count") == 4
+        assert games[3].get("remaining_answers_count") == overall_question_number_per_user - 4
         assert games[3].get("my_score") is not None
         assert games[3].get("opponent_score") is not None
 
@@ -290,14 +293,14 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert games[4].get("id") == fourth_game
         assert games[4].get("my_turn") == False
         assert games[4].get("started") == True
-        assert games[4].get("answer_count") == 4
+        assert games[4].get("remaining_answers_count") == overall_question_number_per_user - 4
         assert games[4].get("my_score") is not None
         assert games[4].get("opponent_score") is not None
 
         print "#2.6: Il sesto game è quello finito"
         assert games[5].get("id") == sixth_game
         assert games[5].get("ended") == True
-        assert games[5].get("answer_count") == 0
+        assert games[5].get("remaining_answers_count") == overall_question_number_per_user
         assert games[5].get("my_score") is not None
         assert games[5].get("opponent_score") is not None
 
