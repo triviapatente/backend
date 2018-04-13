@@ -41,7 +41,8 @@ def getProgressChart(category_id, n, start, end = datetime.now()):
     output = {}
     cursor = start + delta
     while cursor <= end:
-        output[cursor.isoformat()] = getPercentageIn(category_id, start, cursor)
+        (correct, total) = getProgressValuesIn(category_id, start, cursor)
+        output[cursor.isoformat()] = {"correct_answers": correct, "total_answers": total}
         start += delta
         cursor += delta
 
@@ -67,7 +68,7 @@ def getProgressValuesIn(category_id, start, end):
         #AND b."createdAt" <= end
         max_created = max_created.filter(b.createdAt <= end)
     #SELECT count(DISTINCT c.quiz_id) FROM question AS c JOIN quiz ON quiz.id = c.quiz_id
-    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz)
+    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).filter(c.createdAt > start, c.createdAt <= end).join(Quiz)
     if category_id:
         #WHERE quiz.category_id = category.id
         total_questions = total_questions.filter(Quiz.category_id == category_id)
