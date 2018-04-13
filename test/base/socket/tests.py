@@ -3,7 +3,7 @@
 from test.shared import TPAuthTestCase
 from api import *
 from tp import app
-from tp.game.models import Category
+from tp.game.models import Category, Quiz
 from test.game.http.api import new_game
 from test.auth.http.api import register
 from test.shared import get_socket_client
@@ -44,7 +44,16 @@ class BaseSocketTestCase(TPAuthTestCase):
         assert response.json.get("terms_and_conditions_last_update") is not None
         #assert response.json.get("preferences") is not None
         #assert response.json.get("fb") is not None
-        assert response.json.get("stats") is not None
+        categories = response.json.get("stats")
+        assert categories is not None
+        assert len(categories) == Category.query.count() + 1
+        for category in categories:
+            id = category.get("id")
+            total_quizzes = category.get("total_quizzes")
+            if id is not None:
+                assert total_quizzes == Quiz.query.filter(Quiz.category_id == id).count()
+            else:
+                assert total_quizzes == Quiz.query.count()
         #TODO: assert response.json.get("friends_rank_position") is not None
     def test_join_room(self):
         game_id = self.game.get("id")

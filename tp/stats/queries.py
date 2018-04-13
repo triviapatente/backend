@@ -96,11 +96,13 @@ def getCategoryPercentages(user):
     a = aliased(Question, name = "a")
     b = aliased(Question, name = "b")
     c = aliased(Question, name = "c")
+    d = aliased(Quiz, name = "d")
     #SELECT max(v."createdAt") AS max_1 FROM question, question AS b WHERE b.quiz_id = a.quiz_id
     max_created = db.session.query(b).with_entities(func.max(b.createdAt)).filter(b.quiz_id == a.quiz_id)
     #SELECT count(DISTINCT c.quiz_id) FROM question AS c JOIN quiz ON quiz.id = c.quiz_id WHERE quiz.category_id = category.id
     total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz).filter(Quiz.category_id == Category.id).label("total_answers")
-    #count(createdAt)
+
+    total_quizzes = db.session.query(d).with_entities(func.count(d.createdAt)).filter(Category.id == d.category_id).label("total_quizzes")
     correct_questions = func.count(a.createdAt).label("correct_answers")
     #SELECT category.id AS category_id, category.hint AS category_hint, correct_questions AS "correct_answers", total_questions  AS "total_answers"
     #FROM quiz
@@ -108,11 +110,14 @@ def getCategoryPercentages(user):
     #JOIN category ON category.id = quiz.category_id
     #GROUP BY category.id, category.hint
     #ORDER BY category.hint
-    query = db.session.query(Quiz).outerjoin(a, and_(a.quiz_id == Quiz.id, a.answer == Quiz.answer, a.createdAt == max_created, a.user_id == user.id)).join(Category).with_entities(Category.id, Category.hint, correct_questions, total_questions).order_by(Category.hint).group_by(Category.id, Category.hint)
+    query = db.session.query(Quiz).outerjoin(a, and_(a.quiz_id == Quiz.id, a.answer == Quiz.answer, a.createdAt == max_created, a.user_id == user.id)).join(Category, Category.id == Quiz.category_id).with_entities(Category.id, Category.hint, correct_questions, total_questions, total_quizzes).order_by(Category.hint).group_by(Category.id, Category.hint)
     output = query.all()
     general = getGeneralInfos()
     categoryPercentages = []
-    for (id, hint, correct_answers, total_answers) in output:
-        categoryPercentages.append({'id': id, 'hint': hint, 'correct_answers': correct_answers, 'total_answers': total_answers})
+    general_total_quizzes = 0
+    for (id, hint, correct_answers, total_answers, total_quizzes) in output:
+        general_total_quizzes += total_quizzes
+        categoryPercentages.append({'id': id, 'hint': hint, 'correct_answers': correct_answers, 'total_answers': total_answers, "total_quizzes": total_quizzes})
+    general["total_quizzes"] = general_total_quizzes
     categoryPercentages.insert(0, general)
     return categoryPercentages
