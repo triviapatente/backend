@@ -24,7 +24,6 @@ class AlreadyPendingGame(TPException):
     def __init__(self):
         TPException.__init__(self)
         self.message = "Hai già un match da iniziare con questo utente!"
-        self.parameters = {"alreadyPendingGame": True}
 #eccezione chiamata quando un parametro richiesto è mancante
 class MissingParameter(TPException):
     status_code = 400 #bad request
