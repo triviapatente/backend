@@ -61,14 +61,16 @@ def getProgressValuesIn(category_id, start, end):
 
     #SELECT max(b."createdAt") AS max_1 FROM question AS b WHERE  a.quiz_id = b.quiz_id
     max_created = db.session.query(b).with_entities(func.max(b.createdAt)).filter(a.quiz_id == b.quiz_id)
+    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz)
     if start:
         #AND b."createdAt" > start
         max_created = max_created.filter(b.createdAt > start)
+        total_questions = total_questions.filter(c.createdAt > start)
     if end:
         #AND b."createdAt" <= end
         max_created = max_created.filter(b.createdAt <= end)
+        total_questions = total_questions.filter(c.createdAt <= end)
     #SELECT count(DISTINCT c.quiz_id) FROM question AS c JOIN quiz ON quiz.id = c.quiz_id
-    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).filter(c.createdAt > start, c.createdAt <= end).join(Quiz)
     if category_id:
         #WHERE quiz.category_id = category.id
         total_questions = total_questions.filter(Quiz.category_id == category_id)
