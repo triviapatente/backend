@@ -45,18 +45,6 @@ class BaseSocketTestCase(TPAuthTestCase):
         #assert response.json.get("preferences") is not None
         #assert response.json.get("fb") is not None
         #TODO: assert response.json.get("friends_rank_position") is not None
-        stats = response.json.get("stats")
-        assert stats is not None
-        first = stats[0]
-        assert first
-        assert first.get("id") is None
-        assert first.get("hint") == "Complessivo"
-
-        #print "#2: Le statistiche sono su tutte le categorie"
-        stats = response.json.get("stats")
-        count = Category.query.count()
-        #il +1 sta ad indicare 'complessivo'
-        assert len(stats) == count + 1
     def test_join_room(self):
         game_id = self.game.get("id")
 

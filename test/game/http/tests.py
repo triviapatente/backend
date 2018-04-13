@@ -16,6 +16,8 @@ class GameHTTPTestCase(TPAuthTestCase):
     third_opponent = None
 
     first_opponent_socket = None
+    second_opponent_socket = None
+    third_opponent_socket = None
     def setUp(self):
         super(GameHTTPTestCase, self).setUp(socket = True)
         self.first_opponent = register(self, "test1", "test1@gmail.com", "sdfsdfsdfds").json
@@ -23,7 +25,9 @@ class GameHTTPTestCase(TPAuthTestCase):
         #il primo utente deve allacciarsi al socket per ricevere gli eventi, con una chiamata qualsiasi
         global_infos(self.first_opponent_socket, self.first_opponent.get("token"))
         self.second_opponent = register(self, "test2", "test2@gmail.com", "sdfsdfsdfds").json
+        self.second_opponent_socket = get_socket_client()
         self.third_opponent = register(self, "test3", "test3@gmail.com", "sdfsdfsdfds").json
+        self.third_opponent_socket = get_socket_client()
 
     def test_new_game(self):
         opponent_id = self.first_opponent.get("user").get("id")
@@ -56,6 +60,11 @@ class GameHTTPTestCase(TPAuthTestCase):
         response = new_game(self, None)
         assert response.json.get("success") == False
         assert response.json.get("status_code") == 400
+
+        print "#5: Creazione di game con utente che non ha ancora giocato al precedente"
+        response = new_game(self, opponent_id)
+        assert response.json.get("success") == False
+        assert response.json.get("status_code") == 403
 
     def test_leave_score_decrement(self):
         opponent_id = self.first_opponent.get("user").get("id")
@@ -154,20 +163,12 @@ class GameHTTPTestCase(TPAuthTestCase):
         user1 = response.json.get("user")
         assert user1
 
-        #azzero i database se no l'utente scelto è sempre lo stesso (l'unico con game attivi)
-        Partecipation.query.delete()
-        db.session.commit()
-
         print "#2: Creazione game"
         response = new_random_game(self)
         assert response.json.get("success") == True
         assert response.json.get("game")
         user2 = response.json.get("user")
         assert user2
-
-        #azzero i database se no l'utente scelto è sempre lo stesso (l'unico con game attivi)
-        Partecipation.query.delete()
-        db.session.commit()
 
         print "#3: Creazione game"
         response = new_random_game(self)
@@ -177,6 +178,15 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert user3
 
         print "Opponents: ", user1.get("username"), user2.get("username"), user3.get("username")
+
+        print "#4 Non posso spammare lo stesso utente, in modalità casuale"
+
+        print "#4.1: Il primo game e il secondo non hanno lo stesso opponent"
+        assert user1.get("id") != user2.get("id")
+        print "#4.2: Il primo game e il terzo non hanno lo stesso opponent"
+        assert user1.get("id") != user3.get("id")
+        print "#4.3: Il secondo game e il terzo non hanno lo stesso opponent"
+        assert user2.get("id") != user3.get("id")
 
     def prepare_round(self, socket, game, token):
         print "preparing round for game", game
@@ -192,12 +202,12 @@ class GameHTTPTestCase(TPAuthTestCase):
         for question in questions:
             answer(socket, True, game, round_id, question.get("id"), token)
         return round_id
-    def create_bulk_game(self):
-        opponent_id = self.first_opponent.get("user").get("id")
-        opponent_token = self.first_opponent.get("token")
+    def create_bulk_game(self, opponent, opponent_socket):
+        opponent_id = opponent.get("user").get("id")
+        opponent_token = opponent.get("token")
         id = new_game(self, opponent_id).json.get("game").get("id")
         join_room(self.socket, id, "game", self.token)
-        join_room(self.first_opponent_socket, id, "game", self.first_opponent.get("token"))
+        join_room(opponent_socket, id, "game", opponent.get("token"))
         self.socket.get_received()
         return id
 
@@ -210,43 +220,43 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         #il primo game lo creo, inizializzo il round e non rispondo: è il mio turno
         #Risultato sperato : my_turn = true, started = false
-        first_game = self.create_bulk_game()
+        first_game = self.create_bulk_game(self.first_opponent, self.first_opponent_socket)
         init_round(self.socket, first_game, self.token)
         #il secondo game lo creo e faccio scorrere 1 turno fino ad arrivare al secondo turno dell'avversario
         #Risultato sperato : my_turn = true, started = false (il prossimo turno il dealer sarò io!)
-        second_game = self.create_bulk_game()
+        second_game = self.create_bulk_game(self.second_opponent, self.second_opponent_socket)
         round_id = self.process_round(self.socket, second_game, self.token)
-        self.first_opponent_socket.get_received()
-        self.process_round(self.first_opponent_socket, second_game, self.first_opponent.get("token"), round_id)
+        self.second_opponent_socket.get_received()
+        self.process_round(self.second_opponent_socket, second_game, self.second_opponent.get("token"), round_id)
         self.socket.get_received()
-        round_id = self.prepare_round(self.first_opponent_socket, second_game, self.first_opponent.get("token"))
+        round_id = self.prepare_round(self.second_opponent_socket, second_game, self.second_opponent.get("token"))
         self.socket.get_received()
         self.process_round(self.socket, second_game, self.token, round_id)
-        self.first_opponent_socket.get_received()
+        self.second_opponent_socket.get_received()
         init_round(self.socket, second_game, self.token)
         #il terzo game lo creo, rispondo al primo round con l'avversario e ritorno al mio turno, scegliendo la categoria
         #Risultato sperato : my_turn = true, started = false (categoria settata, posso agire!)
-        third_game = self.create_bulk_game()
+        third_game = self.create_bulk_game(self.second_opponent, self.second_opponent_socket)
         round_id = self.process_round(self.socket, third_game, self.token)
-        self.first_opponent_socket.get_received()
-        self.process_round(self.first_opponent_socket, third_game, self.first_opponent.get("token"), round_id)
+        self.second_opponent_socket.get_received()
+        self.process_round(self.second_opponent_socket, third_game, self.second_opponent.get("token"), round_id)
         self.socket.get_received()
-        self.prepare_round(self.first_opponent_socket, third_game, self.first_opponent.get("token"))
+        self.prepare_round(self.second_opponent_socket, third_game, self.second_opponent.get("token"))
         self.socket.get_received()
         #il quarto game lo creo, rispondo al primo round con l'avversario e ritorno al mio turno
         #Risultato sperato : my_turn = false, started = true (devo aspettare che l'avversario setti la categoria)
-        fourth_game = self.create_bulk_game()
+        fourth_game = self.create_bulk_game(self.second_opponent, self.second_opponent_socket)
         round_id = self.process_round(self.socket, fourth_game, self.token)
-        self.first_opponent_socket.get_received()
-        self.process_round(self.first_opponent_socket, fourth_game, self.first_opponent.get("token"), round_id)
-        init_round(self.first_opponent_socket, fourth_game, self.first_opponent.get("token"))
+        self.second_opponent_socket.get_received()
+        self.process_round(self.second_opponent_socket, fourth_game, self.second_opponent.get("token"), round_id)
+        init_round(self.second_opponent_socket, fourth_game, self.second_opponent.get("token"))
         #il quinto game lo creo e rispondo a tutte le domande fino ad arrivare al turno dell'avversario
         #Risultato sperato : my_turn = false, started = false (il prossimo turno è dell'avversario!)
-        fifth_game = self.create_bulk_game()
+        fifth_game = self.create_bulk_game(self.second_opponent, self.second_opponent_socket)
         round_id = self.process_round(self.socket, fifth_game, self.token)
-        self.first_opponent_socket.get_received()
+        self.second_opponent_socket.get_received()
         #il sesto game lo creo e mi tolgo subito, quindi viene settato ended = true
-        sixth_game = self.create_bulk_game()
+        sixth_game = self.create_bulk_game(self.third_opponent, self.third_opponent_socket)
         leave_game(self, sixth_game)
 
         print "#1: Risposta successful"

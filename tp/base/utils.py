@@ -56,7 +56,7 @@ def get_connection_values(user):
     output["privacy_policy_last_update"] = app.config["PRIVACY_POLICY_LAST_UPDATE"]
     output["terms_and_conditions_last_update"] = app.config["TERMS_AND_CONDITIONS_LAST_UPDATE"]
     output["training_stats"] = getTrainingStats()
-    output["stats"] = getCategoryPercentages(user)
+    #output["stats"] = getCategoryPercentages(user)
     #output["preferences"] = getPreferencesFromUser(user)
     #output["fb"] = getFBTokenInfosFromUser(user)
     return output

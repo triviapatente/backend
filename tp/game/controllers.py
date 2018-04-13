@@ -7,7 +7,7 @@ from tp.utils import doTransaction
 from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values, check_game_not_ended
 from tp.ws_decorators import check_in_room
-from tp.exceptions import ChangeFailed, NotAllowed, BadParameters
+from tp.exceptions import ChangeFailed, NotAllowed, BadParameters, AlreadyPendingGame
 from sqlalchemy import or_, func
 from tp.rank.queries import getLastGameResultJoin
 from tp.game.utils import *
@@ -33,6 +33,9 @@ def welcome():
 @fetch_models(opponent = User)
 def newGame():
     opponent = g.models["opponent"]
+    pendingCount = getPendingGamesQuery(g.user, opponent).count()
+    if pendingCount > 0:
+        raise AlreadyPendingGame()
     game = doTransaction(createGame, **({"opponents": [opponent]}))
     if game:
         print "Game %d created." % game.id
@@ -105,10 +108,13 @@ def leave_game():
 def randomSearch():
     limitMinutes = app.config["LIMIT_MINUTES_TO_BE_CONSIDERED_ONLINE"]
     limitDate = datetime.utcnow() - timedelta(minutes=limitMinutes)
-    opponent = User.query.join(Socket, Socket.user_id == User.id).filter(User.id != g.user.id).filter(Socket.updatedAt >= limitDate).order_by(func.random()).first()
+    pendingGames = getPendingGamesQuery(User, g.user, True).label("pendingGames")
+    opponent = User.query.join(Socket, Socket.user_id == User.id).filter(User.id != g.user.id).filter(Socket.updatedAt >= limitDate).filter(pendingGames == 0).order_by(func.random())
+    print opponent
+    opponent = opponent.first()
     if not opponent:
         print "About to search offline opponent..."
-        opponent = User.query.filter(User.id != g.user.id).order_by(func.random()).first()
+        opponent = User.query.filter(User.id != g.user.id).filter(pendingGames == 0).order_by(func.random()).first()
     else:
         print "Online opponent found!"
     #controllo se non ho trovato nessun utente

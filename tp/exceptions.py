@@ -18,7 +18,13 @@ class TPException(Exception):
         rv["status_code"] = self.status_code
         rv = {k: v for k, v in rv.items() if v != None}
         return rv
+class AlreadyPendingGame(TPException):
+    status_code = 403 #unauthorized
 
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "Hai già un match da iniziare con questo utente!"
+        self.parameters = {"alreadyPendingGame": True}
 #eccezione chiamata quando un parametro richiesto è mancante
 class MissingParameter(TPException):
     status_code = 400 #bad request

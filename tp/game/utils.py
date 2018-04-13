@@ -33,6 +33,12 @@ def createGame(opponents):
     db.session.add(round)
     return new_game
 
+def getPendingGamesQuery(userA, userB, count = False):
+    query = Game.query
+    if count:
+        query = query.with_entities(func.count(Game.id))
+    return query.filter(Game.ended == False, Game.started == False).join(Partecipation, Partecipation.game_id == Game.id).filter(or_(and_(Game.creator_id == userA.id, Partecipation.user_id == userB.id), and_(Game.creator_id == userB.id, Partecipation.user_id == userA.id)))
+
 def createTraining(answers):
     new_training = Training(user = g.user)
     for (quiz, item) in answers.items():
