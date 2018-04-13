@@ -44,6 +44,7 @@ class BaseSocketTestCase(TPAuthTestCase):
         assert response.json.get("terms_and_conditions_last_update") is not None
         #assert response.json.get("preferences") is not None
         #assert response.json.get("fb") is not None
+        assert response.json.get("stats") is not None
         #TODO: assert response.json.get("friends_rank_position") is not None
     def test_join_room(self):
         game_id = self.game.get("id")
