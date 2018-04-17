@@ -18,8 +18,9 @@ def event(name, action, preferences_key = None):
             (users, data, push_infos) = f(*args, **kwargs)
             if not users:
                 return None
-            data["action"] = action.value
-            data["name"] = name
+            if data is not None: #necessito di dati socket?
+                data["action"] = action.value
+                data["name"] = name
             #users è una stanza
             if isinstance(users, basestring):
                 users = getUsersFromRoomID(users)
@@ -27,8 +28,9 @@ def event(name, action, preferences_key = None):
                 return (users, data, preferences_key)
             #elimino il currentuser
             users = [u for u in users if u.id != g.user.id]
-            for user in users:
-                send_socket_message(name, user, data)
+            if data is not None:
+                for user in users:
+                    send_socket_message(name, user, data)
             if push_infos:
                 send_push_message(users, push_infos)
             return (users, data, preferences_key)

@@ -11,8 +11,9 @@ class EventActions(Enum):
     answer = "answer"
     game_left = "game_left"
     message = "message"
+    notify = "notify"
+    expired = "expired"
 
 def getUsersFromRoomID(room):
     (type, id) = getInfosFromRoom(room)
-    print "room: (", type, id, ")"
     return getUsersFromRoom(type.value, id)

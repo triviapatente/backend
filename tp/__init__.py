@@ -63,6 +63,24 @@ def init(testing = False, ci = False):
     mail = Mail()
     mail.init_app(app)
 
+    from flask_apscheduler import APScheduler
+    from tp.cron.config import Config
+    import atexit
+    app.config.from_object(Config())
+    scheduler = APScheduler()
+    scheduler.init_app(app)
+    scheduler.start()
+    atexit.register(lambda: scheduler.shutdown(wait= True))
+    import logging
+
+    log = logging.getLogger('apscheduler.executors.default')
+    log.setLevel(logging.INFO)  # DEBUG
+
+    fmt = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+    h = logging.StreamHandler()
+    h.setFormatter(fmt)
+    log.addHandler(h)
+
     from tp.exceptions import TPException
     from flask import request
     import traceback, sys

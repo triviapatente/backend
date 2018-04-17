@@ -13,3 +13,4 @@ pip install flask-mail
 pip install pyfcm
 pip install premailer
 pip install lxml==3.4.4
+pip install Flask-APScheduler

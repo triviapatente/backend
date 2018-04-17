@@ -27,6 +27,10 @@ class Game(Base, CommonPK):
   ended = Column(Boolean, default = False)
   #il gioco è iniziato? ovvero tutti gli inviti son stati accettati?
   started = Column(Boolean, default = False)
+  #il gioco è scaduto per tempo massimo?
+  expired = Column(Boolean, default = False)
+  #il sistema, eventualmente, ha già notificato che fra un pò c'è expiration?
+  pre_expiration_notified = Column(Boolean, default = False)
 
   export_properties = ["remaining_answers_count", "opponent_score", "my_score", "my_turn", "opponent_id", "opponent_username", "opponent_image", "opponent_name", "opponent_surname", "question"]
   #ottiene l'utente avversario all'utente userToExclude e lo inserisce nel modello per la serializzazione
@@ -102,7 +106,7 @@ class Question(Base):
   quiz_id = Column(BigInteger, ForeignKey("quiz.id"), nullable = False, primary_key = True)
   quiz = relationship("Quiz")
   #risposta data dall'utente
-  answer = Column(Boolean, nullable = False)
+  answer = Column(Boolean, nullable = True)
 
   round_id = Column(BigInteger, ForeignKey("round.id"), nullable = False, primary_key = True)
   user_id = Column(BigInteger, ForeignKey("user.id"), nullable = False, primary_key = True)
