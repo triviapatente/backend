@@ -30,7 +30,13 @@ def alert(game):
     db.session.add(game)
 
 def expire(game):
+    print "[expire_matches.expire cron] Game: %d" % game.id
     [userA, userB] = getUsersFromGame(game)
-    print userA, userB
-    #print "[expire_matches.expire cron] Game: %d" % game.id
-    pass
+    #lastRound = pass
+    #last round need to be filled with empty answers
+    game.ended = True
+    game.expired = True
+    #set winner
+    events.game_expired(game, userA, userB)
+    events.game_expired(game, userB, userA)
+    db.session.add(game)

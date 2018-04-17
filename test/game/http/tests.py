@@ -502,6 +502,40 @@ class GameHTTPTestCase(TPAuthTestCase):
         print "#2.2.4: Stats: more_errors corretto"
         assert stats.get(app.config["TRAINING_STATS_MORE_ERRORS"]) == 3
 
+    def test_tickle(self):
+        dumb_crawler()
+        game_id = self.create_bulk_game(self.first_opponent, self.first_opponent_socket)
+        round_id = self.prepare_round(self.socket, game_id, self.token)
+        second_game_id = self.create_bulk_game(self.second_opponent, self.second_opponent_socket)
+        second_game_round_id = self.process_round(self.socket, second_game_id, self.token)
+        self.second_opponent_socket.get_received()
+        self.process_round(self.second_opponent_socket, second_game_id, self.second_opponent.get("token"), second_game_round_id)
+
+        print "#1.1 Non posso trillare da dealer"
+        response = tickle(self, round_id)
+        assert response.json.get("success") == False
+        assert response.status_code == 403
+
+        print "#1.2 Non posso trillare in un round finito"
+        response = tickle(self, second_game_round_id, self.second_opponent.get("token"))
+        assert response.json.get("success") == False
+        assert response.status_code == 403
+
+        print "#1.3 Posso trillare da non dealer"
+        response = tickle(self, round_id, self.first_opponent.get("token"))
+        assert response.json.get("success") == True
+        assert response.status_code == 200
+        print "#1.3 Non posso trillare due volte nello stesso round"
+        print "#2: Parametri mancanti"
+        print "#2.1: round_id"
+        response = tickle(self, None)
+        assert response.json.get("success") == False
+        assert response.status_code == 400
+
+        print "#3: Non appartengo al game"
+        response = tickle(self, second_game_round_id, self.first_opponent.get("token"))
+        assert response.json.get("success") == False
+        assert response.status_code == 403
 
     def test_get_training_questions(self):
         dumb_crawler()

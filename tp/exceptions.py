@@ -111,9 +111,11 @@ class FormatNotAllowed(TPException):
 class NotAllowed(TPException):
     status_code = 403 #not allowed
 
-    def __init__(self):
+    def __init__(self, otherMessage = None):
         TPException.__init__(self)
         self.message = "Non hai i permessi di accesso su questa risorsa"
+        if otherMessage is not None:
+            self.message += " : %s" % otherMessage
 
 class OldPasswordNotMatching(TPException):
     status_code = 403

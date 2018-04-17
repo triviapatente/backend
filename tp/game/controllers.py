@@ -26,6 +26,28 @@ def welcome():
     output = app.config["PUBLIC_INFOS"]
     return jsonify(output)
 
+@game.route("/tickle", methods = ["POST"])
+@auth_required
+@needs_values("POST", "round")
+@fetch_models(round = Round)
+def tickleGame():
+    round = g.models.get("round")
+    users = getUsersFromGame(round.game_id)
+    question_number = Question.query.filter(Question.round_id == round.id).count()
+    game = Game.query.get(round.game_id)
+    user_ids = [u.id for u in users]
+    #se non appartengo al gioco
+    if g.user.id not in user_ids:
+        raise NotAllowed("Non appartieni al game")
+    if g.user.id == round.dealer_id:
+        raise NotAllowed("Questo round non è bloccabile dall'avversario, sei il dealer")
+    if round.alreadyTickled:
+        raise NotAllowed("C'è già stato un sollecito per questo round")
+    if question_number == app.config["NUMBER_OF_QUESTIONS_PER_ROUND"] * 2:
+        raise NotAllowed("Il round è completo")
+    opponent = [u for u in users if u.id != g.user.id][0]
+    events.tickle(game, opponent)
+    return jsonify(success = True)
 #creazione della partita
 @game.route("/new", methods = ["POST"])
 @auth_required

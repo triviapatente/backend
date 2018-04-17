@@ -12,3 +12,11 @@ def game_about_to_expire(game, user, opponent):
     message = "La partita con %s scadrà fra 1 giorno! Affrettati!" % user.username
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(user.json), "message": message}
     return ([opponent], None, push_infos)
+
+@event("game_expired", action = EventActions.expired)
+def game_expired(game, user, opponent):
+    room = roomName(game.id, "game")
+    g.user = user
+    message = "La partita con %s è scaduta." % user.username
+    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(user.json), "message": message}
+    return ([opponent], None, push_infos)

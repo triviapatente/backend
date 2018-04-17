@@ -82,7 +82,7 @@ class Round(Base, CommonPK):
   #categoria scelta per il round
   cat_id = Column(BigInteger, ForeignKey("category.id"))
   chosen_category = relationship("Category")
-
+  alreadyTickled = Column(Boolean, default = False)
   __table_args__ = (UniqueConstraint('game_id', 'number', name = "unique_game_number"), )
 
 class Quiz(Base, CommonPK):

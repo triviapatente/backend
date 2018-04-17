@@ -17,6 +17,11 @@ def user_answered(room, question, quiz):
 def round_ended(room, round):
     data = {"round": round.json, "user": g.user.json}
     return (room, data, None)
+@event("tickle", action = EventActions.notify)
+def tickle(game, opponent):
+    message = "L'utente %s sta aspettando che tu completi il turno!" % g.user.username
+    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
+    return ([opponent], None, push_infos)
 
 @event("category_chosen", action = EventActions.create)
 def category_chosen(room, category):
