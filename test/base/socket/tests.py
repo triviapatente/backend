@@ -42,6 +42,7 @@ class BaseSocketTestCase(TPAuthTestCase):
         assert response.json.get("training_stats").get(app.config["TRAINING_STATS_3_4_ERRORS"]) is not None
         assert response.json.get("training_stats").get(app.config["TRAINING_STATS_MORE_ERRORS"]) is not None
         assert response.json.get("terms_and_conditions_last_update") is not None
+        assert response.json.get("match_max_age") == app.config["MATCH_MAX_AGE"]
         #assert response.json.get("preferences") is not None
         #assert response.json.get("fb") is not None
         categories = response.json.get("stats")

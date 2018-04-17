@@ -23,14 +23,14 @@ def expire_matches():
 
 def alert(game):
     print "[expire_matches.alert cron] Game: %d" % game.id
-    users = getUsersFromGame(game)
+    [userA, userB] = getUsersFromGame(game)
     events.game_about_to_expire(game, userA, userB)
     events.game_about_to_expire(game, userB, userA)
     game.pre_expiration_notified = True
     db.session.add(game)
 
 def expire(game):
-[userA, userB] = getUsersFromGame(game)
-print userA, userB
+    [userA, userB] = getUsersFromGame(game)
+    print userA, userB
     #print "[expire_matches.expire cron] Game: %d" % game.id
     pass

@@ -57,6 +57,7 @@ def get_connection_values(user):
     output["terms_and_conditions_last_update"] = app.config["TERMS_AND_CONDITIONS_LAST_UPDATE"]
     output["training_stats"] = getTrainingStats()
     output["stats"] = getCategoryPercentages(user)
+    output["match_max_age"] = app.config["MATCH_MAX_AGE"]
     #output["preferences"] = getPreferencesFromUser(user)
     #output["fb"] = getFBTokenInfosFromUser(user)
     return output
