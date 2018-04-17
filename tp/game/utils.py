@@ -224,7 +224,7 @@ def get_increments(game, user, opponent, left):
     output = {}
     if left:
         output[user.id] = left_score_decrement(user)
-        output[opponent.id] = left_score_increment(user)
+        output[opponent.id] = left_score_increment(opponent)
         return output
     else:
         #ottengo il numero di risposte corrette nella partita per user

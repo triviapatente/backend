@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from tp import app, db
-from tp.game.models import Game
-from tp.game.utils import getUsersFromGame
+from flask import g
+from tp.game.models import Game, Round, Question, ProposedQuestion
+from tp.game.utils import getUsersFromGame, getWinner, updateScore
+from tp.utils import doTransaction
 from tp.cron import events
 from datetime import datetime, timedelta
 def expire_matches():
@@ -15,11 +17,11 @@ def expire_matches():
         alert_games = Game.query.filter(Game.createdAt > expire_thresold).filter(Game.createdAt <= alert_thresold).filter(Game.ended == False, Game.pre_expiration_notified == False).all()
         print alert_games
         for game in alert_games:
-            alert(game)
+            doTransaction(alert, game = game)
         db.session.commit()
         expired_games = Game.query.filter(Game.createdAt <= expire_thresold).filter(Game.ended == False).all()
         for game in expired_games:
-            expire(game)
+            doTransaction(expire, game = game)
 
 def alert(game):
     print "[expire_matches.alert cron] Game: %d" % game.id
@@ -32,11 +34,24 @@ def alert(game):
 def expire(game):
     print "[expire_matches.expire cron] Game: %d" % game.id
     [userA, userB] = getUsersFromGame(game)
-    #lastRound = pass
-    #last round need to be filled with empty answers
+    if game.started == True:
+        lastRound = Round.query.filter(Round.game_id == game.id, Round.cat_id is not None).order_by(Round.number.desc()).first()
+        questions = ProposedQuestion.query.filter(ProposedQuestion.round_id == lastRound.id).all()
+        for q in questions:
+            baseQuery = Question.query.filter(Question.round_id == lastRound.id, Question.quiz_id == q.quiz_id)
+            if baseQuery.filter(Question.user_id == userA.id).count() == 0:
+                db.session.add(Question(round_id = lastRound.id, quiz_id = q.quiz_id, user_id = userA.id, answer = None))
+            if baseQuery.filter(Question.user_id == userB.id).count() == 0:
+                db.session.add(Question(round_id = lastRound.id, quiz_id = q.quiz_id, user_id = userB.id, answer = None))
     game.ended = True
     game.expired = True
-    #set winner
+    winner = getWinner(game)
+    if winner is not None:
+        game.winner_id = winner.id
+    #non importante, può essere qualsiasi dei due
+    g.user = userA
+    updateScore(game)
+    db.session.add(game)
     events.game_expired(game, userA, userB)
     events.game_expired(game, userB, userA)
     db.session.add(game)
