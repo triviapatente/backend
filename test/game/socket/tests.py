@@ -59,6 +59,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("round")
         assert response.json.get("opponent_online")
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
         #essendo il primo round, il dealer dev'essere chi ha creato la partita
         assert response.json.get("round").get("dealer_id") == self.game.get("creator_id")
 
@@ -76,6 +77,7 @@ class GameSocketTestCase(TPAuthTestCase):
         #quando ri-accedo alla room per continuare con il round successivo mi viene comunicato che l'altro sta ancora giocando
         response = init_round(self.socket, self.game_id, self.token)
         assert response.json.get("success") == True
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
         assert response.json.get("waiting") == "game"
 
         print "#4: Chiamo init_round senza aver risposto alle domande del precedente (mi ritorna le info del round in cui sto giocando)"
@@ -83,6 +85,7 @@ class GameSocketTestCase(TPAuthTestCase):
         #opponent accede senza completare il primo turno al secondo turno
         response = init_round(self.opponent_socket, self.game_id, self.opponent_token)
         assert response.json.get("success") == True
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
         assert response.json.get("round").get("number") == 1
 
         print "#5: Accedo al round ma il dealer ne sta scegliendo la categoria"
@@ -96,6 +99,7 @@ class GameSocketTestCase(TPAuthTestCase):
         response = init_round(self.socket, self.game_id, self.token)
         assert response.json.get("success") == True
         assert response.json.get("round")
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
         assert response.json.get("waiting") == "category"
 
         print "#6: game_id inesistente"
@@ -132,6 +136,7 @@ class GameSocketTestCase(TPAuthTestCase):
         #chiamo due volte per consumare gli eventi
         response = init_round(self.opponent_socket, self.game_id, self.token)
         assert response.json.get("ended")
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
         partecipations = response.json.get("partecipations")
         assert partecipations
         socket_response = self.socket.get_received()
@@ -143,7 +148,7 @@ class GameSocketTestCase(TPAuthTestCase):
             assert score_inc != 0
         print "#9.1 draw: no winner"
         assert response.json.get("winner_id") == None
-
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
         print "#9.2 user win"
         #creo una nuova partita
         self.game = new_game(self, self.opponent_id).json.get("game")
@@ -167,6 +172,8 @@ class GameSocketTestCase(TPAuthTestCase):
         #doppia chiamata per togliere gli eventi
         response = init_round(self.opponent_socket, self.game_id, self.token)
         assert response.json.get("ended")
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
+
         partecipations = response.json.get("partecipations")
         assert partecipations
         # controllo che tutti i giocatori abbiano avuto un cambiamento nel punteggio
@@ -183,7 +190,8 @@ class GameSocketTestCase(TPAuthTestCase):
         response = init_round(self.socket, self.game.get("id"), self.token)
         assert response.json.get("success") == True
         assert response.json.get("waiting") == "category"
-
+        assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
+        
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, self.token).json.get("round").get("id")
 
