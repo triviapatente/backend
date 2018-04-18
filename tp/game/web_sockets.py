@@ -55,12 +55,12 @@ def init_round(data):
             winner_id = winner.id
         if endedNow:
             events.game_ended(g.roomName, game, partecipations)
-        return emit("init_round", {"success": True, "partecipations": partecipations, "ended": True, "winner_id": winner_id})
+        return emit("init_round", {"success": True, "max_age": app.config["MATCH_MAX_AGE"], "partecipations": partecipations, "ended": True, "winner_id": winner_id})
     #controllo il caso in cui si è al round 10, con domande completate, e quindi si fa riferimento all'11, ma la partita non è finita:
     #vuol dire che gli altri utenti devono ancora giocare
     if next_number > NUMBER_OF_ROUNDS:
         opponent = getOpponentFrom(game)
-        return emit("init_round", {"success": True, "waiting": "game", "waiting_for": opponent})
+        return emit("init_round", {"success": True, "max_age": app.config["MATCH_MAX_AGE"], "waiting": "game", "waiting_for": opponent})
     #ottengo il round di riferimento
     round = Round.query.filter(Round.game_id == game.id, Round.number == next_number).first()
     #caso in cui ho completato il secondo round (di cui son sicuramente dealer), ma l'avversario è ancora fermo all'1
@@ -71,7 +71,7 @@ def init_round(data):
         answered_count = Round.query.filter(Round.number == next_number - 3).filter(Round.game_id == game.id).join(Question).count()
         if answered_count != len(users) * NUMBER_OF_QUESTIONS_PER_ROUND:
             opponent = getOpponentFrom(game)
-            return emit("init_round", {"success": True, "waiting": "game", "waiting_for": opponent, "round": round.json})
+            return emit("init_round", {"success": True, "max_age": app.config["MATCH_MAX_AGE"], "waiting": "game", "waiting_for": opponent, "round": round.json})
     need_new_round = round is None
     #se è nullo
     if need_new_round:
@@ -107,6 +107,7 @@ def init_round(data):
     print "User %s in init round got output:" % g.user.username, output
     #TODO informazione ridondante, rimuoverla quando avremo il db lato client (in tal caso basterà l'id della categoria, che è messo nel round)
     output["category"] = Category.query.filter(Category.id == round.cat_id).first()
+    output["max_age"] = app.config["MATCH_MAX_AGE"]
     emit("init_round", output)
 
 
