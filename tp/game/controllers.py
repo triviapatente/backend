@@ -47,6 +47,9 @@ def tickleGame():
         raise NotAllowed("Il round è completo")
     opponent = [u for u in users if u.id != g.user.id][0]
     events.tickle(game, opponent)
+    round.alreadyTickled = True
+    db.session.add(round)
+    db.session.commit()
     return jsonify(success = True)
 #creazione della partita
 @game.route("/new", methods = ["POST"])
