@@ -34,6 +34,8 @@ def alert(game):
 def expire(game):
     print "[expire_matches.expire cron] Game: %d" % game.id
     [userA, userB] = getUsersFromGame(game)
+    #non importante, può essere qualsiasi dei due
+    g.user = userA
     if game.started == True:
         lastRound = Round.query.filter(Round.game_id == game.id, Round.cat_id is not None).order_by(Round.number.desc()).first()
         questions = ProposedQuestion.query.filter(ProposedQuestion.round_id == lastRound.id).all()
@@ -51,8 +53,6 @@ def expire(game):
     winner = getWinner(game)
     if winner is not None:
         game.winner_id = winner.id
-    #non importante, può essere qualsiasi dei due
-    g.user = userA
     #events.game_expired(game, userA, userB)
     #events.game_expired(game, userB, userA)
     db.session.add(game)
