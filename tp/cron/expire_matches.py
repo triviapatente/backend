@@ -47,7 +47,7 @@ def expire(game):
                 db.session.add(Question(round_id = lastRound.id, quiz_id = q.quiz_id, user_id = userA.id, answer = None))
             if userBQuery.count() == 0:
                 db.session.add(Question(round_id = lastRound.id, quiz_id = q.quiz_id, user_id = userB.id, answer = None))
-            updateScore(game)
+        updateScore(game)
     game.ended = True
     game.expired = True
     winner = getWinner(game)
