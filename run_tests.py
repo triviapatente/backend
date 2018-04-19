@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 if __name__ == '__main__':
+
+    import eventlet
+
+    eventlet.monkey_patch()
     import sys
 
     reload(sys)
