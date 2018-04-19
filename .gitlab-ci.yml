@@ -1,8 +1,8 @@
 before_script:
   - sh scripts/init_ci.sh
   - sh scripts/dependencies.sh
-timeout: 20
 test:
+  timeout: 20
   script:
     - python run_tests.py -ci
 
