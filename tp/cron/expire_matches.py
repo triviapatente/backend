@@ -39,10 +39,13 @@ def expire(game):
         questions = ProposedQuestion.query.filter(ProposedQuestion.round_id == lastRound.id).all()
         for q in questions:
             baseQuery = Question.query.filter(Question.round_id == lastRound.id, Question.quiz_id == q.quiz_id)
-            if baseQuery.filter(Question.user_id == userA.id).count() == 0:
+            userAQuery = baseQuery.filter(Question.user_id == userA.id)
+            userBQuery = baseQuery.filter(Question.user_id == userB.id)
+            if userAQuery.count() == 0:
                 db.session.add(Question(round_id = lastRound.id, quiz_id = q.quiz_id, user_id = userA.id, answer = None))
-            if baseQuery.filter(Question.user_id == userB.id).count() == 0:
+            if userBQuery.count() == 0:
                 db.session.add(Question(round_id = lastRound.id, quiz_id = q.quiz_id, user_id = userB.id, answer = None))
+            updateScore(game)
     game.ended = True
     game.expired = True
     winner = getWinner(game)
@@ -50,8 +53,6 @@ def expire(game):
         game.winner_id = winner.id
     #non importante, può essere qualsiasi dei due
     g.user = userA
-    updateScore(game)
-    db.session.add(game)
-    events.game_expired(game, userA, userB)
-    events.game_expired(game, userB, userA)
+    #events.game_expired(game, userA, userB)
+    #events.game_expired(game, userB, userA)
     db.session.add(game)

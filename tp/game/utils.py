@@ -278,9 +278,6 @@ def getUserCountFrom(game):
 def getMaxQuestionNumberFrom(game):
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     return getUserCountFrom(game) * NUMBER_OF_QUESTIONS_PER_ROUND
-# funzione che ritorna l'utente vincitore di una partita (##game)
-def getWinner(game):
-    return User.query.filter_by(id = game.winner_id).first()
 
 # funzione che ritorna il risultato previsto per ##user_A dati gli ##users di una partita avvenuta in ##scoreRange
 def getExpectedScoreForUser(user_A, users, scoreRange):
