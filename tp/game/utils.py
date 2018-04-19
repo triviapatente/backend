@@ -464,7 +464,7 @@ def getRecentGames(user):
     my_turn = db.session.query(a).with_entities(func.count(a.id) != 0).filter(a.game_id == Game.id).filter(or_(Game.ended == True, and_(or_(a.cat_id != None, a.dealer_id == user.id), questions < question_number))).label("my_turn")
     remainingAnswersCount = db.session.query(func.count(Question.quiz_id)).join(b, b.id == Question.round_id).filter(b.game_id == Game.id, Question.user_id == g.user.id).as_scalar()
     myScore = db.session.query(func.count(Question.quiz_id)).join(c, c.id == Question.round_id).join(Quiz, Quiz.id == Question.quiz_id).filter(c.game_id == Game.id, Question.user_id == g.user.id, Question.answer == Quiz.answer).as_scalar()
-    opponentScore = db.session.query(func.count(Question.quiz_id)).join(d, d.id == Question.round_id).filter(d.game_id == Game.id, Question.user_id == g.user.id).filter(Question.user_id != g.user.id, Question.answer == Quiz.answer).as_scalar()
+    opponentScore = db.session.query(func.count(Question.quiz_id)).join(d, d.id == Question.round_id).join(Quiz, Quiz.id == Question.quiz_id).filter(d.game_id == Game.id, Question.user_id != g.user.id, Question.answer == Quiz.answer).as_scalar()
     #SELECT game.*, my_turn AS my_turn
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
