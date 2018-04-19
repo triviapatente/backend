@@ -14,3 +14,4 @@ pip install pyfcm
 pip install premailer
 pip install lxml==3.4.4
 pip install Flask-APScheduler
+env ARCHFLAGS="-arch x86_64" LDFLAGS="-L/usr/local/opt/openssl/lib" CFLAGS="-I/usr/local/opt/openssl/include" pip install PyOpenSSL
