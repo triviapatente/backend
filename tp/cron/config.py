@@ -9,7 +9,7 @@ class Config(object):
             'func': expire_matches,
             'replace_existing': True,
             'trigger': 'interval',
-            'seconds': 10
+            'seconds': 60 * 30
         }
     ]
 
