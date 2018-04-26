@@ -51,7 +51,7 @@ def game_left(room, game, partecipations):
 def new_game(game):
     opponent = getOpponentFrom(game)
     data = {"game": game.json, "user": g.user.json}
-    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": "%s ti ha sfidato a una partita! Fagli vedere chi è il più in gamba!" % g.user.username}
+    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": "%s ti ha sfidato a una partita! Fagli vedere chi è il più in gamba!" % g.user.displayName}
     return ([opponent], data, push_infos)
 
 class RecentGameEvents:

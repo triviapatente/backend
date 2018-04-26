@@ -201,7 +201,7 @@ def changeName():
     db.session.add(g.user)
     db.session.commit()
     print "User %d change name to: %s." % (g.user.id, g.user.name)
-    return jsonify(user = g.user)
+    return jsonify(success = True, user = g.user)
 
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
@@ -215,7 +215,7 @@ def changeSurname():
     db.session.add(g.user)
     db.session.commit()
     print "User %d change surname to: %s" % (g.user.id, g.user.surname)
-    return jsonify(user = g.user)
+    return jsonify(success = True, user = g.user)
 
 #api per il cambio dell'immagine (##image)
 @account.route("/image/edit", methods = ["POST"])
@@ -240,7 +240,7 @@ def changeImage():
             print "Unable to change user image."
             raise ChangeFailed()
         print "User %d change image to: %s." % (g.user.id, g.user.image)
-        return jsonify(user = g.user)
+        return jsonify(success = True, user = g.user)
     else:
         print "User image not allowed."
         raise FormatNotAllowed()
@@ -258,4 +258,4 @@ def getUserImage(id):
 @account.route("/user", methods = ["GET"])
 @auth_required
 def getCurrentUser():
-    return jsonify(user = g.user)
+    return jsonify(success = True, user = g.user)
