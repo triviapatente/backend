@@ -53,6 +53,6 @@ def expire(game):
     winner = getWinner(game)
     if winner is not None:
         game.winner_id = winner.id
-    #events.game_expired(game, userA, userB)
-    #events.game_expired(game, userB, userA)
+    events.game_expired(game, userA, userB)
+    events.game_expired(game, userB, userA)
     db.session.add(game)
