@@ -19,7 +19,7 @@ def round_ended(room, round):
     return (room, data, None)
 @event("tickle", action = EventActions.notify)
 def tickle(game, opponent):
-    message = "L'utente %s sta aspettando che tu completi il turno!" % g.user.username
+    message = "L'utente %s sta aspettando che tu completi il turno!" % g.user.displayName
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
     return ([opponent], None, push_infos)
 
@@ -37,7 +37,7 @@ def game_ended(room, game, partecipations):
 
 @event("your_turn", action = EventActions.update)
 def your_turn(game, opponent):
-    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": "Partita con %s: è il tuo turno!" % g.user.username}
+    push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": "Partita con %s: è il tuo turno!" % g.user.displayName}
     return ([opponent], {}, push_infos)
 
 @event("user_left_game", action = EventActions.game_left)

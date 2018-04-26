@@ -57,7 +57,7 @@ class Game(Base, CommonPK):
           suffix = "annullata dall'avversario!"
       else:
           suffix = "resa dell'avversario!"
-      return "Partita con %s: %s" % (g.user.username, suffix)
+      return "Partita con %s: %s" % (g.user.displayName, suffix)
   def getGameResultPushMessage(self):
       suffix = ""
       if self.winner_id == g.user.id:
@@ -66,7 +66,7 @@ class Game(Base, CommonPK):
           suffix = "pareggio!"
       else:
           suffix = "hai vinto!"
-      return "Partita con %s: %s" % (g.user.username, suffix)
+      return "Partita con %s: %s" % (g.user.displayName, suffix)
 
 
 #rappresenta il round di un game, con categoria che ha scelto, game di appartenenza, domande proposte
