@@ -55,7 +55,8 @@ def init_round(data):
         if winner:
             winner_id = winner.id
         if endedNow:
-            events.game_ended(g.roomName, game, partecipations)
+            users = getUsersFromGame(game)
+            events.game_ended(users, game, partecipations)
         return emit("init_round", {"success": True, "max_age": MAX_AGE, "partecipations": partecipations, "ended": True, "winner_id": winner_id})
     #controllo il caso in cui si è al round 10, con domande completate, e quindi si fa riferimento all'11, ma la partita non è finita:
     #vuol dire che gli altri utenti devono ancora giocare
