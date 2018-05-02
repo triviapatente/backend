@@ -19,6 +19,10 @@ SQLALCHEMY_TEST_DATABASE_URI = 'postgresql://ted:ted@localhost:5432/triviapatent
 
 LIMIT_MINUTES_TO_BE_CONSIDERED_ONLINE = 5
 
+INSTAGRAM_API_ENDPOINT = "https://api.instagram.com/v1/users/self/media/recent/"
+INSTAGRAM_ACCESS_TOKEN = "7547904163.2fef49b.06b60bdfda3348f49ff13020d87c5d34"
+NEEDS_INSTAGRAM_SHOWGALLERY = True
+
 DAY = 24 * 60 * 60
 MATCH_MAX_AGE = 3 * DAY #3 days
 MATCH_ALERT_AGE = MATCH_MAX_AGE - DAY #2 days

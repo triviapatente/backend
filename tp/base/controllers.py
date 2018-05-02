@@ -3,13 +3,14 @@ from flask import request, jsonify, Blueprint, render_template
 from tp import app, db
 from flask import g, redirect, request
 from porting import getJSONModels
-from tp.exceptions import NotAllowed, BadParameters
+from tp.exceptions import NotAllowed, BadParameters, InstagramProblem, InstagramUnnecessary
 from tp.decorators import auth_required, needs_values
 from tp.base.models import Feedback
 from sqlalchemy import exc
 from tp.events.models import Installation
 from premailer import transform
 import jinja2
+import requests
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
 
@@ -25,6 +26,32 @@ def generateTemplates():
     with open('tp/templates/generated/email.html', 'w') as output_file:
         output_file.write(text)
     return jsonify(success = True)
+
+@base.route("/instagram", methods = ["GET"])
+def obtainInstagramPhotos():
+    BASE_URL = app.config["INSTAGRAM_API_ENDPOINT"]
+    NEEDS_INSTAGRAM = app.config["NEEDS_INSTAGRAM_SHOWGALLERY"]
+    ACCESS_TOKEN = app.config["INSTAGRAM_ACCESS_TOKEN"]
+    if not NEEDS_INSTAGRAM:
+        raise InstagramUnnecessary()
+    request = requests.get(BASE_URL + "?access_token=" + ACCESS_TOKEN)
+    json = request.json()
+    meta = json["meta"]
+    code = meta["code"]
+    if code != 200:
+        raise InstagramProblem()
+    data = json["data"]
+    images = []
+    for item in data:
+        type = item["type"]
+        if type == "image":
+            url = item["images"]["standard_resolution"]["url"]
+        elif type == "video":
+            url = item["videos"]["standard_resolution"]["url"]
+        link = item["link"]
+        images.append({"url": url, "type": type, "link": link})
+    return jsonify(success = True, images = images)
+
 
 @base.route("/models", methods = ["GET"])
 def obtainModels():

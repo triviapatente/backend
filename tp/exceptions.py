@@ -108,6 +108,18 @@ class FormatNotAllowed(TPException):
     def __init__(self):
         TPException.__init__(self)
         self.message = "Il file ha un' estensione non permessa dai nostri server"
+class InstagramProblem(TPException):
+    status_code = 410 #Request gone
+
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "Il file ha un' estensione non permessa dai nostri server"
+class InstagramUnnecessary(TPException):
+    status_code = 204 #No content
+
+    def __init__(self):
+        TPException.__init__(self)
+        self.message = "Il servizio di condivisione delle nostre foto su instagram è disabilitato"
 class NotAllowed(TPException):
     status_code = 403 #not allowed
 
