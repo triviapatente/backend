@@ -45,6 +45,7 @@ class User(Base, CommonPK):
   surname = Column(String(MAX_CHARS))
   #path dell'immagine
   image = Column(String)
+  last_game_friend_ended_game_stimulation = Column(Date)
   #data di nascita
   birth = Column(Date)
   #punteggio di partenza del giocatore
@@ -93,7 +94,7 @@ class User(Base, CommonPK):
       if self.name is not None and self.surname is not None:
           return "%s %s" %(self.name, self.surname)
       return self.username
-      
+
 class FacebookToken(Base, CommonPK):
   #utente che possiede il token
   user_id = Column(BigInteger, ForeignKey("user.id"), nullable = False, unique = True)

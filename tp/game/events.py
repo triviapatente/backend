@@ -23,7 +23,12 @@ def tickle(game, opponent):
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
     return ([opponent], None, push_infos)
 
-@event("category_chosen", action = EventActions.create)
+@event("user_stimulation", action = EventActions.notify)
+def stimulate_on_game_end(increment, destination):
+    message = "Hey! Il tuo amico %s ha appena vinto una partita guadagnando %d punti! Gioca anche tu!" % (g.user.displayName, increment)
+    push_infos = {"message": message}
+    return ([destination], None, push_infos)
+
 def category_chosen(room, category):
     data = {"category": category.json, "user": g.user.json}
     return (room, data, None)

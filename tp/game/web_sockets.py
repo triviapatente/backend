@@ -48,6 +48,7 @@ def init_round(data):
             updatedUsers = updateScore(game)
             print "User's score updated."
             RecentGameEvents.ended(game = game)
+            sendStimulationOnGameEnded(game, updatedUsers)
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         winner = User.query.filter(User.id == game.winner_id).first()

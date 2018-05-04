@@ -150,6 +150,14 @@ def generateQuestionsForTraining(random):
         items.append(quiz)
     return items
 
+def getMostPlayedUser(except_user):
+    a = aliased("Partecipation", name = "a")
+    b = aliased("Partecipation", name = "b")
+    query = User.query.with_entities(User.id, func.count(a.createdAt).label("count")).join(a, a.user_id == User.id).join(b, b.user_id == g.user.id, b.game_id == a.game_id).join(Game, game.id == b.game_id)
+    (user_id, count) = query.filter(Game.started == True, User.id != g.user.id, User.id != except_user).group_by(User.id).order_by(desc("count")).first();
+    if user_id is not None:
+        return User.get(user_id)
+    return None
 def getMostValuableUsersForMe():
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
     p1 = aliased(Partecipation, name = "p1")
@@ -254,6 +262,21 @@ def get_increments(game, user, opponent, left):
         output[opponent.id] = score_increment(opponent, opponentScore, userScore)
         return output
 
+def sendStimulationOnGameEnded(game, updatedUsers):
+    opponent = getOpponentFrom(game)
+    destination = getMostPlayedUser(except_user = opponent)
+    (userA, incrementA) = updatedUsers[0]
+    (userB, incrementB) = updatedUsers[1]
+    if userB == g.user.id:
+        increment = incrementB
+    elif userA == g.user.id:
+        increment = incrementA
+    limitDate = datetime.utcnow() - timedelta(days=1)
+    if game.winner_id == g.user.id and destination is not None and destination.last_game_friend_ended_game_stimulation <= limitDate:
+        events.stimulate_on_game_end(increment, destination)
+        destination.last_game_friend_ended_game_stimulation = datetime.utcnow()
+        db.session.add(destination)
+        db.session.commit()
 # funzione che aggiorna il punteggio di una partita (##game)
 def updateScore(game, left = False):
     user = g.user
