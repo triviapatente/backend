@@ -9,6 +9,7 @@ from tp.cron import events
 from datetime import datetime, timedelta
 def expire_matches():
     with app.app_context():
+        stimulate_users()
         alert_age = app.config["MATCH_ALERT_AGE"]
         max_age = app.config["MATCH_MAX_AGE"]
         alert_thresold = datetime.utcnow() - timedelta(seconds=alert_age)
@@ -22,7 +23,17 @@ def expire_matches():
         expired_games = Game.query.filter(Game.createdAt <= expire_thresold).filter(Game.ended == False).all()
         for game in expired_games:
             doTransaction(expire, game = game)
-
+def stimulate_users():
+    trigger_thresold = datetime.utcnow() - timedelta(days=1)
+    lastGame = Partecipation.query.with_entities(func.max(Partecipation.createdAt)).filter(Partecipation.user_id == User.id).label("lastGame")
+    users = User.query.filter(lastGame < trigger_thresold, last_daily_stimulation < trigger_thresold).all()
+    for user in users:
+        stimulate(user)
+def stimulate(user):
+    user.last_daily_stimulation = datetime.utcnow()
+    events.stimulate_daily(user)
+    db.session.add(user)
+    db.session.save()
 def alert(game):
     print "[expire_matches.alert cron] Game: %d" % game.id
     [userA, userB] = getUsersFromGame(game)

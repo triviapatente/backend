@@ -4,6 +4,7 @@ from tp.events.decorators import event
 from flask import g
 from tp.base.utils import jsonifyDates
 from tp.game.utils import isRoundEnded, get_round_infos, getOpponentFrom
+import random
 
 @event("user_answered", action = EventActions.create)
 def user_answered(room, question, quiz):
@@ -22,6 +23,13 @@ def tickle(game, opponent):
     message = "L'utente %s sta aspettando che tu completi il turno!" % g.user.displayName
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
     return ([opponent], None, push_infos)
+
+stimulations = ["Hey %s, chi dorme non piglia pesci, chi non gioca a TriviaPatente non migliora!", "Ciao %s! Vuoi andare al mare in auto quest'estate? Devi allenarti e prendere la patente prima!", "Bella giornata eh %s? Oggi c'è il divieto di sosta sui libri, esercitati su TriviaPatente!", "Ciao %s! Entra su TriviaPatente per esercitarti coi tuoi amici!", "Quanto è bello giocare con gli amici e nel frattempo imparare, %s? Clicca qui e scoprilo!"]
+@event("user_stimulation", action = EventActions.notify)
+def stimulate_daily(user):
+    message = random.choice(stimulations) % user.friendlyDisplayName
+    push_infos = {"message": message}
+    return ([destination], None, push_infos)
 
 @event("user_stimulation", action = EventActions.notify)
 def stimulate_on_game_end(increment, destination):

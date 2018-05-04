@@ -46,6 +46,7 @@ class User(Base, CommonPK):
   #path dell'immagine
   image = Column(String)
   last_game_friend_ended_game_stimulation = Column(Date)
+  last_daily_stimulation = Column(Date)
   #data di nascita
   birth = Column(Date)
   #punteggio di partenza del giocatore
@@ -93,6 +94,11 @@ class User(Base, CommonPK):
   def displayName(self):
       if self.name is not None and self.surname is not None:
           return "%s %s" %(self.name, self.surname)
+      return self.username
+  @property
+  def friendlyDisplayName(self):
+      if self.name is not None:
+          return self.name
       return self.username
 
 class FacebookToken(Base, CommonPK):
