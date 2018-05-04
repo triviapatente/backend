@@ -21,6 +21,7 @@ tp.init()
 
 from tp import app, socketio
 
+print 'Running the service..'
 debug = app.config["DEBUG"]
 port = app.config["PORT"]
 host = "0.0.0.0"
@@ -32,6 +33,5 @@ else:
     socketio.run(app, host = host, port = port, debug = debug)
 
 
-print 'Running the service..'
 
 call(["fuser", "-k", "%d/tcp" % port])
