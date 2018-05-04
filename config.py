@@ -7,7 +7,7 @@ from datetime import timedelta
 DEBUG = True
 
 #port used to serve this service
-PORT = 8000
+PORT = 8080
 
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
