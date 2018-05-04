@@ -360,8 +360,8 @@ class GameHTTPTestCase(TPAuthTestCase):
             else:
                 assert last_game_won is None or last_game_won == False
 
-        print "#3. Lunghezza output = 10"
-        assert len(users) == 3
+        print "#3. Lunghezza output = 1"
+        assert len(users) == 1
 
         print "#4. Non ci sono io nell'output"
         for user in users:

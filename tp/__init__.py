@@ -5,6 +5,17 @@ app = None
 socketio = None
 db = None
 mail = None
+from flask.json import JSONEncoder
+#classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
+class TPJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        #la classe ha la proprietà json? (Base e le sue derivate la hanno)
+        serialized = getattr(obj, "json", None)
+        if serialized:
+            #se si, ritornala direttamente
+            return serialized
+        #se no, gestisci con la classe padre (genererà un errore se la classe non è serializable)
+        return super(TPJSONEncoder, self).default(obj)
 
 def init(testing = False, ci = False):
     print "app initialization"
@@ -21,24 +32,12 @@ def init(testing = False, ci = False):
 
     from flask.ext.mail import Mail
 
-    from flask.json import JSONEncoder
 
     # Import SocketIO
     from flask_socketio import SocketIO, emit
 
     # Define the WSGI application object
     app = Flask(__name__)
-
-    #classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
-    class TPJSONEncoder(JSONEncoder):
-        def default(self, obj):
-            #la classe ha la proprietà json? (Base e le sue derivate la hanno)
-            serialized = getattr(obj, "json", None)
-            if serialized:
-                #se si, ritornala direttamente
-                return serialized
-            #se no, gestisci con la classe padre (genererà un errore se la classe non è serializable)
-            return super(TPJSONEncoder, self).default(obj)
 
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder

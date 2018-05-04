@@ -5,7 +5,8 @@ from tp.game.models import Game, Round, Partecipation, LastTrainingAnswer, Train
 from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import label
+from sqlalchemy.sql import column
+from sqlalchemy.sql.expression import label, exists
 from sqlalchemy import func, desc, asc
 from random import randint
 from flask import g
@@ -13,8 +14,9 @@ from tp.utils import doTransaction
 from tp.exceptions import NotAllowed
 from distutils.util import strtobool
 from tp.events.models import Socket, RoomParticipation
-from tp.rank.queries import getRank
-
+from tp.rank.queries import getRank, getLastGameResultJoin
+from tp import TPJSONEncoder
+from flask.json import jsonify
 #metodo transazionale per la creazione di una partita
 def createGame(opponents):
     new_game = Game(creator = g.user)
@@ -148,8 +150,24 @@ def generateQuestionsForTraining(random):
         items.append(quiz)
     return items
 
+def getMostValuableUsersForMe():
+    limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
+    p1 = aliased(Partecipation, name = "p1")
+    p2 = aliased(Partecipation, name = "p2")
+    u = aliased(User, name = "u")
+    gameWithMe = db.session.query(p2).filter(p2.game_id == p1.game_id, p2.user_id == g.user.id).exists();
+    last_game_date = db.session.query(p1).with_entities(func.max(p1.createdAt)).filter(p1.user_id == u.id, p1.user_id != g.user.id).filter(gameWithMe).label("last_game_date")
+    output = db.session.query(u).with_entities(u, last_game_date, getLastGameResultJoin(u)).filter(last_game_date != None).order_by(desc("last_game_date")).limit(limit).all();
+    items = []
+    for (user, last_game_date, last_game_winner_id) in output:
+        if last_game_winner_id is not None:
+            user.last_game_won = (last_game_winner_id == g.user.id)
+        items.append(user)
+    return items
+
 def getSuggestedUsers(user):
-    output = []
+    output = getMostValuableUsersForMe()
+    print output
     if len(output) == 0:
         return getRank(True)
     return output

@@ -44,10 +44,7 @@ def obtainInstagramPhotos():
     images = []
     for item in data:
         type = item["type"]
-        if type == "image":
-            url = item["images"]["standard_resolution"]["url"]
-        elif type == "video":
-            url = item["videos"]["standard_resolution"]["url"]
+        url = item["images"]["standard_resolution"]["url"]
         link = item["link"]
         images.append({"url": url, "type": type, "link": link})
     return jsonify(success = True, images = images)
