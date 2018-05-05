@@ -2,6 +2,7 @@
 from tp.events.utils import EventActions
 from tp.events.decorators import event
 from flask import g
+from tp.auth.models import User
 from tp.game.utils import getOpponentFrom
 from tp.base.utils import roomName, jsonifyDates
 import random
@@ -25,15 +26,15 @@ stimulations = ["Hey %s, chi dorme non piglia pesci, chi non gioca a TriviaPaten
 @event("user_stimulation", action = EventActions.notify)
 def stimulate_daily(user):
     message = random.choice(stimulations) % user.friendlyDisplayName
-    g.user = {}
-    g.user.id = -1
+    #utente fantasma, la notifica arriva dal sistema, non un utente
+    g.user = User(id = -1)
     push_infos = {"message": message}
     return ([user], None, push_infos)
 
 @event("user_stimulation", action = EventActions.notify)
 def stimulate_on_game_end(increment, destination):
     message = "Hey! Il tuo amico %s ha appena vinto una partita guadagnando %d punti! Gioca anche tu!" % (g.user.displayName, increment)
-    g.user = {}
-    g.user.id = -1
+    #utente fantasma, la notifica arriva dal sistema, non un utente
+    g.user = User(id = -1)
     push_infos = {"message": message}
     return ([destination], None, push_infos)
