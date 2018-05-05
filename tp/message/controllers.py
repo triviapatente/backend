@@ -5,15 +5,17 @@ from tp.message.models import *
 from tp.message.utils import *
 from tp.decorators import *
 from datetime import datetime
+from tp.decorators import create_session
 
 message = Blueprint("message", __name__, url_prefix = "/message")
 
+@create_session
 @message.route("/", methods = ["GET"])
 def welcome():
     output = app.config["PUBLIC_INFOS"]
     return jsonify(output)
 
-
+@create_session
 @message.route("/list/<int:game_id>", methods = ["GET"])
 @auth_required
 @needs_values("GET", "timestamp")

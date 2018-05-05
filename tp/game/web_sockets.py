@@ -115,6 +115,7 @@ def init_round(data):
     emit("init_round", output)
 
 
+@create_session
 @socketio.on("get_categories")
 @ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
@@ -152,6 +153,7 @@ def get_random_categories(data):
     print "User %s got proposed categories." % g.user.username, proposed
     emit("get_categories", {"categories": proposed, "success": True})
 
+@create_session
 @socketio.on("choose_category")
 @ws_auth_required
 @needs_values("SOCKET", "category", "game", "round_id")
@@ -199,6 +201,7 @@ def choose_category(data):
         events.your_turn(game, opponent)
         RecentGameEvents.change(opponent)
 
+@create_session
 @socketio.on("get_questions")
 @ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
@@ -225,6 +228,7 @@ def get_questions(data):
     print "User %s got questions." % g.user.username, proposed
     emit("get_questions", {"questions": proposed, "success": True})
 
+@create_session
 @socketio.on("answer")
 @ws_auth_required
 @needs_values("SOCKET", "answer", "game", "round_id", "quiz_id")
@@ -268,6 +272,7 @@ def answer(data):
             opponent = getOpponentFrom(game)
             RecentGameEvents.change(opponent)
 
+@create_session
 @socketio.on("is_user_online")
 @ws_auth_required
 @needs_values("SOCKET", "game", "user")
@@ -280,6 +285,7 @@ def is_user_online(data):
     emit("is_user_online", {"answer": output})
 
 
+@create_session
 @socketio.on("round_details")
 @ws_auth_required
 @needs_values("SOCKET", "game")

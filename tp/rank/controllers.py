@@ -3,10 +3,12 @@ from flask import Blueprint, g, jsonify, request
 from tp.decorators import auth_required, needs_values
 from tp.exceptions import BadParameters
 from tp.rank.queries import *
+from tp.decorators import create_session
 import re
 
 rank = Blueprint("rank", __name__, url_prefix = "/rank")
 
+@create_session
 #api per la richiesta della classifica italiana (globale)
 @rank.route("/global", methods = ["GET"])
 @auth_required
@@ -37,6 +39,7 @@ def getItalianRank():
 def getFriendsRank():
     pass
 
+@create_session
 @rank.route("/search", methods = ["GET"])
 @auth_required
 @needs_values("GET", "query")

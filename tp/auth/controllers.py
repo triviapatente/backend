@@ -6,7 +6,7 @@ from tp.auth.queries import *
 from tp.auth.models import *
 from sqlalchemy import or_
 from tp.exceptions import *
-from tp.decorators import auth_required, needs_values, trim_values, webpage
+from tp.decorators import auth_required, needs_values, trim_values, webpage, create_session
 from tp.preferences.models import *
 from tp.utils import *
 from tp.auth.utils import createUser, createFBUser, obtainFacebookToken, linkUserToFB
@@ -18,6 +18,7 @@ fb = Blueprint("fb", __name__, url_prefix = "/fb")
 account = Blueprint("account", __name__, url_prefix = "/account")
 info = Blueprint("info", __name__, url_prefix = "/info")
 
+@create_session
 #api che effettua il login dell'utente
 @auth.route("/login", methods = ["POST"])
 #utilizzando il decorator che ho creato, posso fare il controllo dell'input in una riga
@@ -44,6 +45,7 @@ def login():
         #se no, login fallito
         raise LoginFailed()
 
+@create_session
 #api che effettua la registrazione dell'utente
 @auth.route("/register", methods = ["POST"])
 #utilizzando il decorator che ho creato, posso fare il controllo dell'input in una riga
@@ -64,6 +66,7 @@ def register():
     print "User %s has registered." % user.username, user
     return jsonify(user = user, token = keychain.auth_token)
 
+@create_session
 @fb.route("/auth", methods = ["POST"])
 @needs_values("POST", "token")
 def fb_auth():
@@ -92,6 +95,7 @@ def fb_auth():
             return jsonify(user = user, token = keychain.auth_token)
         raise TPException() #TODO: trovare exception appropriata
 
+@create_session
 @fb.route("/link", methods = ["POST"])
 @needs_values("POST", "token")
 @auth_required
@@ -108,6 +112,7 @@ def link_to_fb():
     raise TPException() #TODO: trovare exception appropriata
 
 
+@create_session
 #api per il cambio della password
 @auth.route("/password/edit", methods = ["POST"])
 @auth_required
@@ -124,6 +129,7 @@ def changePassword():
         return jsonify(token = keychain.auth_token, success = True)
     raise OldPasswordNotMatching()
 
+@create_session
 #richiesta da app per il forgot password. Quando chiamata, provvede a mandare la mail in cui l'utente confermerà che vuole mandare la password
 @auth.route("/password/request", methods = ["POST"])
 @needs_values("POST", "usernameOrEmail")
@@ -148,6 +154,7 @@ def requestNewPassword():
     else:
         raise NotFound()
 
+@create_session
 #@auth.route("/password/", methods = ["GET"])
 #def passwordPage():
 #    return render_template("forgot_password/email.html")
@@ -164,6 +171,7 @@ def forgotPasswordWebPage():
     #present web page
     return {"token": token, "user": g.user}
 
+@create_session
 #richiesta che viene chiamata quando l'utente cambia effettivamente la password da web. Cambia la password e mostra l'esito
 @auth.route("/password/change_from_email", methods = ["POST"])
 @webpage("forgot_password/change.html", passwordMinChars = app.config["PASSWORD_MIN_CHARS"])
@@ -188,7 +196,7 @@ def forgotPasswordWebPageResult():
 
 
 #api(s) per le modifiche
-
+@create_session
 #api per il cambio del nome (##name)
 @account.route("/name/edit", methods = ["POST"])
 @auth_required
@@ -203,6 +211,7 @@ def changeName():
     print "User %d change name to: %s." % (g.user.id, g.user.name)
     return jsonify(success = True, user = g.user)
 
+@create_session
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
 @auth_required
@@ -217,6 +226,7 @@ def changeSurname():
     print "User %d change surname to: %s" % (g.user.id, g.user.surname)
     return jsonify(success = True, user = g.user)
 
+@create_session
 #api per il cambio dell'immagine (##image)
 @account.route("/image/edit", methods = ["POST"])
 @auth_required
@@ -245,6 +255,7 @@ def changeImage():
         print "User image not allowed."
         raise FormatNotAllowed()
 
+@create_session
 @account.route("/image/<int:id>", methods = ["GET"])
 def getUserImage(id):
     user = User.query.filter(User.id == id).first()
@@ -254,7 +265,8 @@ def getUserImage(id):
         return send_file("../" + user.image, add_etags=False)
     else:
         return ""
-
+        
+@create_session
 @account.route("/user", methods = ["GET"])
 @auth_required
 def getCurrentUser():

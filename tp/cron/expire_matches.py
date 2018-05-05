@@ -7,9 +7,12 @@ from tp.game.models import Game, Round, Question, ProposedQuestion, Partecipatio
 from tp.game.utils import getUsersFromGame, getWinner, updateScore
 from tp.utils import doTransaction
 from tp.cron import events
+from tp.decorators import create_session
+
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_
 
+@create_session
 def expire_matches():
     with app.app_context():
         stimulate_users()

@@ -4,7 +4,7 @@ from tp import app, db
 from flask import g, redirect, request
 from porting import getJSONModels
 from tp.exceptions import NotAllowed, BadParameters, InstagramProblem, InstagramUnnecessary
-from tp.decorators import auth_required, needs_values
+from tp.decorators import auth_required, needs_values, create_session
 from tp.base.models import Feedback
 from sqlalchemy import exc
 from tp.events.models import Installation
@@ -14,10 +14,13 @@ import requests
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
 
+@create_session
 @base.route("/")
 def welcome():
     output = app.config["PUBLIC_INFOS"]
     return jsonify(output)
+
+@create_session
 @base.route("/generateTemplates", methods = ["GET"])
 def generateTemplates():
     if app.config["DEBUG"] is False:
@@ -27,6 +30,7 @@ def generateTemplates():
         output_file.write(text)
     return jsonify(success = True)
 
+@create_session
 @base.route("/instagram", methods = ["GET"])
 def obtainInstagramPhotos():
     BASE_URL = app.config["INSTAGRAM_API_ENDPOINT"]
@@ -49,7 +53,7 @@ def obtainInstagramPhotos():
         images.append({"url": url, "type": type, "link": link})
     return jsonify(success = True, images = images)
 
-
+@create_session
 @base.route("/models", methods = ["GET"])
 def obtainModels():
     debug = app.config["DEBUG"]
@@ -58,20 +62,23 @@ def obtainModels():
     output = getJSONModels()
     return jsonify(output)
 
+@create_session
 @base.route("/store_page/ios", methods = ["GET"])
 def redirectToAppStore():
     url = app.config["IOS_STORE_URL"]
     return redirect(url)
+@create_session
 @base.route("/store_page/android", methods = ["GET"])
 def redirectToPlayStore():
     url = app.config["ANDROID_STORE_URL"]
     return redirect(url)
+@create_session
 @base.route("/terms", methods = ["GET"])
 def redirectToTerms():
     path = app.config["TERMS_PATH"]
     url = request.host_url + path
     return redirect(url)
-
+@create_session
 @base.route("/registerForPush", methods = ["POST"])
 @needs_values("POST", "token", "deviceId", "os")
 @auth_required
@@ -89,7 +96,7 @@ def registerForPush():
     db.session.add(installation)
     db.session.commit()
     return jsonify(success = True)
-
+@create_session
 @base.route("/unregisterForPush", methods = ["POST"])
 @needs_values("POST", "deviceId", "os")
 def unregisterForPush():
@@ -98,11 +105,13 @@ def unregisterForPush():
     Installation.query.filter(Installation.device_id == device_id, Installation.os == os).delete()
     db.session.commit()
     return jsonify(success = True)
+@create_session
 @base.route("/privacyPolicy", methods = ["GET"])
 def redirectToPrivacyPolicy():
     url = app.config["PRIVACY_POLICY_URL"]
     return redirect(url)
 
+@create_session
 #API usata per intercettare le richieste di contatto degli utenti
 @base.route("/contact", methods = ["POST"])
 @needs_values("POST", "message", "scope")

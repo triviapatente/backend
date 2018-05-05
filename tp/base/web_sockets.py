@@ -6,11 +6,13 @@ from tp.base.utils import roomName, get_connection_values, getInfosFromRoom
 from tp.events.models import *
 from tp.auth.utils import getUserFromRequest, deviceIdFromRequest
 from tp.events.models import Socket
+from tp.decorators import create_session
 from tp.decorators import needs_values
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g, request
 import events
 
+@create_session
 @socketio.on("join_room")
 @ws_auth_required
 @needs_values("SOCKET", "id", "type")
@@ -28,7 +30,7 @@ def join_room_request(data):
     leave_rooms(exceptId = room_id)
     events.user_joined(g.roomName)
 
-
+@create_session
 @socketio.on("global_infos")
 @ws_auth_required
 def get_global_infos(data):
@@ -36,6 +38,7 @@ def get_global_infos(data):
     output["success"] = True
     emit("global_infos", output)
 
+@create_session
 @socketio.on("leave_room")
 @ws_auth_required
 @needs_values("SOCKET", "type")
@@ -62,6 +65,7 @@ def leave_rooms(exceptId = None):
         print "User %s left room %s" % (g.user.username, name)
         events.user_left(name)
 
+@create_session
 @socketio.on("disconnect")
 def disconnect():
     print "About to be disconnected"
