@@ -8,7 +8,7 @@ from tp.game.utils import getUsersFromGame, getWinner, updateScore
 from tp.utils import doTransaction
 from tp.cron import events
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 def expire_matches():
     with app.app_context():
@@ -29,7 +29,7 @@ def expire_matches():
 def stimulate_users():
     trigger_thresold = datetime.utcnow() - timedelta(days=1)
     lastGame = Partecipation.query.with_entities(func.max(Partecipation.createdAt)).filter(Partecipation.user_id == User.id).label("lastGame")
-    users = User.query.filter(lastGame < trigger_thresold, User.last_daily_stimulation < trigger_thresold)
+    users = User.query.filter(or_(lastGame == None, lastGame < trigger_thresold), or_(User.last_daily_stimulation == None, User.last_daily_stimulation < trigger_thresold))
     print users
     users = users.all()
     for user in users:
