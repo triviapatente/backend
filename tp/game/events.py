@@ -10,12 +10,12 @@ def user_answered(room, question, quiz):
     question.correct = (question.answer == quiz.answer)
     questionJSON = question.json
     del questionJSON["answer"]
-    data = {"user": g.user.json, "answer": questionJSON}
+    data = {"user": jsonifyDates(g.user.json), "answer": questionJSON}
     return (room, data, None)
 
 @event("round_ended", action = EventActions.destroy)
 def round_ended(room, round):
-    data = {"round": round.json, "user": g.user.json}
+    data = {"round": jsonifyDates(round.json), "user": jsonifyDates(g.user.json)}
     return (room, data, None)
 @event("tickle", action = EventActions.notify)
 def tickle(game, opponent):
@@ -24,7 +24,7 @@ def tickle(game, opponent):
     return ([opponent], None, push_infos)
 
 def category_chosen(room, category):
-    data = {"category": category.json, "user": g.user.json}
+    data = {"category": jsonifyDates(category.json), "user": jsonifyDates(g.user.json)}
     return (room, data, None)
 
 @event("game_ended", action = EventActions.destroy)
@@ -49,7 +49,7 @@ def game_left(room, game, partecipations):
 @event("game", action = EventActions.create)
 def new_game(game):
     opponent = getOpponentFrom(game)
-    data = {"game": game.json, "user": g.user.json}
+    data = {"game": jsonifyDates(game.json), "user": jsonifyDates(g.user.json)}
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": "%s ti ha sfidato a una partita! Fagli vedere chi è il più in gamba!" % g.user.displayName}
     return ([opponent], data, push_infos)
 
@@ -61,7 +61,7 @@ class RecentGameEvents:
         opponent = getOpponentFrom(game)
         game.setOpponent(opponent)
         game.my_turn = True
-        data = {"game": game.json}
+        data = {"game": jsonifyDates(game.json)}
         return ([opponent], data, None)
 
     @staticmethod
@@ -69,7 +69,7 @@ class RecentGameEvents:
     def ended(game):
         opponent = getOpponentFrom(game)
         game.setOpponent(opponent)
-        data = {"game": game.json}
+        data = {"game": jsonifyDates(game.json)}
         return ([opponent], data, None)
     @staticmethod
     @event("recent_game", action = EventActions.update)
@@ -77,5 +77,5 @@ class RecentGameEvents:
         opponent = getOpponentFrom(game)
         game.setOpponent(opponent)
         game.my_turn = my_turn
-        data = {"game": game.json}
+        data = {"game": jsonifyDates(game.json)}
         return ([opponent], data, None)
