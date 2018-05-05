@@ -25,11 +25,15 @@ stimulations = ["Hey %s, chi dorme non piglia pesci, chi non gioca a TriviaPaten
 @event("user_stimulation", action = EventActions.notify)
 def stimulate_daily(user):
     message = random.choice(stimulations) % user.friendlyDisplayName
+    g.user = {}
+    g.user.id = -1
     push_infos = {"message": message}
     return ([user], None, push_infos)
 
 @event("user_stimulation", action = EventActions.notify)
 def stimulate_on_game_end(increment, destination):
     message = "Hey! Il tuo amico %s ha appena vinto una partita guadagnando %d punti! Gioca anche tu!" % (g.user.displayName, increment)
+    g.user = {}
+    g.user.id = -1
     push_infos = {"message": message}
     return ([destination], None, push_infos)
