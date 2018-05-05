@@ -8,6 +8,8 @@ from tp.game.utils import getUsersFromGame, getWinner, updateScore
 from tp.utils import doTransaction
 from tp.cron import events
 from datetime import datetime, timedelta
+from sqlalchemy import func
+
 def expire_matches():
     with app.app_context():
         stimulate_users()
