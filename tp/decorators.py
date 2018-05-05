@@ -20,7 +20,13 @@ def auth_required(f):
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         return f(*args, **kwargs)
     return decorated_function
-
+def create_session(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        db.session = db.Session()
+        #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
+        return f(*args, **kwargs)
+    return decorated_function
 def webpage(template, **defaultParams):
     def decorator(f):
         @wraps(f)

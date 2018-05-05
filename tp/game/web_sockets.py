@@ -7,7 +7,7 @@ from tp.base.utils import roomName
 from tp.game.utils import *
 from tp.auth.models import User
 from tp.game.models import Game, Question, Round, Category, Quiz, ProposedCategory, ProposedQuestion
-from tp.decorators import needs_values, fetch_models
+from tp.decorators import needs_values, fetch_models, create_session
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 from tp.base.utils import RoomType
@@ -16,6 +16,7 @@ from sqlalchemy import func, and_, asc
 import events
 from events import RecentGameEvents
 
+@create_session
 @socketio.on("init_round")
 @ws_auth_required
 @needs_values("SOCKET", "game")
