@@ -28,8 +28,6 @@ if not os.path.exists(imgPath):
 ### Extraction ###
 print 'Start crawling ' + seed + '..'
 
-db.engine.execute(DropTable(Quiz.__table__))
-db.engine.execute(DropTable(Category.__table__))
 db.create_all()
 crawler.getCategories(db.session, seed, baseUrl, imgPath)
 

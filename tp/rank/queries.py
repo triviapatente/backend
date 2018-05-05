@@ -98,12 +98,10 @@ def search(query):
 #ottiene la posizione dell'utente
 def getUserPosition(user):
     query = userPositionQuery(User, user)
-    print query
     return query.scalar()
 #ottiene la posizione interna dell'utente
 def getUserInternalPosition(user):
     query = userInternalPositionQuery(User, user)
-    print query
     return query.scalar()
 
 

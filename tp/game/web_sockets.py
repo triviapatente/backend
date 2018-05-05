@@ -139,7 +139,6 @@ def get_random_categories(data):
             proposed = proposed.filter(~Category.id.in_(ids))
         proposed = proposed.order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"]).all()
 
-        print proposed
         #e le aggiungo come proposed in db
         for (candidate, totalAnswers) in proposed:
             c = ProposedCategory(round_id = round.id, category_id = candidate.id)

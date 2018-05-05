@@ -2,7 +2,7 @@
 from tp import app
 import sys
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum, Date, BigInteger
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum, Date, BigInteger, DateTime
 from sqlalchemy.orm import relationship
 from passlib.apps import custom_app_context as pwd_context
 
@@ -45,8 +45,8 @@ class User(Base, CommonPK):
   surname = Column(String(MAX_CHARS))
   #path dell'immagine
   image = Column(String)
-  last_game_friend_ended_game_stimulation = Column(Date)
-  last_daily_stimulation = Column(Date)
+  last_game_friend_ended_game_stimulation = Column(DateTime)
+  last_daily_stimulation = Column(DateTime)
   #data di nascita
   birth = Column(Date)
   #punteggio di partenza del giocatore

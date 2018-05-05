@@ -135,7 +135,6 @@ def randomSearch():
     limitDate = datetime.utcnow() - timedelta(minutes=limitMinutes)
     pendingGames = getPendingGamesQuery(User, g.user, True).label("pendingGames")
     opponent = User.query.join(Socket, Socket.user_id == User.id).filter(User.id != g.user.id).filter(Socket.updatedAt >= limitDate).filter(pendingGames == 0).order_by(func.random())
-    print opponent
     opponent = opponent.first()
     if not opponent:
         print "About to search offline opponent..."

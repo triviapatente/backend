@@ -175,7 +175,6 @@ def getMostValuableUsersForMe():
 
 def getSuggestedUsers(user):
     output = getMostValuableUsersForMe()
-    print output
     if len(output) == 0:
         return getRank(True)
     return output
