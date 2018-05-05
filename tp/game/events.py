@@ -56,26 +56,7 @@ def new_game(game):
 class RecentGameEvents:
     #Eventi Recent games
     @staticmethod
-    @event("recent_game", action = EventActions.create)
-    def created(game):
-        opponent = getOpponentFrom(game)
-        game.setOpponent(opponent)
-        game.my_turn = True
-        data = {"game": jsonifyDates(game.json)}
-        return ([opponent], data, None)
-
-    @staticmethod
-    @event("recent_game", action = EventActions.update)
-    def ended(game):
-        opponent = getOpponentFrom(game)
-        game.setOpponent(opponent)
-        data = {"game": jsonifyDates(game.json)}
-        return ([opponent], data, None)
-    @staticmethod
-    @event("recent_game", action = EventActions.update)
-    def turn_changed(game, my_turn):
-        opponent = getOpponentFrom(game)
-        game.setOpponent(opponent)
-        game.my_turn = my_turn
-        data = {"game": jsonifyDates(game.json)}
+    @event("recent_game")
+    def change(opponent):
+        data = {"recent_game_changed": True}
         return ([opponent], data, None)

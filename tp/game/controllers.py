@@ -65,7 +65,7 @@ def newGame():
     if game:
         print "Game %d created." % game.id
         events.new_game(game)
-        RecentGameEvents.created(game)
+        RecentGameEvents.change(opponent)
         return jsonify(success = True, game = game, user = opponent)
     else:
         raise ChangeFailed()
@@ -121,7 +121,7 @@ def leave_game():
         #ritorno le varie risposte
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         events.game_left(users, game, partecipations)
-        RecentGameEvents.ended(game = game)
+        RecentGameEvents.change(opponent)
         return jsonify(success = True, ended = True, game = game, winner = opponent, partecipations = partecipations)
     #nessun avversario.. solo io nel gioco
     #NOTE: non dovrebbe succedere mai, in new_game l'opponent è obbligatorio
@@ -151,7 +151,7 @@ def randomSearch():
     if game:
         print "Game %d created." % game.id
         events.new_game(game)
-        RecentGameEvents.created(game)
+        RecentGameEvents.change(opponent)
         return jsonify(success = True, game = game, user = opponent)
     else:
         raise ChangeFailed()

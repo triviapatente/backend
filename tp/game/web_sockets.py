@@ -47,7 +47,8 @@ def init_round(data):
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
             print "User's score updated."
-            RecentGameEvents.ended(game = game)
+            opponent = getOpponentFrom(game)
+            RecentGameEvents.change(opponent)
             sendStimulationOnGameEnded(game, updatedUsers)
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
@@ -195,7 +196,7 @@ def choose_category(data):
     opponent_turn = isOpponentTurn(game)
     if opponent_turn != previous_opponent_turn:
         events.your_turn(game, opponent)
-        RecentGameEvents.turn_changed(game, opponent_turn)
+        RecentGameEvents.change(opponent)
 
 @socketio.on("get_questions")
 @ws_auth_required
@@ -263,7 +264,8 @@ def answer(data):
             db.session.commit()
         events.round_ended(g.roomName, round)
         if opponent_turn is not None:
-            RecentGameEvents.turn_changed(game, opponent_turn)
+            opponent = getOpponentFrom(game)
+            RecentGameEvents.change(opponent)
 
 @socketio.on("is_user_online")
 @ws_auth_required
