@@ -2,7 +2,8 @@
 
 from tp import app, db
 from flask import g
-from tp.game.models import Game, Round, Question, ProposedQuestion
+from tp.auth.models import User
+from tp.game.models import Game, Round, Question, ProposedQuestion, Partecipation
 from tp.game.utils import getUsersFromGame, getWinner, updateScore
 from tp.utils import doTransaction
 from tp.cron import events
@@ -30,6 +31,7 @@ def stimulate_users():
     for user in users:
         stimulate(user)
 def stimulate(user):
+    print "About to stimulate user %s.." % user.username
     user.last_daily_stimulation = datetime.utcnow()
     events.stimulate_daily(user)
     db.session.add(user)
