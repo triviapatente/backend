@@ -29,7 +29,9 @@ def expire_matches():
 def stimulate_users():
     trigger_thresold = datetime.utcnow() - timedelta(days=1)
     lastGame = Partecipation.query.with_entities(func.max(Partecipation.createdAt)).filter(Partecipation.user_id == User.id).label("lastGame")
-    users = User.query.filter(lastGame < trigger_thresold, User.last_daily_stimulation < trigger_thresold).all()
+    users = User.query.filter(lastGame < trigger_thresold, User.last_daily_stimulation < trigger_thresold)
+    print users
+    users = users.all()
     for user in users:
         stimulate(user)
 def stimulate(user):
