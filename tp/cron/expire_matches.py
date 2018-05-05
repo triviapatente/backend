@@ -39,7 +39,7 @@ def stimulate(user):
     user.last_daily_stimulation = datetime.utcnow()
     events.stimulate_daily(user)
     db.session.add(user)
-    db.session.save()
+    db.session.commit()
 def alert(game):
     print "[expire_matches.alert cron] Game: %d" % game.id
     [userA, userB] = getUsersFromGame(game)
