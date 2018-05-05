@@ -56,7 +56,7 @@ def new_game(game):
 class RecentGameEvents:
     #Eventi Recent games
     @staticmethod
-    @event("recent_game")
+    @event("recent_game", action = EventActions.notify)
     def change(opponent):
         data = {"recent_game_changed": True}
         return ([opponent], data, None)
