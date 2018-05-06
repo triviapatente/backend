@@ -26,7 +26,7 @@ def create_session(f):
     def decorated_function(*args, **kwargs):
         engine = db.engine
         Session = sessionmaker(engine)
-        session = Session(expire_on_commit=False)
+        session = Session(expire_on_commit=False, autocommit = True)
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         return f(*args, **kwargs)
     return decorated_function
