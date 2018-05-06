@@ -24,11 +24,7 @@ def auth_required(f):
 def create_session(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        engine = db.engine
-        if db.session is not None:
-            db.session.close()
-        Session = sessionmaker(bind = engine, expire_on_commit = False, autocommit = True)
-        db.session = db.create_scoped_session({"bind": engine, "expire_on_commit": False, "autocommit": True})()
+        db.session.remove()
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         output = f(*args, **kwargs)
         db.session.close()
