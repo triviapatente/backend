@@ -160,7 +160,7 @@ def getMostPlayedUser(except_user):
     if result is not None:
         (user_id, count) = result
     if user_id is not None:
-        return User.get(user_id)
+        return User.query.get(user_id)
     return None
 def getMostValuableUsersForMe():
     limit = app.config["RESULTS_LIMIT_RANK_ITALY"]
