@@ -48,7 +48,7 @@ def game_left(room, game, partecipations):
 
 @event("game", action = EventActions.create)
 def new_game(game):
-    opponent = getOpponentFrom(game)
+    opponent = getOpponentFrom(game.id)
     data = {"game": jsonifyDates(game.json), "user": jsonifyDates(g.user.json)}
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": "%s ti ha sfidato a una partita! Fagli vedere chi è il più in gamba!" % g.user.displayName}
     return ([opponent], data, push_infos)

@@ -262,7 +262,7 @@ def get_increments(game, user, opponent, left):
         return output
 
 def sendStimulationOnGameEnded(game, updatedUsers):
-    opponent = getOpponentFrom(game)
+    opponent = getOpponentFrom(game.id)
     destination = getMostPlayedUser(except_user = opponent)
     (userA, incrementA) = updatedUsers[0]
     (userB, incrementB) = updatedUsers[1]
@@ -279,7 +279,7 @@ def sendStimulationOnGameEnded(game, updatedUsers):
 # funzione che aggiorna il punteggio di una partita (##game)
 def updateScore(game, left = False):
     user = g.user
-    opponent = getOpponentFrom(game)
+    opponent = getOpponentFrom(game.id)
     increments = get_increments(game, user, opponent, left)
 
     # calcolo i nuovi punteggi
@@ -544,11 +544,11 @@ def getNextRoundNumberFor(game, user):
 def getNextRoundNumber(game):
     return getNextRoundNumberFor(game, g.user)
 
-def getOpponentFrom(game):
-    return User.query.join(Partecipation).filter(Partecipation.game_id == game.id).filter(Partecipation.user_id != g.user.id).first()
+def getOpponentFrom(game_id):
+    return User.query.join(Partecipation).filter(Partecipation.game_id == game_id).filter(Partecipation.user_id != g.user.id).first()
 
 def isOpponentTurn(game):
-    opponent = getOpponentFrom(game)
+    opponent = getOpponentFrom(game.id)
     return isTurnOf(game, opponent)
 
 def isTurnOf(game, user):
@@ -563,7 +563,7 @@ def isTurnOf(game, user):
     return False
 
 def isOpponentOnline(game):
-    opponent = getOpponentFrom(game)
+    opponent = getOpponentFrom(game.id)
     return isUserOnline(game.id, opponent.id)
 
 def isUserOnline(game_id, user_id):

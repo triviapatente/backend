@@ -25,6 +25,7 @@ from events import RecentGameEvents
 def init_round(data):
     #parametri in input
     game = g.models["game"]
+    opponent = getOpponentFrom(game.id)
     #costanti
     MAX_AGE = app.config["MATCH_MAX_AGE"]
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
@@ -48,7 +49,6 @@ def init_round(data):
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
             print "User's score updated."
-            opponent = getOpponentFrom(game)
             RecentGameEvents.change(opponent)
             sendStimulationOnGameEnded(game, updatedUsers)
         #preparo l'output
@@ -64,7 +64,6 @@ def init_round(data):
     #controllo il caso in cui si è al round 10, con domande completate, e quindi si fa riferimento all'11, ma la partita non è finita:
     #vuol dire che gli altri utenti devono ancora giocare
     if next_number > NUMBER_OF_ROUNDS:
-        opponent = getOpponentFrom(game)
         return emit("init_round", {"success": True, "max_age": MAX_AGE, "waiting": "game", "waiting_for": opponent})
     #ottengo il round di riferimento
     round = Round.query.filter(Round.game_id == game.id, Round.number == next_number).first()
@@ -75,7 +74,6 @@ def init_round(data):
         #controllo se ci sono risposte non date dagli utenti nel round precedente a quello in cui ho appena giocato
         answered_count = Round.query.filter(Round.number == next_number - 3).filter(Round.game_id == game.id).join(Question).count()
         if answered_count != len(users) * NUMBER_OF_QUESTIONS_PER_ROUND:
-            opponent = getOpponentFrom(game)
             return emit("init_round", {"success": True, "max_age": MAX_AGE, "waiting": "game", "waiting_for": opponent, "round": round.json})
     need_new_round = round is None
     #se è nullo
@@ -135,7 +133,7 @@ def get_random_categories(data):
     #se non ci sono
     if len(proposed) == 0:
         ids = Round.query.filter(Round.game_id == game.id).join(Category).with_entities(Category.id).all()
-        opponent = getOpponentFrom(game)
+        opponent = getOpponentFrom(game.id)
         #le genero random
         proposed = Category.query.with_entities(Category, getNumberOfTotalAnswersForCategory(Category, game, opponent).label("total_answers"))
         if len(ids) != 0:
@@ -179,7 +177,7 @@ def choose_category(data):
     #aggiorno la categoria e salvo in db
     round.cat_id = category.id
     db.session.add(round)
-    opponent = getOpponentFrom(game)
+    opponent = getOpponentFrom(game.id)
     # genero le domande random, pescando da quelle della categoria richiesta
     proposed = Quiz.query.with_entities(Quiz, getNumberOfTotalAnswersForQuiz(Quiz, game, opponent).label("total_answers")).filter(Quiz.category_id == category.id).order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]).all()
     print proposed
@@ -189,7 +187,7 @@ def choose_category(data):
         db.session.add(q)
     db.session.commit()
     db.session.commit()
-    opponent = getOpponentFrom(game)
+    opponent = getOpponentFrom(game.id)
 
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
@@ -269,7 +267,7 @@ def answer(data):
             db.session.commit()
         events.round_ended(g.roomName, round)
         if opponent_turn is not None:
-            opponent = getOpponentFrom(game)
+            opponent = getOpponentFrom(game.id)
             RecentGameEvents.change(opponent)
 
 @create_session
