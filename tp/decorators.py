@@ -4,6 +4,7 @@ from flask import g, request, session, render_template
 from functools import wraps
 from tp import db, app
 from time import time
+from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import sessionmaker
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate

@@ -16,8 +16,8 @@ from sqlalchemy import func, and_, asc
 import events
 from events import RecentGameEvents
 
-@create_session
 @socketio.on("init_round")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "game")
 @fetch_models(game = Game)
@@ -113,8 +113,8 @@ def init_round(data):
     emit("init_round", output)
 
 
-@create_session
 @socketio.on("get_categories")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
 #round id, non round number!!!
@@ -151,8 +151,8 @@ def get_random_categories(data):
     print "User %s got proposed categories." % g.user.username, proposed
     emit("get_categories", {"categories": proposed, "success": True})
 
-@create_session
 @socketio.on("choose_category")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "category", "game", "round_id")
 @fetch_models(game = Game, round_id = Round, category = Category)
@@ -197,8 +197,8 @@ def choose_category(data):
         events.your_turn(game, opponent)
         RecentGameEvents.change(opponent)
 
-@create_session
 @socketio.on("get_questions")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "round_id", "game")
 @fetch_models(round_id = Round, game = Game)
@@ -224,8 +224,8 @@ def get_questions(data):
     print "User %s got questions." % g.user.username, proposed
     emit("get_questions", {"questions": proposed, "success": True})
 
-@create_session
 @socketio.on("answer")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "answer", "game", "round_id", "quiz_id")
 @fetch_models(game = Game, round_id = Round, quiz_id = Quiz)
@@ -268,8 +268,8 @@ def answer(data):
         if opponent_turn is not None:
             RecentGameEvents.change(opponent)
 
-@create_session
 @socketio.on("is_user_online")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "game", "user")
 @fetch_models(game = Game, user = User)
@@ -281,8 +281,8 @@ def is_user_online(data):
     emit("is_user_online", {"answer": output})
 
 
-@create_session
 @socketio.on("round_details")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "game")
 @fetch_models(game = Game)
