@@ -208,7 +208,7 @@ def changeName():
     g.user.name = name
     db.session.add(g.user)
     db.session.commit()
-    print "User %d change name to: %s." % (g.user.id, g.user.name)
+    print "User %d changed name to: %s." % (g.user.id, g.user.name)
     return jsonify(success = True, user = g.user)
 
 @create_session
@@ -217,19 +217,13 @@ def changeName():
 @auth_required
 @trim_values("POST", False, "surname")
 def changeSurname():
-    print "A"
     surname = g.post.get("surname")
-    print "B"
     if surname is not None and len(surname) == 0:
         surname = None;
-    print "C"
     g.user.surname = surname
-    print "D"
     db.session.add(g.user)
-    print "E"
     db.session.commit()
-    print "F"
-    print "User %d change surname to: %s" % (g.user.id, g.user.surname)
+    print "User %d changed surname to: %s" % (g.user.id, g.user.surname)
     return jsonify(success = True, user = g.user)
 
 @create_session
