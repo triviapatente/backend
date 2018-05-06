@@ -108,3 +108,4 @@ def authenticate(socket = False):
     print "User %s associated with token." % user.username
     #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente
     g.user = user
+    db.session.expunge(user)
