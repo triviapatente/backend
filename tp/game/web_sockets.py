@@ -49,7 +49,7 @@ def init_round(data):
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
             print "User's score updated."
-            sendStimulationOnGameEnded(game, updatedUsers)
+            sendStimulationOnGameEnded(game, updatedUsers, events)
             RecentGameEvents.change(opponent)
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]

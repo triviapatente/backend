@@ -3,7 +3,7 @@
 from flask_socketio import emit
 from models import *
 from flask import g
-from utils import getUsersFromRoomID
+from tp.base.utils import getUsersFromRoomID
 from functools import wraps
 from tp import socketio, app
 from tp.preferences.models import Preferences

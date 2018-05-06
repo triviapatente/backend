@@ -18,6 +18,11 @@ def roomName(id, type):
         type = type.value
     return "%s_%s" % (type, id)
 
+def getUsersFromRoomID(room):
+    (type, id) = getInfosFromRoom(room)
+    return getUsersFromRoom(type.value, id)
+
+
 def getInfosFromRoom(id):
     parts = id.split("_")
     if parts and len(parts) == 2:
