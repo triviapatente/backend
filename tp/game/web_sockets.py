@@ -164,6 +164,7 @@ def choose_category(data):
     category = g.models["category"]
     game = g.models["game"]
     opponent = getOpponentFrom(game.id)
+    opponent_id = opponent.id
 
     proposed = ProposedCategory.query.filter(ProposedCategory.round_id == round.id).filter(ProposedCategory.category_id == category.id).first()
     if not proposed:
@@ -195,7 +196,7 @@ def choose_category(data):
     opponent_turn = isOpponentTurn(game)
     if opponent_turn != previous_opponent_turn:
         g.user = User.query.get(g.user.id)
-        opponent = User.query.get(opponent.id)
+        opponent = User.query.get(opponent_id)
         events.your_turn(game, opponent)
         RecentGameEvents.change(opponent)
 
