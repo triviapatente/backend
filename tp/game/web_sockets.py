@@ -163,6 +163,7 @@ def choose_category(data):
     round = g.models["round_id"]
     category = g.models["category"]
     game = g.models["game"]
+    opponent = getOpponentFrom(game.id)
 
     proposed = ProposedCategory.query.filter(ProposedCategory.round_id == round.id).filter(ProposedCategory.category_id == category.id).first()
     if not proposed:
@@ -177,7 +178,6 @@ def choose_category(data):
     #aggiorno la categoria e salvo in db
     round.cat_id = category.id
     db.session.add(round)
-    opponent = getOpponentFrom(game.id)
     # genero le domande random, pescando da quelle della categoria richiesta
     proposed = Quiz.query.with_entities(Quiz, getNumberOfTotalAnswersForQuiz(Quiz, game, opponent).label("total_answers")).filter(Quiz.category_id == category.id).order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]).all()
     print proposed
@@ -187,7 +187,6 @@ def choose_category(data):
         db.session.add(q)
     db.session.commit()
     db.session.commit()
-    opponent = getOpponentFrom(game.id)
 
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
@@ -239,6 +238,7 @@ def answer(data):
     round = g.models["round_id"]
     game = g.models["game"]
     quiz = g.models["quiz_id"]
+    opponent = getOpponentFrom(game.id)
     question = Question.query.filter(Question.round_id == round.id, Question.user_id == g.user.id, Question.quiz_id == quiz.id).first()
     proposedQuestion = ProposedQuestion.query.filter(ProposedQuestion.round_id == round.id).filter(ProposedQuestion.quiz_id == quiz.id).first()
     if not proposedQuestion:
@@ -267,7 +267,6 @@ def answer(data):
             db.session.commit()
         events.round_ended(g.roomName, round)
         if opponent_turn is not None:
-            opponent = getOpponentFrom(game.id)
             RecentGameEvents.change(opponent)
 
 @create_session
