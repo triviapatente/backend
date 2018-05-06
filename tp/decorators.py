@@ -68,7 +68,9 @@ def trim_values(method, allowEmptyString, *keys):
             output = {}
             for key in keys:
                 if store is not None:
-                    value = store.get(key).strip()
+                    value = store.get(key)
+                if value is not None:
+                    value = value.strip()
                 if value is not None and not allowEmptyString and len(value) == 0:
                     value = None
                 output[key] = value
