@@ -27,6 +27,7 @@ def create_session(f):
     def decorated_function(*args, **kwargs):
         engine = db.engine
         Session = sessionmaker(bind = engine, expire_on_commit = False)
+        db.session.remove()
         db.session = scoped_session(Session)
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         output = f(*args, **kwargs)
