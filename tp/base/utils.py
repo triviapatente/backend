@@ -27,8 +27,10 @@ def getInfosFromRoom(id):
     return (None, None)
 
 def jsonifyDates(json):
-    json["createdAt"] = str(json["createdAt"])
-    json["updatedAt"] = str(json["updatedAt"])
+    keys = ["createdAt", "updatedAt", "last_daily_stimulation", "last_game_friend_ended_game_stimulation"]
+    for key in keys:
+        if key in json and json[key] is not None:
+            json[key] = str(json[key])
     return json
 #ottiene gli utenti di una room in base al tipo
 #se la room non è conosciuta ritorna None
