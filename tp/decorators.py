@@ -4,6 +4,7 @@ from flask import g, request, session, render_template
 from functools import wraps
 from tp import db, app
 from time import time
+from sqlalchemy import sessionmaker
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
@@ -23,7 +24,9 @@ def auth_required(f):
 def create_session(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        db.session = db.Session()
+        engine = db.engine
+        Session = sessionmaker(engine)
+        session = Session()
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         return f(*args, **kwargs)
     return decorated_function
