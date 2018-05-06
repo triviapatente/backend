@@ -202,7 +202,7 @@ def forgotPasswordWebPageResult():
 @auth_required
 @trim_values("POST", False, "name")
 def changeName():
-    name = g.post.get("name").strip()
+    name = g.post.get("name")
     if len(name) == 0:
         name = None;
     g.user.name = name
@@ -217,7 +217,7 @@ def changeName():
 @auth_required
 @trim_values("POST", False, "surname")
 def changeSurname():
-    surname = g.post.get("surname").strip()
+    surname = g.post.get("surname")
     if len(surname) == 0:
         surname = None;
     g.user.surname = surname
