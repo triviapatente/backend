@@ -67,7 +67,9 @@ def trim_values(method, allowEmptyString, *keys):
             #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente
             output = {}
             for key in keys:
+                print "Examining key %s" % key
                 value = store.get(key).strip()
+                print "Found %s" % value
                 if value is not None and not allowEmptyString and len(value) == 0:
                     value = None
                 output[key] = value

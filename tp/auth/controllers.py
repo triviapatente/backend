@@ -200,7 +200,6 @@ def forgotPasswordWebPageResult():
 #api per il cambio del nome (##name)
 @account.route("/name/edit", methods = ["POST"])
 @auth_required
-@needs_values("POST", "name")
 @trim_values("POST", False, "name")
 def changeName():
     name = request.form.get("name").strip()
@@ -216,9 +215,9 @@ def changeName():
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
 @auth_required
-@needs_values("POST", "surname")
 @trim_values("POST", False, "surname")
 def changeSurname():
+    print "changeSurname"
     surname = request.form.get("surname").strip()
     if len(surname) == 0:
         surname = None;
