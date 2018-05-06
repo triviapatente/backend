@@ -67,13 +67,17 @@ def trim_values(method, allowEmptyString, *keys):
             #inoltre inserisco i parametri all'interno di questo array associativo, all'interno di g, per tirarli fuori più facilmente
             output = {}
             for key in keys:
+                print key
                 if store is not None:
                     value = store.get(key)
+                print store
                 if value is not None:
                     value = value.strip()
+                print value
                 if value is not None and not allowEmptyString and len(value) == 0:
                     value = None
                 output[key] = value
+            print output
             #necessario perchè g non supporta cose del tipo g[a]
             setattr(g, outputKey, output)
             return f(*args, **kwargs)
