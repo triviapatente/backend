@@ -200,6 +200,7 @@ def forgotPasswordWebPageResult():
 #api per il cambio del nome (##name)
 @account.route("/name/edit", methods = ["POST"])
 @auth_required
+@needs_values("POST", "name")
 @trim_values("POST", False, "name")
 def changeName():
     name = request.form.get("name").strip()
@@ -215,6 +216,7 @@ def changeName():
 #api per il cambio del cognome (##surname)
 @account.route("/surname/edit", methods = ["POST"])
 @auth_required
+@needs_values("POST", "surname")
 @trim_values("POST", False, "surname")
 def changeSurname():
     surname = request.form.get("surname").strip()
@@ -265,7 +267,7 @@ def getUserImage(id):
         return send_file("../" + user.image, add_etags=False)
     else:
         return ""
-        
+
 @create_session
 @account.route("/user", methods = ["GET"])
 @auth_required
