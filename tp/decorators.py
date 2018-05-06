@@ -4,6 +4,7 @@ from flask import g, request, session, render_template
 from functools import wraps
 from tp import db, app
 from time import time
+from sqlalchemy.orm import sessionmaker
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
@@ -26,7 +27,8 @@ def create_session(f):
         engine = db.engine
         if db.session is not None:
             db.session.close()
-        db.session = db.create_scoped_session(bind = engine, expire_on_commit = False, autocommit = True)()
+        Session = sessionmaker(bind = engine, expire_on_commit = False, autocommit = True)
+        db.session = db.create_scoped_session(Session)()
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         output = f(*args, **kwargs)
         db.session.close()
