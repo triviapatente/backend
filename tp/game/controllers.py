@@ -22,14 +22,14 @@ training = Blueprint("training", __name__, url_prefix = "/training")
 quiz = Blueprint("quiz", __name__, url_prefix = "/quiz")
 category = Blueprint("category", __name__, url_prefix = "/category")
 
-@create_session
 @game.route("/", methods = ["GET"])
+@create_session
 def welcome():
     output = app.config["PUBLIC_INFOS"]
     return jsonify(output)
 
-@create_session
 @game.route("/tickle", methods = ["POST"])
+@create_session
 @auth_required
 @needs_values("POST", "round")
 @fetch_models(round = Round)
@@ -55,9 +55,9 @@ def tickleGame():
     db.session.commit()
     return jsonify(success = True)
 
-@create_session
 #creazione della partita
 @game.route("/new", methods = ["POST"])
+@create_session
 @auth_required
 # @needs_values("POST", "number_of_players")
 @fetch_models(opponent = User)
@@ -75,8 +75,8 @@ def newGame():
     else:
         raise ChangeFailed()
 
-@create_session
 @game.route("/leave/decrement", methods = ["GET"])
+@create_session
 @auth_required
 @needs_values("GET", "game_id")
 @fetch_models(game_id = Game)
@@ -94,8 +94,8 @@ def get_leave_score_decrement():
         decrement = left_score_decrement(g.user)
     return jsonify(success = True, decrement = decrement)
 
-@create_session
 @game.route("/leave", methods = ["POST"])
+@create_session
 @auth_required
 @fetch_models(game_id = Game)
 @check_game_not_ended("game_id")
@@ -136,8 +136,8 @@ def leave_game():
     return jsonify(success = False, message = "Nessun avversario in questo match!")
 
 # ricerca aleatoria di un avversario
-@create_session
 @game.route("/new/random", methods = ["POST"])
+@create_session
 @auth_required
 def randomSearch():
     limitMinutes = app.config["LIMIT_MINUTES_TO_BE_CONSIDERED_ONLINE"]
@@ -165,8 +165,8 @@ def randomSearch():
     else:
         raise ChangeFailed()
 
-@create_session
 @game.route("/recents", methods = ["GET"])
+@create_session
 @auth_required
 def recent_games():
     #timestamp = g.query.get("timestamp")
@@ -175,32 +175,32 @@ def recent_games():
     recent_games = getRecentGames(g.user)
     return jsonify(success = True, recent_games = recent_games)
 
-@create_session
 @quiz.route("/image/<int:id>", methods = ["GET"])
+@create_session
 def getQuizImage(id):
     image = Image.query.filter(Image.id == id).first()
     if image:
         return send_file(image.imagePath, add_etags=False)
     raise NotAllowed()
 
-@create_session
 @category.route("/image/<int:id>", methods = ["GET"])
+@create_session
 def getCategoryImage(id):
     category = Category.query.filter(Category.id == id).first()
     if category:
         return send_file(category.imagePath, add_etags=False)
     raise NotAllowed()
 
-@create_session
 @game.route("/users/suggested", methods = ["GET"])
+@create_session
 @auth_required
 def get_suggested_users():
     users = getSuggestedUsers(g.user)
     return jsonify(success = True, users = users)
 
 
-@create_session
 @game.route("/users/search", methods = ["GET"])
+@create_session
 @needs_values("GET", "query")
 @auth_required
 def search_user():
@@ -212,16 +212,16 @@ def search_user():
     return jsonify(success = True, users = output)
 
 
-@create_session
 @training.route("/all", methods = ["GET"])
+@create_session
 @auth_required
 def get_trainings():
     trainings = getTrainings()
     stats = getTrainingStats(trainings)
     return jsonify(success = True, trainings = trainings, stats = stats)
 
-@create_session
 @training.route("/<int:id>", methods = ["GET"])
+@create_session
 @auth_required
 def get_training(id):
     training = Training.query.filter(Training.id == id).filter(Training.user_id == g.user.id).first()
@@ -231,8 +231,8 @@ def get_training(id):
     else:
         raise NotAllowed()
 
-@create_session
 @training.route("/new", methods = ["GET"])
+@create_session
 @needs_values("GET", "random")
 @auth_required
 def get_training_questions():
@@ -240,8 +240,8 @@ def get_training_questions():
     questions = generateQuestionsForTraining(needsRandom)
     return jsonify(success = True, questions = questions)
 
-@create_session
 @training.route("/new", methods = ["POST"])
+@create_session
 @needs_values("JSON", "answers")
 @auth_required
 def answer_training():

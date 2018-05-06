@@ -11,8 +11,8 @@ from tp.base.utils import RoomType
 from tp.decorators import create_session
 import events
 
-@create_session
 @socketio.on("send_message")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "game_id", "content")
 @check_in_room(RoomType.game, "game_id")

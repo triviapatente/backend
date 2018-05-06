@@ -23,6 +23,7 @@ def tickle(game, opponent):
     push_infos = {"game": jsonifyDates(game.json), "opponent": jsonifyDates(g.user.json), "message": message}
     return ([opponent], None, push_infos)
 
+@event("category_chosen", action = EventActions.create)
 def category_chosen(room, category):
     data = {"category": jsonifyDates(category.json), "user": jsonifyDates(g.user.json)}
     return (room, data, None)

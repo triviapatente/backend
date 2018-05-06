@@ -5,7 +5,7 @@ from functools import wraps
 from tp import db, app
 from time import time
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate
 from tp.auth.models import Keychain, User
@@ -25,10 +25,12 @@ def auth_required(f):
 def create_session(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        db = SQLAlchemy(app, session_options={"expire_on_commit": False})
+        engine = db.engine
+        Session = sessionmaker(bind = engine, expire_on_commit = False)
+        db.session = scoped_session(Session)
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         output = f(*args, **kwargs)
-        db.session.close()
+        db.session.remove()
         return output
     return decorated_function
 def webpage(template, **defaultParams):

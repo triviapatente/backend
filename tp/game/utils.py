@@ -17,6 +17,7 @@ from tp.events.models import Socket, RoomParticipation
 from tp.rank.queries import getRank, getLastGameResultJoin
 from tp import TPJSONEncoder
 from flask.json import jsonify
+from datetime import datetime, timedelta
 #metodo transazionale per la creazione di una partita
 def createGame(opponents):
     new_game = Game(creator = g.user)
@@ -151,10 +152,13 @@ def generateQuestionsForTraining(random):
     return items
 
 def getMostPlayedUser(except_user):
-    a = aliased("Partecipation", name = "a")
-    b = aliased("Partecipation", name = "b")
-    query = User.query.with_entities(User.id, func.count(a.createdAt).label("count")).join(a, a.user_id == User.id).join(b, b.user_id == g.user.id, b.game_id == a.game_id).join(Game, game.id == b.game_id)
-    (user_id, count) = query.filter(Game.started == True, User.id != g.user.id, User.id != except_user).group_by(User.id).order_by(desc("count")).first();
+    a = aliased(Partecipation, name = "a")
+    b = aliased(Partecipation, name = "b")
+    query = User.query.with_entities(User.id, func.count(a.createdAt).label("count")).join(a, a.user_id == User.id).join(b, b.game_id == a.game_id).join(Game, Game.id == b.game_id).filter(b.user_id == g.user.id)
+    result = query.filter(Game.started == True, User.id != g.user.id, User.id != except_user.id).group_by(User.id).order_by(desc("count")).first();
+    user_id = None
+    if result is not None:
+        (user_id, count) = result
     if user_id is not None:
         return User.get(user_id)
     return None
@@ -264,12 +268,7 @@ def get_increments(game, user, opponent, left):
 def sendStimulationOnGameEnded(game, updatedUsers):
     opponent = getOpponentFrom(game.id)
     destination = getMostPlayedUser(except_user = opponent)
-    (userA, incrementA) = updatedUsers[0]
-    (userB, incrementB) = updatedUsers[1]
-    if userB == g.user.id:
-        increment = incrementB
-    elif userA == g.user.id:
-        increment = incrementA
+    increment = updatedUsers[g.user.id]
     limitDate = datetime.utcnow() - timedelta(days=1)
     if game.winner_id == g.user.id and destination is not None and destination.last_game_friend_ended_game_stimulation <= limitDate:
         events.stimulate_on_game_end(increment, destination)

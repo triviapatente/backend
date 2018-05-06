@@ -8,9 +8,9 @@ import re
 
 rank = Blueprint("rank", __name__, url_prefix = "/rank")
 
-@create_session
 #api per la richiesta della classifica italiana (globale)
 @rank.route("/global", methods = ["GET"])
+@create_session
 @auth_required
 def getItalianRank():
     #inizializzazione vars
@@ -39,8 +39,8 @@ def getItalianRank():
 def getFriendsRank():
     pass
 
-@create_session
 @rank.route("/search", methods = ["GET"])
+@create_session
 @auth_required
 @needs_values("GET", "query")
 def searchInRank():

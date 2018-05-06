@@ -191,7 +191,8 @@ def choose_category(data):
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
     emit("choose_category", {"success": True, "category": category})
-    events.category_chosen(g.roomName, category)
+    opponent = User.query.get(opponent_id)
+    events.category_chosen([opponent], category)
 
     opponent_turn = isOpponentTurn(game)
     if opponent_turn != previous_opponent_turn:

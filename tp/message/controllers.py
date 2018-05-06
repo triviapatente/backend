@@ -9,14 +9,14 @@ from tp.decorators import create_session
 
 message = Blueprint("message", __name__, url_prefix = "/message")
 
-@create_session
 @message.route("/", methods = ["GET"])
+@create_session
 def welcome():
     output = app.config["PUBLIC_INFOS"]
     return jsonify(output)
 
-@create_session
 @message.route("/list/<int:game_id>", methods = ["GET"])
+@create_session
 @auth_required
 @needs_values("GET", "timestamp")
 def list(game_id):

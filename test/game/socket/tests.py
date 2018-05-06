@@ -191,7 +191,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert response.json.get("success") == True
         assert response.json.get("waiting") == "category"
         assert response.json.get("max_age") == app.config["MATCH_MAX_AGE"]
-        
+
     def test_get_categories(self):
         round_id = init_round(self.socket, self.game_id, self.token).json.get("round").get("id")
 
@@ -268,6 +268,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#4: Event Test: controllo che all'avversario sia arrivato l'evento correttamente"
         response = self.opponent_socket.get_received() #consumo l'evento category_chosen, innescato dalla precedente chiamata a chosen_category
+        print "response", response.json
         assert response.json.get("action") == "create"
         assert response.json.get("user")
         assert response.json.get("category")

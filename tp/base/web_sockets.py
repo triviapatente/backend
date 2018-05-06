@@ -12,8 +12,8 @@ from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g, request
 import events
 
-@create_session
 @socketio.on("join_room")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "id", "type")
 @filter_input_room
@@ -30,16 +30,16 @@ def join_room_request(data):
     leave_rooms(exceptId = room_id)
     events.user_joined(g.roomName)
 
-@create_session
 @socketio.on("global_infos")
+@create_session
 @ws_auth_required
 def get_global_infos(data):
     output = get_connection_values(g.user)
     output["success"] = True
     emit("global_infos", output)
 
-@create_session
 @socketio.on("leave_room")
+@create_session
 @ws_auth_required
 @needs_values("SOCKET", "type")
 @filter_input_room
@@ -65,8 +65,8 @@ def leave_rooms(exceptId = None):
         print "User %s left room %s" % (g.user.username, name)
         events.user_left(name)
 
-@create_session
 @socketio.on("disconnect")
+@create_session
 def disconnect():
     print "About to be disconnected"
     g.user = getUserFromRequest(socket = True)
