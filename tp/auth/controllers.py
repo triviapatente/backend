@@ -217,12 +217,18 @@ def changeName():
 @auth_required
 @trim_values("POST", False, "surname")
 def changeSurname():
+    print "A"
     surname = g.post.get("surname")
+    print "B"
     if len(surname) == 0:
         surname = None;
+    print "C"
     g.user.surname = surname
+    print "D"
     db.session.add(g.user)
+    print "E"
     db.session.commit()
+    print "F"
     print "User %d change surname to: %s" % (g.user.id, g.user.surname)
     return jsonify(success = True, user = g.user)
 
