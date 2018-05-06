@@ -14,6 +14,7 @@ from tp.base.utils import RoomType
 from tp.exceptions import NotAllowed, ChangeFailed
 from sqlalchemy import func, and_, asc
 import events
+from tp.cron import events as cronEvents
 from events import RecentGameEvents
 
 @socketio.on("init_round")
@@ -49,7 +50,7 @@ def init_round(data):
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
             print "User's score updated."
-            sendStimulationOnGameEnded(game, updatedUsers, events)
+            sendStimulationOnGameEnded(game, updatedUsers, cronEvents)
             RecentGameEvents.change(opponent)
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
