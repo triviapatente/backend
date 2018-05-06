@@ -203,7 +203,7 @@ def forgotPasswordWebPageResult():
 @trim_values("POST", False, "name")
 def changeName():
     name = g.post.get("name")
-    if len(name) == 0:
+    if name is not None and len(name) == 0:
         name = None;
     g.user.name = name
     db.session.add(g.user)
@@ -220,7 +220,7 @@ def changeSurname():
     print "A"
     surname = g.post.get("surname")
     print "B"
-    if len(surname) == 0:
+    if surname is not None and len(surname) == 0:
         surname = None;
     print "C"
     g.user.surname = surname
