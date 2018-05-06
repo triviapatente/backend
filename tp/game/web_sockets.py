@@ -194,7 +194,8 @@ def choose_category(data):
 
     opponent_turn = isOpponentTurn(game)
     if opponent_turn != previous_opponent_turn:
-        print "%d", g.user.id
+        g.user = User.query.get(g.user.id)
+        opponent = User.query.get(opponent.id)
         events.your_turn(game, opponent)
         RecentGameEvents.change(opponent)
 
