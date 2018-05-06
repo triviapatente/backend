@@ -270,7 +270,7 @@ def sendStimulationOnGameEnded(game, updatedUsers):
     destination = getMostPlayedUser(except_user = opponent)
     increment = updatedUsers[g.user.id]
     limitDate = datetime.utcnow() - timedelta(days=1)
-    if game.winner_id == g.user.id and destination is not None and destination.last_game_friend_ended_game_stimulation <= limitDate:
+    if game.winner_id == g.user.id and destination is not None and (destination.last_game_friend_ended_game_stimulation is None or destination.last_game_friend_ended_game_stimulation <= limitDate):
         events.stimulate_on_game_end(increment, destination)
         destination.last_game_friend_ended_game_stimulation = datetime.utcnow()
         db.session.add(destination)
