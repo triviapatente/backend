@@ -217,7 +217,6 @@ def changeName():
 @auth_required
 @trim_values("POST", False, "surname")
 def changeSurname():
-    print "changeSurname"
     surname = request.form.get("surname").strip()
     if len(surname) == 0:
         surname = None;
