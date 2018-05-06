@@ -45,12 +45,12 @@ def init_round(data):
             if winner is not None:
                 game.winner_id = winner.id
             db.session.add(game)
+            db.session.commit()
             print "Game %d ended. Updating scores.." % game.id
             updatedUsers = updateScore(game)
             print "User's score updated."
             sendStimulationOnGameEnded(game, updatedUsers)
             RecentGameEvents.change(opponent)
-            db.session.commit()
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         winner = User.query.filter(User.id == game.winner_id).first()
@@ -185,6 +185,7 @@ def choose_category(data):
     for (candidate, totalAnswers) in proposed:
         q = ProposedQuestion(round_id = round.id, quiz_id = candidate.id)
         db.session.add(q)
+    db.session.commit()
 
     #rispondo anche con info sulla category scelta
     print "User %s has choosen category." % g.user.username, category
@@ -195,7 +196,6 @@ def choose_category(data):
     if opponent_turn != previous_opponent_turn:
         events.your_turn(game, opponent)
         RecentGameEvents.change(opponent)
-    db.session.commit()
 
 @create_session
 @socketio.on("get_questions")
@@ -247,6 +247,7 @@ def answer(data):
         raise NotAllowed()
     question = Question(round_id = round.id, user_id = g.user.id, quiz_id = quiz.id, answer = answer)
     db.session.add(question)
+    db.session.commit()
 
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     number_of_answers = Question.query.filter(Question.round_id == round.id).filter(Question.user_id == g.user.id).count()
@@ -262,10 +263,10 @@ def answer(data):
         if number_of_round_answers == NUMBER_OF_QUESTIONS_PER_ROUND * 2:
             game.started = True
             db.session.add(game)
+            db.session.commit()
         events.round_ended(g.roomName, round)
         if opponent_turn is not None:
             RecentGameEvents.change(opponent)
-    db.session.commit()
 
 @create_session
 @socketio.on("is_user_online")
