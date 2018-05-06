@@ -265,7 +265,7 @@ def get_increments(game, user, opponent, left):
         output[opponent.id] = score_increment(opponent, opponentScore, userScore)
         return output
 
-def sendStimulationOnGameEnded(game, updatedUsers):
+def sendStimulationOnGameEnded(game, updatedUsers, events):
     opponent = getOpponentFrom(game.id)
     destination = getMostPlayedUser(except_user = opponent)
     increment = updatedUsers[g.user.id]
