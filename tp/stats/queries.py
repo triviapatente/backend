@@ -61,7 +61,7 @@ def getProgressValuesIn(category_id, start, end):
 
     #SELECT max(b."createdAt") AS max_1 FROM question AS b WHERE  a.quiz_id = b.quiz_id
     max_created = db.session.query(b).with_entities(func.max(b.createdAt)).filter(a.quiz_id == b.quiz_id)
-    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz).filter(c.user_id == g.user.id)
+    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz)
     if start:
         #AND b."createdAt" > start
         max_created = max_created.filter(b.createdAt > start)
@@ -75,13 +75,13 @@ def getProgressValuesIn(category_id, start, end):
         #WHERE quiz.category_id = category.id
         total_questions = total_questions.filter(Quiz.category_id == category_id)
     #count(createdAt)
-    correct_questions = func.count(a.createdAt)
+    correct_questions = func.count(distinct(a.quiz_id))
     #SELECT  total_questions as total, correct_questions AS correct
     #FROM question AS a
     #JOIN quiz ON quiz.id = a.quiz_id
     #JOIN category ON category.id = quiz.category_id
     #WHERE a.user_id = g.user_id AND a."createdAt" = max_created
-    query = db.session.query(a).join(Quiz).with_entities(correct_questions.label("correct"), total_questions.label("total")).filter(a.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer)
+    query = db.session.query(a).join(Quiz).with_entities(correct_questions.label("correct"), total_questions.label("total")).filter(a.user_id == g.user.id).filter(c.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer)
     if category_id:
         #AND quiz.category_id = category.id
         query = query.join(Category).filter(Quiz.category_id == category_id)
