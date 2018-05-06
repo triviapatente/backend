@@ -27,7 +27,7 @@ def create_session(f):
         engine = db.engine
         if db.session is not None:
             db.session.close()
-        db.session = sessionmaker(bind = engine, expire_on_commit = False, autocommit = True)
+        db.session = sessionmaker(bind = engine, expire_on_commit = False, autocommit = True)()
         #f è la rappresentazione della funzione a cui hai messo sopra @auth_required. ora che hai finito tutto, può essere eseguita
         output = f(*args, **kwargs)
         db.session.close()
