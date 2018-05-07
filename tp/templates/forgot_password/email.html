@@ -1,7 +1,7 @@
 {% extends "forgot_password/layout.html" %}
 {% block body %}
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
-<link rel="stylesheet" href="https://triviapatente.it:8000{{url_for('static', filename='assets/bootstrap/css/bootstrap.light.css')}}">
+<link rel="stylesheet" href="https://triviapatente.it:8080{{url_for('static', filename='assets/bootstrap/css/bootstrap.light.css')}}">
 <style>
     .mail-content {
         padding-left: 10% !important;
@@ -17,7 +17,7 @@
 </style>
 <div class="lead text-white content mail-content">Il nostro sistema ha ricevuto una richiesta di reset della password. Se sei stato tu procedi premendo il bottone sottostante. Se non hai inviato la richiesta in questione, non devi fare altro che ignorare questa mail, e la tua password rimarrà invariata.</div>
 <div class="button-area">
-    <a class="btn btn-primary submit" href="https://triviapatente.it:8000{{url_for('auth.forgotPasswordWebPage', token = token)}}" role="button">Reimposta password</a>
+    <a class="btn btn-primary submit" href="https://triviapatente.it:8080{{url_for('auth.forgotPasswordWebPage', token = token)}}" role="button">Reimposta password</a>
 </div>
 <center><span class="lead small text-white mail-disclaimer">Questa email è stata generata automaticamente dai nostri sistemi.</span></center>
 {% endblock %}
