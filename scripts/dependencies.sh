@@ -1,5 +1,6 @@
-pip install eventlet
+pip install gevent
 pip install scrypt
+pip install flask-sockets
 pip install flask-sqlalchemy
 pip install Enum34
 pip install pytz
