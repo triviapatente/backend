@@ -2,9 +2,9 @@
 
 if __name__ == '__main__':
 
-    import eventlet
 
-    eventlet.monkey_patch()
+    from gevent import monkey
+    monkey.patch_all()
     import sys
 
     reload(sys)
