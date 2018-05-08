@@ -1,4 +1,4 @@
-pip install gevent
+pip install eventlet
 pip install scrypt
 pip install flask-sockets
 pip install flask-sqlalchemy

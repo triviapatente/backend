@@ -2,8 +2,8 @@
 #!/usr/bin/python
 import sys
 
-from gevent import monkey
-monkey.patch_all()
+import eventlet
+eventlet.monkey_patch()
 reload(sys)
 sys.setdefaultencoding('utf8')
 

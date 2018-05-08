@@ -3,8 +3,8 @@
 if __name__ == '__main__':
 
 
-    from gevent import monkey
-    monkey.patch_all()
+    import eventlet
+    eventlet.monkey_patch()
     import sys
 
     reload(sys)
