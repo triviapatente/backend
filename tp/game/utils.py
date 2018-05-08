@@ -6,7 +6,7 @@ from tp.auth.models import User
 from sqlalchemy import or_, and_, func, select
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import column
-from sqlalchemy.sql.expression import label, exists
+from sqlalchemy.sql.expression import label, exists, case
 from sqlalchemy import func, desc, asc
 from random import randint
 from flask import g
@@ -485,14 +485,9 @@ def getNumberOfTotalAnswersForQuiz(quiz, game, opponent):
 #obtain recent games
 #TODO: add time range
 def getRecentGames(user):
-    a = aliased(Round, name = "a")
-    b = aliased(Round, name = "b")
-    c = aliased(Round, name = "c")
-    d = aliased(Round, name = "d")
     #(SELECT count(question.round_id) AS count_1
     #FROM question, round AS a
     #WHERE question.round_id = a.id AND question.user_id = user.id)
-    questions = Question.query.with_entities(func.count(Question.round_id)).filter(Question.round_id == a.id).filter(Question.user_id == user.id).as_scalar()
     #(SELECT count(a.id) = 0 AS count_1
     #FROM round AS a, game
     #WHERE game.id = a.game_id AND a.cat_id IS NOT NULL AND (SELECT count(question.round_id) AS count_2
@@ -500,31 +495,30 @@ def getRecentGames(user):
     #WHERE question.round_id = a.id AND question.user_id = user.id) != 0)
     question_number = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     overall_question_number_per_user = question_number * app.config["NUMBER_OF_ROUNDS"]
-    my_turn = db.session.query(a).with_entities(func.count(a.id) != 0).filter(a.game_id == Game.id).filter(or_(Game.ended == True, and_(or_(a.cat_id != None, a.dealer_id == user.id), questions < question_number))).label("my_turn")
-    remainingAnswersCount = db.session.query(func.count(Question.quiz_id)).join(b, b.id == Question.round_id).filter(b.game_id == Game.id, Question.user_id == g.user.id).as_scalar()
-    myScore = db.session.query(func.count(Question.quiz_id)).join(c, c.id == Question.round_id).join(Quiz, Quiz.id == Question.quiz_id).filter(c.game_id == Game.id, Question.user_id == g.user.id, Question.answer == Quiz.answer).as_scalar()
-    opponentScore = db.session.query(func.count(Question.quiz_id)).join(d, d.id == Question.round_id).join(Quiz, Quiz.id == Question.quiz_id).filter(d.game_id == Game.id, Question.user_id != g.user.id, Question.answer == Quiz.answer).as_scalar()
+    questions = Question.query.with_entities(func.count(Question.quiz_id)).filter(Question.user_id == user.id, Question.round_id == Round.id).correlate(Round).label("questions")
+    my_turn = func.sum(case([(and_(Game.ended == False, Round.id != None, or_(Round.cat_id != None, Round.dealer_id == user.id), questions < question_number), 1)], else_ = 0)).label("my_turn")
+    myAnswersCount = func.sum(case([(Question.user_id == user.id, 1)], else_ = 0)).label("myAnswersCount")
+    myScore = func.sum(case([(and_(Question.user_id == user.id, Question.answer == Quiz.answer), 1)], else_ = 0)).label("myScore")
+    opponentScore = func.sum(case([(and_(Question.user_id != user.id, Question.answer == Quiz.answer), 1)], else_ = 0)).label("opponentScore")
     #SELECT game.*, my_turn AS my_turn
     #FROM game JOIN partecipation ON game.id = partecipation.game_id
     #WHERE partecipation.user_id = user.id ORDER BY my_turn DESC, ended ASC, createdAt ASC LIMIT 10
     RECENT_GAMES_PER_PAGE = app.config["RECENT_GAMES_PER_PAGE"]
-    active_recent_games = db.session.query(Game).join(Partecipation).filter(Game.ended == False).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn, remainingAnswersCount, myScore, opponentScore).order_by(desc("my_turn"), Game.updatedAt.desc()).all()
-    print "Active Games Length for", user.username, ": ", len(active_recent_games)
+    active_recent_games = Game.query.join(Partecipation).outerjoin(Round).outerjoin(Question).outerjoin(Quiz).filter(Game.ended == False).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn, myAnswersCount, myScore, opponentScore).group_by(Game.id).order_by(desc("my_turn"), Game.updatedAt.desc()).all()
     recent_games = []
     recent_games += active_recent_games
     if len(active_recent_games) < RECENT_GAMES_PER_PAGE:
         limit = RECENT_GAMES_PER_PAGE - len(active_recent_games)
-        ended_recent_games = db.session.query(Game).join(Partecipation).filter(Game.ended == True).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn, remainingAnswersCount, myScore, opponentScore).order_by(Game.updatedAt.desc()).limit(limit).all()
+        ended_recent_games = Game.query.join(Partecipation).outerjoin(Round).outerjoin(Question).outerjoin(Quiz).filter(Game.ended == True).filter(Partecipation.user_id == user.id).with_entities(Game, my_turn, myAnswersCount, myScore, opponentScore).group_by(Game.id).order_by(Game.updatedAt.desc()).limit(limit).all()
         recent_games += ended_recent_games
     output = []
     for game, my_turn, remaining_answers_count, my_score, opponent_score in recent_games:
-        game.my_turn = my_turn
+        game.my_turn = my_turn != 0
         game.remaining_answers_count = overall_question_number_per_user - remaining_answers_count
         game.my_score = my_score
         game.opponent_score = opponent_score
         game.getOpponentForExport()
         output.append(game)
-    print "Recent Games Length for", user.username, ": ", len(output)
     return output
 
 #ottiene il numero del round corrente se non è stato ancora completato, altrimenti il successivo
