@@ -23,6 +23,7 @@ def init(testing = False, ci = False):
     global socketio
     global db
     global mail
+    import flask_monitoringdashboard as dashboard
 
     # Import flask and template operators
     from flask import Flask, render_template, jsonify, json
@@ -40,7 +41,7 @@ def init(testing = False, ci = False):
     # Define the WSGI application object
     app = Flask(__name__)
 
-
+    dashboard.bind(app)
     envdump = EnvironmentDump(app, "/environment")
 
     #aggiungo il json encoder custom
