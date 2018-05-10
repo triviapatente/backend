@@ -32,12 +32,16 @@ def init(testing = False, ci = False):
 
     from flask.ext.mail import Mail
 
+    from healthcheck import EnvironmentDump
 
     # Import SocketIO
     from flask_socketio import SocketIO, emit
 
     # Define the WSGI application object
     app = Flask(__name__)
+
+
+    envdump = EnvironmentDump(app, "/environment")
 
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder

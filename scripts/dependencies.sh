@@ -16,3 +16,4 @@ pip install premailer
 pip install lxml==3.4.4
 pip install Flask-APScheduler
 pip install requests[security]
+pip install healthcheck
