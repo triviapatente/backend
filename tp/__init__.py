@@ -33,7 +33,6 @@ def init(testing = False, ci = False):
 
     from flask.ext.mail import Mail
 
-    from healthcheck import EnvironmentDump
 
     # Import SocketIO
     from flask_socketio import SocketIO, emit
@@ -41,8 +40,9 @@ def init(testing = False, ci = False):
     # Define the WSGI application object
     app = Flask(__name__)
 
+    dashboard.config.init_from(file="../dashboard.cfg")
+
     dashboard.bind(app)
-    envdump = EnvironmentDump(app, "/environment")
 
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder

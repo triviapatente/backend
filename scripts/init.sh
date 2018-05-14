@@ -1,5 +1,6 @@
 apt-get -qqy update
 apt-get -qqy install postgresql python-psycopg2
+apt-get -qqy install postgresql-contrib-9.5
 apt-get -qqy install python-flask python-sqlalchemy
 apt-get -qqy install python-pip
 apt-get install -y libxml2-dev libxslt1-dev zlib1g-dev
