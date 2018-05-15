@@ -29,9 +29,9 @@ class Base(db.Model):
         return cls.__name__.lower()
 
     #createdAt, parametro che indica la data di creazione, comune a tutti
-    createdAt = Column(DateTime, default = db.func.current_timestamp())
+    createdAt = Column(DateTime(timezone=True), default = db.func.current_timestamp())
     #updatedAt, parametro che indica la data di ultima modifica, comune a tutti
-    updatedAt = Column(DateTime, default = db.func.current_timestamp(),
+    updatedAt = Column(DateTime(timezone=True), default = db.func.current_timestamp(),
                                  onupdate = db.func.current_timestamp())
 
     #metodo che serializza l'oggetto in json

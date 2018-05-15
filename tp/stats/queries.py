@@ -6,8 +6,9 @@ from sqlalchemy import func, distinct, and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import case
 from tp import db
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from utils import *
+import pytz
 
 def getWrongLastQuestions(category_id):
     if not category_id:
@@ -28,43 +29,35 @@ def getWrongLastQuestions(category_id):
 # parametro: ##category_id: id della categoria, o None per riferirsi alla categoria complessiva
 def getCategoryInfo(category_id):
     n = app.config["NUMBER_OF_CHART_DIVISORS"]
-    end = datetime.now()
+    tz = pytz.timezone('Europe/Rome')
+    now = datetime.now(tz = tz)
+    end = datetime(now.year, now.month, now.day)
     start = end + timedelta(days = -n)
-    start = start.replace(hour=0, minute=0, second=0)
     output = {"success": True}
-    output["progress"] = getProgressChart(category_id, n, start, end)
+    output["progress"] = getProgressChart(category_id, n, start, end, tz)
     if category_id:
         output["wrong_answers"] = getWrongLastQuestions(category_id)
     return output
 
-def getProgressChart(category_id, n, start, end = datetime.now()):
-    time_slice = (timestamp(end) - timestamp(start)) / n
+def getProgressChart(category_id, n, start, end, tz = pytz.timezone('Europe/Rome')):
+    time_slice = (timestamp(end, tz) - timestamp(start, tz)) / n
     delta = timedelta(seconds = time_slice)
     output = {}
-    cursor = start + delta
-    while cursor <= end:
-        (correct, total) = getProgressValuesIn(category_id, start, cursor)
+    cursor = end
+    while cursor >= start:
+        (correct, total) = getProgressValuesIn(category_id, cursor)
         output[cursor.isoformat()] = {"correct_answers": correct, "total_answers": total}
-        start += delta
-        cursor += delta
+        cursor -= delta
 
     return output
 
-def getPercentageIn(category_id, start, end):
-    (correct, total) = getProgressValuesIn(category_id, start, end)
-    if total == 0:
-        return 0
-    return correct * 100 / total
-
-def getProgressValuesIn(category_id, start, end):
+def getProgressValuesIn(category_id, day):
     a = aliased(Question, name = "a")
     b = aliased(Question, name = "b")
 
     max_created = db.session.query(b).with_entities(func.max(b.createdAt)).filter(a.quiz_id == b.quiz_id, a.user_id == b.user_id)
-    if start:
-        max_created = max_created.filter(b.createdAt > start)
-    if end:
-        max_created = max_created.filter(b.createdAt <= end)
+    if day:
+        max_created = max_created.filter(func.date_trunc('day', func.timezone("CEST", b.createdAt)) == func.date_trunc('day', day))
     total_questions = func.count(Quiz.id).label("total")
     correct_questions = func.sum(case([(a.answer == Quiz.answer, 1)], else_ = 0)).label("correct")
     query = Quiz.query.with_entities(total_questions, correct_questions).join(a).filter(a.user_id == g.user.id, a.createdAt == max_created)
@@ -78,7 +71,7 @@ def getProgressValuesIn(category_id, start, end):
 def getGeneralInfos():
     #nessuna category_id si traduce in complessivo
     #nessun range si traduce in totale
-    (correct, total) = getProgressValuesIn(None, None, None)
+    (correct, total) = getProgressValuesIn(None, None)
     return {"id": None, "hint": "Complessivo", "total_answers": total, "correct_answers": correct}
 
 def getCategoryPercentages(user):
