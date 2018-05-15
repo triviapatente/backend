@@ -496,7 +496,7 @@ def getRecentGames(user):
     question_number = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     overall_question_number_per_user = question_number * app.config["NUMBER_OF_ROUNDS"]
     questions = Question.query.with_entities(func.count(Question.quiz_id)).filter(Question.user_id == user.id, Question.round_id == Round.id).correlate(Round).label("questions")
-    my_turn = func.sum(case([(and_(Game.ended == False, Round.id != None, or_(Round.cat_id != None, Round.dealer_id == user.id), questions < question_number), 1)], else_ = 0)).label("my_turn")
+    my_turn = (func.sum(case([(and_(Game.ended == False, Round.id != None, or_(Round.cat_id != None, Round.dealer_id == user.id), questions < question_number), 1)], else_ = 0)) != 0).label("my_turn")
     myAnswersCount = func.sum(case([(Question.user_id == user.id, 1)], else_ = 0)).label("myAnswersCount")
     myScore = func.sum(case([(and_(Question.user_id == user.id, Question.answer == Quiz.answer), 1)], else_ = 0)).label("myScore")
     opponentScore = func.sum(case([(and_(Question.user_id != user.id, Question.answer == Quiz.answer), 1)], else_ = 0)).label("opponentScore")
