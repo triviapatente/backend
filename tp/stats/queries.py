@@ -30,6 +30,7 @@ def getCategoryInfo(category_id):
     n = app.config["NUMBER_OF_CHART_DIVISORS"]
     end = datetime.now()
     start = end + timedelta(days = -n)
+    start = start.replace(hour=0, minute=0, second=0)
     output = {"success": True}
     output["progress"] = getProgressChart(category_id, n, start, end)
     if category_id:
