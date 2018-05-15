@@ -84,7 +84,7 @@ def init(testing = False, ci = False):
     import traceback, sys
 
     @app.teardown_request
-    def onRequestDown():
+    def onRequestDown(exc):
         session.clear()
         db.session.remove()
     #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
