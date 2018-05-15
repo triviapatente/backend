@@ -16,6 +16,7 @@ from sqlalchemy import func, and_, asc
 import events
 from tp.cron import events as cronEvents
 from events import RecentGameEvents
+import pytz
 
 @socketio.on("init_round")
 @create_session
@@ -89,6 +90,9 @@ def init_round(data):
         #lo salvo in db
         db.session.add(round)
         db.session.commit()
+    game.updatedAt = datetime.now(tz = pytz.utc)
+    db.session.add(game)
+    db.session.commit()
     #risposta standard
     output = {"round": round.json, "max_age": MAX_AGE, "success": True, "opponent_online": isOpponentOnline(game)}
     #ottengo il dealer per usarlo successivamente
@@ -180,6 +184,9 @@ def choose_category(data):
     #aggiorno la categoria e salvo in db
     round.cat_id = category.id
     db.session.add(round)
+    game.updatedAt = datetime.now(tz = pytz.utc)
+    db.session.add(game)
+    db.session.commit()
     # genero le domande random, pescando da quelle della categoria richiesta
     proposed = Quiz.query.with_entities(Quiz, getNumberOfTotalAnswersForQuiz(Quiz, game, opponent).label("total_answers")).filter(Quiz.category_id == category.id).order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]).all()
     print proposed
@@ -252,6 +259,8 @@ def answer(data):
         raise NotAllowed()
     question = Question(round_id = round.id, user_id = g.user.id, quiz_id = quiz.id, answer = answer)
     db.session.add(question)
+    game.updatedAt = datetime.now(tz = pytz.utc)
+    db.session.add(game)
     db.session.commit()
 
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
