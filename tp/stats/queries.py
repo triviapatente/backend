@@ -15,7 +15,7 @@ def getWrongLastQuestions(category_id):
         return None
     a = aliased(Question, name = "a")
     #SELECT max(a."createdAt") AS max_1 FROM question AS a WHERE question.quiz_id = a.quiz_id
-    max_created = db.session.query(a).with_entities(func.max(a.createdAt)).filter(a.quiz_id == Question.quiz_id)
+    max_created = db.session.query(a).with_entities(func.max(a.createdAt)).filter(a.quiz_id == Question.quiz_id, a.user_id == Question.user_id)
     #SELECT * FROM question
     #JOIN quiz ON quiz.id = question.quiz_id
     #WHERE question.user_id = g.user_id
@@ -77,31 +77,16 @@ def getGeneralInfos():
 
 def getCategoryPercentages(user):
     a = aliased(Question, name = "a")
-    b = aliased(Question, name = "b")
-    c = aliased(Question, name = "c")
-    d = aliased(Quiz, name = "d")
-    #SELECT max(v."createdAt") AS max_1 FROM question, question AS b WHERE b.quiz_id = a.quiz_id
-    max_created = db.session.query(b).with_entities(func.max(b.createdAt)).filter(b.quiz_id == a.quiz_id)
-    #SELECT count(DISTINCT c.quiz_id) FROM question AS c JOIN quiz ON quiz.id = c.quiz_id WHERE quiz.category_id = category.id
-    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz).filter(Quiz.category_id == Category.id).label("total_answers")
 
-    total_quizzes = db.session.query(d).with_entities(func.count(d.createdAt)).filter(Category.id == d.category_id).label("total_quizzes")
-    correct_questions = func.count(a.createdAt).label("correct_answers")
-    #SELECT category.id AS category_id, category.hint AS category_hint, correct_questions AS "correct_answers", total_questions  AS "total_answers"
-    #FROM quiz
-    #LEFT OUTER JOIN question AS a ON quiz.id = a.quiz_id AND quiz.answer = a.answer AND a."createdAt" = max_created AND a.user_id = 2
-    #JOIN category ON category.id = quiz.category_id
-    #GROUP BY category.id, category.hint
-    #ORDER BY category.hint
-    query = db.session.query(Quiz).outerjoin(a, and_(a.quiz_id == Quiz.id, a.answer == Quiz.answer, a.createdAt == max_created, a.user_id == user.id)).join(Category, Category.id == Quiz.category_id).with_entities(Category.id, Category.hint, correct_questions, total_questions, total_quizzes).order_by(Category.hint).group_by(Category.id, Category.hint)
-    print query
-    output = query.all()
+    max_created = db.session.query(a).with_entities(func.max(a.createdAt)).filter(a.quiz_id == Question.quiz_id, a.user_id == Question.user_id)
+
+    total_answers = func.count(Question.quiz_id).label("total_answers")
+    correct_answers = func.sum(case([(Question.answer == Quiz.answer, 1)], else_ = 0)).label("correct_answers")
+
+    query = Category.query.with_entities(Category.id, Category.hint, correct_answers, total_answers).join(Quiz).join(Question).filter(Question.user_id == g.user.id, Question.createdAt == max_created).order_by(Category.hint).group_by(Category.id, Category.hint).all()
     general = getGeneralInfos()
     categoryPercentages = []
-    general_total_quizzes = 0
-    for (id, hint, correct_answers, total_answers, total_quizzes) in output:
-        general_total_quizzes += total_quizzes
-        categoryPercentages.append({'id': id, 'hint': hint, 'correct_answers': correct_answers, 'total_answers': total_answers, "total_quizzes": total_quizzes})
-    general["total_quizzes"] = general_total_quizzes
+    for (id, hint, correct_answers, total_answers) in output:
+        categoryPercentages.append({'id': id, 'hint': hint, 'correct_answers': correct_answers, 'total_answers': total_answers})
     categoryPercentages.insert(0, general)
     return categoryPercentages
