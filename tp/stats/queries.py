@@ -83,7 +83,7 @@ def getCategoryPercentages(user):
     total_answers = func.count(Question.quiz_id).label("total_answers")
     correct_answers = func.sum(case([(Question.answer == Quiz.answer, 1)], else_ = 0)).label("correct_answers")
 
-    query = Category.query.with_entities(Category.id, Category.hint, correct_answers, total_answers).join(Quiz).join(Question).filter(Question.user_id == g.user.id, Question.createdAt == max_created).order_by(Category.hint).group_by(Category.id, Category.hint).all()
+    output = Category.query.with_entities(Category.id, Category.hint, correct_answers, total_answers).join(Quiz).join(Question).filter(Question.user_id == g.user.id, Question.createdAt == max_created).order_by(Category.hint).group_by(Category.id, Category.hint).all()
     general = getGeneralInfos()
     categoryPercentages = []
     for (id, hint, correct_answers, total_answers) in output:
