@@ -51,6 +51,8 @@ def obtainInstagramPhotos():
         url = item["images"]["standard_resolution"]["url"]
         link = item["link"]
         images.append({"url": url, "type": type, "link": link})
+    import random
+    random.shuffle(images)
     return jsonify(success = True, images = images)
 
 @base.route("/models", methods = ["GET"])
