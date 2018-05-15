@@ -31,7 +31,7 @@ def getCategoryInfo(category_id):
     n = app.config["NUMBER_OF_CHART_DIVISORS"]
     tz = pytz.timezone('Europe/Rome')
     now = datetime.now(tz = tz)
-    end = datetime(now.year, now.month, now.day, 0, 0, 0)
+    end = datetime(now.year, now.month, now.day, 0, 0, 0, 1)
     start = end + timedelta(days = -n)
     output = {"success": True}
     output["progress"] = getProgressChart(category_id, n, start, end, tz)
