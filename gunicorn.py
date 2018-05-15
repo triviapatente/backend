@@ -1,6 +1,6 @@
 import multiprocessing
 
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = multiprocessing.cpu_count() * 2
 worker_class = "eventlet"
 preload_app = True
 pidfile = "server_pid.log"

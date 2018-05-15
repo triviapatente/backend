@@ -30,7 +30,7 @@ MATCH_ALERT_AGE = MATCH_MAX_AGE - DAY #2 days
 # using 2 per available processor cores - to handle
 # incoming requests using one and performing background
 # operations using the other.
-THREADS_PER_PAGE = 2
+THREADS_PER_PAGE = 1
 # Enable protection agains *Cross-site Request Forgery (CSRF)*
 CSRF_ENABLED     = True
 
