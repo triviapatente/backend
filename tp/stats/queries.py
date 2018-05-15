@@ -46,7 +46,8 @@ def getProgressChart(category_id, n, start, end, tz = pytz.timezone('Europe/Rome
     cursor = end
     while cursor >= start:
         (correct, total) = getProgressValuesIn(category_id, cursor)
-        output[cursor.isoformat()] = {"correct_answers": correct, "total_answers": total}
+        date = cursor.replace(tzinfo = tz).isoformat()
+        output[date] = {"correct_answers": correct, "total_answers": total}
         cursor -= delta
 
     return output
