@@ -31,7 +31,7 @@ def getCategoryInfo(category_id):
     n = app.config["NUMBER_OF_CHART_DIVISORS"]
     tz = pytz.timezone('Europe/Rome')
     now = datetime.now(tz = tz)
-    end = datetime(now.year, now.month, now.day)
+    end = datetime(now.year, now.month, now.day, 0, 0, 0)
     start = end + timedelta(days = -n)
     output = {"success": True}
     output["progress"] = getProgressChart(category_id, n, start, end, tz)
@@ -46,7 +46,7 @@ def getProgressChart(category_id, n, start, end, tz = pytz.timezone('Europe/Rome
     cursor = end
     while cursor >= start:
         (correct, total) = getProgressValuesIn(category_id, cursor)
-        date = cursor.replace(tzinfo = tz).isoformat()
+        date = cursor.isoformat()
         output[date] = {"correct_answers": correct, "total_answers": total}
         cursor -= delta
 
