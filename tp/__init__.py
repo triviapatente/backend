@@ -23,8 +23,6 @@ def init(testing = False, ci = False):
     global socketio
     global db
     global mail
-    import flask_monitoringdashboard as dashboard
-
     # Import flask and template operators
     from flask import Flask, render_template, jsonify, json
 
@@ -39,10 +37,6 @@ def init(testing = False, ci = False):
 
     # Define the WSGI application object
     app = Flask(__name__)
-
-    dashboard.config.init_from(file="../dashboard.cfg")
-
-    dashboard.bind(app)
 
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder
@@ -86,8 +80,13 @@ def init(testing = False, ci = False):
     log.addHandler(h)
 
     from tp.exceptions import TPException
-    from flask import request
+    from flask import request, session
     import traceback, sys
+
+    @app.teardown_request
+    def onRequestDown():
+        session.clear()
+        db.session.remove()
     #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
     @app.errorhandler(TPException)
     def handleTPException(error):
