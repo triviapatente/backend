@@ -4,6 +4,7 @@ from flask import g
 from tp.game.models import *
 from sqlalchemy import func, distinct, and_
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import case
 from tp import db
 from datetime import datetime, timedelta
 from utils import *
@@ -57,34 +58,18 @@ def getPercentageIn(category_id, start, end):
 def getProgressValuesIn(category_id, start, end):
     a = aliased(Question, name = "a")
     b = aliased(Question, name = "b")
-    c = aliased(Question, name = "c")
 
-    #SELECT max(b."createdAt") AS max_1 FROM question AS b WHERE  a.quiz_id = b.quiz_id
-    max_created = db.session.query(b).with_entities(func.max(b.createdAt)).filter(a.quiz_id == b.quiz_id)
-    total_questions = db.session.query(c).with_entities(func.count(distinct(c.quiz_id))).join(Quiz)
+    max_created = db.session.query(b).with_entities(func.max(b.createdAt)).filter(a.quiz_id == b.quiz_id, a.user_id == b.user_id)
     if start:
-        #AND b."createdAt" > start
         max_created = max_created.filter(b.createdAt > start)
-        total_questions = total_questions.filter(c.createdAt > start)
     if end:
-        #AND b."createdAt" <= end
         max_created = max_created.filter(b.createdAt <= end)
-        total_questions = total_questions.filter(c.createdAt <= end)
-    #SELECT count(DISTINCT c.quiz_id) FROM question AS c JOIN quiz ON quiz.id = c.quiz_id
-    if category_id:
-        #WHERE quiz.category_id = category.id
-        total_questions = total_questions.filter(Quiz.category_id == category_id)
-    #count(createdAt)
-    correct_questions = func.count(distinct(a.quiz_id))
-    #SELECT  total_questions as total, correct_questions AS correct
-    #FROM question AS a
-    #JOIN quiz ON quiz.id = a.quiz_id
-    #JOIN category ON category.id = quiz.category_id
-    #WHERE a.user_id = g.user_id AND a."createdAt" = max_created
-    query = db.session.query(a).join(Quiz).with_entities(correct_questions.label("correct"), total_questions.label("total")).filter(a.user_id == g.user.id).filter(c.user_id == g.user.id).filter(a.createdAt == max_created).filter(a.answer == Quiz.answer)
+    total_questions = func.count(Quiz.id).label("total")
+    correct_questions = func.sum(case([(a.answer == Quiz.answer, 1)], else_ = 0)).label("correct")
+    query = Quiz.query.with_entities(total_questions, correct_questions).join(a).filter(a.user_id == g.user.id, a.createdAt == max_created)
     if category_id:
         #AND quiz.category_id = category.id
-        query = query.join(Category).filter(Quiz.category_id == category_id)
+        query = query.filter(Quiz.category_id == category_id)
     output = query.first()
     return (output.correct, output.total)
 
@@ -114,6 +99,7 @@ def getCategoryPercentages(user):
     #GROUP BY category.id, category.hint
     #ORDER BY category.hint
     query = db.session.query(Quiz).outerjoin(a, and_(a.quiz_id == Quiz.id, a.answer == Quiz.answer, a.createdAt == max_created, a.user_id == user.id)).join(Category, Category.id == Quiz.category_id).with_entities(Category.id, Category.hint, correct_questions, total_questions, total_quizzes).order_by(Category.hint).group_by(Category.id, Category.hint)
+    print query
     output = query.all()
     general = getGeneralInfos()
     categoryPercentages = []
