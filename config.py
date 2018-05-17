@@ -124,7 +124,7 @@ PRIVACY_POLICY_LAST_UPDATE = datetime(2017, 12, 15, 00, 22) #00:22 of 16/12/2017
 #url to android store
 ANDROID_STORE_URL = "http://www.android.com"
 #url to iOS store
-IOS_STORE_URL = "http://www.apple.com"
+IOS_STORE_URL = "https://itunes.apple.com/it/app/triviapatente/id1326510033"
 #numero di messaggi nuovi mostrati ad ogni scroll
 MESSAGE_PER_SCROLL = 50
 #numero di divisioni dati nel chart delle statistiche
