@@ -57,7 +57,13 @@ def init(testing = False, ci = False):
     # Define the database object which is imported
     # by modules and controllers
     db = SQLAlchemy(app)
-    socketio = SocketIO(app, json = json, async_mode='eventlet')
+    socketio = None
+    if app.config["DEBUG"] == True:
+        print "Starting SocketIO without Redis.."
+        socketio = SocketIO(app, json = json, async_mode='eventlet')
+    else:
+        print "Starting SocketIO with Redis.."
+        socketio = SocketIO(app, json = json, async_mode='eventlet', message_queue='redis://')
     mail = Mail()
     mail.init_app(app)
 
@@ -85,7 +91,6 @@ def init(testing = False, ci = False):
 
     @app.teardown_request
     def onRequestDown(exc):
-        session.clear()
         db.session.remove()
     #registro la generica exception TPException creata. D'ora in poi quando in una richiesta lancerò un exception che deriva da questa verrà spedito all'utente l'output di questa funzione
     @app.errorhandler(TPException)
@@ -107,7 +112,6 @@ def init(testing = False, ci = False):
             response = {"error": error, "success": False, "status_code": 500}
             print "Socket Error %s (%s)" % (error, event)
         print "Traceback: %s" % traceback.format_exc(sys.exc_info())
-
         emit(event, response)
 
 
