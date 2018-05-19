@@ -2,6 +2,7 @@ pip install eventlet
 pip install scrypt
 pip install flask-sockets
 pip install flask-sqlalchemy
+pip install redis
 pip install Enum34
 pip install pytz
 pip install itsdangerous
