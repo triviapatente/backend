@@ -9,6 +9,7 @@ DEBUG = True
 #port used to serve this service
 PORT = 8080
 
+SESSION_TYPE = 'redis'
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 

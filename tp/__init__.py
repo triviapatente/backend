@@ -28,6 +28,7 @@ def init(testing = False, ci = False):
 
     # Import SQLAlchemy
     from flask.ext.sqlalchemy import SQLAlchemy
+    from flask.ext.session import Session
 
     from flask.ext.mail import Mail
 
@@ -37,6 +38,9 @@ def init(testing = False, ci = False):
 
     # Define the WSGI application object
     app = Flask(__name__)
+
+    #configure session
+    Session(app)
 
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder
