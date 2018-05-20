@@ -60,13 +60,13 @@ def init(testing = False, ci = False):
     # Define the database object which is imported
     # by modules and controllers
     db = SQLAlchemy(app)
-    socketio = None
+    socketio = SocketIO(json = json, async_mode='eventlet')
     if app.config["DEBUG"] == True:
         print "Starting SocketIO without Redis.."
-        socketio = SocketIO(app, json = json, async_mode='eventlet')
+        socketio.init_app(app)
     else:
         print "Starting SocketIO with Redis.."
-        socketio = SocketIO(app, json = json, async_mode='eventlet', message_queue='redis://')
+        socketio.init_app(app, message_queue='redis://')
     mail = Mail()
     mail.init_app(app)
 
