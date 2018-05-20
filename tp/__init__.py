@@ -39,9 +39,6 @@ def init(testing = False, ci = False):
     # Define the WSGI application object
     app = Flask(__name__)
 
-    #configure session
-    Session(app)
-
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder
 
@@ -49,6 +46,8 @@ def init(testing = False, ci = False):
     # This line imports contents of config.py in app.config
     app.config.from_object('config')
 
+    #configure session
+    Session(app)
 
     if testing:
         print "enabling testing mode.."
