@@ -69,7 +69,7 @@ def init(testing = False, ci = False):
     # by modules and controllers
     db = SQLAlchemy(app)
     socketio = SocketIO(json = json, async_mode='eventlet')
-    if app.config["DEBUG"] == True:
+    if app.config["DEBUG"] == True or testing or ci:
         print "Starting SocketIO without Redis.."
         socketio.init_app(app)
     else:
