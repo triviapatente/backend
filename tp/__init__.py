@@ -48,8 +48,9 @@ def init(testing = False, ci = False):
     # This line imports contents of config.py in app.config
     app.config.from_object('config')
 
-    #configure session
-    Session(app)
+    if not testing and not ci:
+        #configure session (with redis)
+        Session(app)
 
     Limiter(
         app,
