@@ -52,7 +52,6 @@ def init_round(data):
             updatedUsers = updateScore(game)
             print "User's score updated."
             sendStimulationOnGameEnded(game, updatedUsers, cronEvents)
-            RecentGameEvents.change(opponent)
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
         winner = User.query.filter(User.id == game.winner_id).first()
@@ -61,6 +60,7 @@ def init_round(data):
             winner_id = winner.id
         if endedNow:
             users = getUsersFromGame(game)
+            RecentGameEvents.change(opponent)
             events.game_ended(users, game, partecipations)
         return emit("init_round", {"success": True, "max_age": MAX_AGE, "partecipations": partecipations, "ended": True, "winner_id": winner_id})
     #controllo il caso in cui si è al round 10, con domande completate, e quindi si fa riferimento all'11, ma la partita non è finita:
@@ -261,7 +261,6 @@ def answer(data):
     db.session.add(question)
     game.updatedAt = datetime.now(tz = pytz.utc)
     db.session.add(game)
-    db.session.commit()
 
     NUMBER_OF_QUESTIONS_PER_ROUND = app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]
     number_of_answers = Question.query.filter(Question.round_id == round.id).filter(Question.user_id == g.user.id).count()
@@ -270,17 +269,17 @@ def answer(data):
     print "User %s answered to proposed question." % g.user.username, question, answer
     correct = (quiz.answer == question.answer)
     opponent_turn = isOpponentTurn(game)
-    emit("answer", {"success": True, "correct_answer": correct})
-    events.user_answered(g.roomName, question, quiz)
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:
         number_of_round_answers = Question.query.filter(Question.round_id == round.id).count()
         if number_of_round_answers == NUMBER_OF_QUESTIONS_PER_ROUND * 2:
             game.started = True
             db.session.add(game)
-            db.session.commit()
         events.round_ended(g.roomName, round)
         if opponent_turn is not None:
             RecentGameEvents.change(opponent)
+    db.session.commit()
+    emit("answer", {"success": True, "correct_answer": correct})
+    events.user_answered(g.roomName, question, quiz)
 
 @socketio.on("is_user_online")
 @create_session
