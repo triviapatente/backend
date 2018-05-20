@@ -8,6 +8,7 @@ pip install itsdangerous
 pip install passlib
 pip install flask-httpauth
 pip install Flask-Session
+pip install Flask-Limiter
 pip install flask-socketio==3.0.0
 pip install validate_email
 pip install facebook-sdk

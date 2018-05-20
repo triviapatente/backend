@@ -28,6 +28,8 @@ def init(testing = False, ci = False):
 
     # Import SQLAlchemy
     from flask.ext.sqlalchemy import SQLAlchemy
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
     from flask.ext.session import Session
 
     from flask.ext.mail import Mail
@@ -48,6 +50,12 @@ def init(testing = False, ci = False):
 
     #configure session
     Session(app)
+
+    Limiter(
+        app,
+        key_func=get_remote_address,
+        default_limits=app.config["DDOS_LIMITS"]
+    )
 
     if testing:
         print "enabling testing mode.."
