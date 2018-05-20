@@ -51,12 +51,12 @@ def init(testing = False, ci = False):
     if not testing and not ci:
         #configure session (with redis)
         Session(app)
-
-    Limiter(
-        app,
-        key_func=get_remote_address,
-        default_limits=app.config["DDOS_LIMITS"]
-    )
+        #configure ddos limiter
+        Limiter(
+            app,
+            key_func=get_remote_address,
+            default_limits=app.config["DDOS_LIMITS"]
+        )
 
     if testing:
         print "enabling testing mode.."
