@@ -20,7 +20,7 @@ SQLALCHEMY_TEST_DATABASE_URI = 'postgresql://ted:ted@localhost:5432/triviapatent
 
 LIMIT_MINUTES_TO_BE_CONSIDERED_ONLINE = 5
 
-DDOS_LIMITS = ["2 per second", "30 per minute"]
+DDOS_LIMITS = ["3 per second", "30 per minute"]
 RATELIMIT_STORAGE_URL = "redis://localhost:6379"
 
 INSTAGRAM_API_ENDPOINT = "https://api.instagram.com/v1/users/self/media/recent/"
