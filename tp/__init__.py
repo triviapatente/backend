@@ -5,7 +5,7 @@ app = None
 socketio = None
 db = None
 mail = None
-redis = None
+redisDB = None
 limiter = None
 from flask.json import JSONEncoder
 #classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
@@ -25,7 +25,7 @@ def init(testing = False, ci = False):
     global socketio
     global db
     global mail
-    global redis
+    global redisDB
     global limiter
     # Import flask and template operators
     from flask import Flask, render_template, jsonify, json
@@ -63,7 +63,8 @@ def init(testing = False, ci = False):
     )
 
     if not testing and not ci:
-        redis = redis.StrictRedis(host="localhost", port=6379, db=0)
+        import redis
+        redisDB = redis.StrictRedis(host="localhost", port=6379, db=0)
         #configure ddos limiter
 
     if testing:

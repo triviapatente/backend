@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import request, g
-from tp import db, redis
+from tp import db, redisDB
 from tp.auth.social.facebook.utils import FBManager
 from tp.auth.models import *
 from tp.events.models import Socket
@@ -14,17 +14,17 @@ from tp.auth.social.facebook.utils import getFBTokenInfosFromUser
 TOKEN_KEY = 'tp-session-token'
 DEVICE_ID_KEY = 'tp-device-id'
 def session_set(key, value):
-    if redis:
+    if redisDB:
         id = request.sid
-        sessionData = r.get(id)
+        sessionData = redisDB.get(id)
         if sessionData is None:
             sessionData = {}
         sessionData[key] = value
-        r.set(id, sessionData)
+        redisDB.set(id, sessionData)
 def session_get(key):
-    if redis:
+    if redisDB:
         id = request.sid
-        sessionData = r.get(id)
+        sessionData = redisDB.get(id)
         if sessionData is not None and key in sessionData:
             return sessionData[key]
     return None
