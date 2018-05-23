@@ -15,18 +15,12 @@ TOKEN_KEY = 'tp-session-token'
 DEVICE_ID_KEY = 'tp-device-id'
 def session_set(key, value):
     if redisDB:
-        id = request.sid
-        sessionData = redisDB.get(id)
-        if sessionData is None:
-            sessionData = {}
-        sessionData[key] = value
-        redisDB.set(id, sessionData)
+        key = request.sid + "|||" + key
+        redisDB.set(key, value)
 def session_get(key):
     if redisDB:
-        id = request.sid
-        sessionData = redisDB.get(id)
-        if sessionData is not None and key in sessionData:
-            return sessionData[key]
+        key = request.sid + "|||" + key
+        return redisDB.get(key)
     return None
 #chiamata che a partire da una richiesta ritorna il token.
 #centralizzata, cosi la si può usare dappertutto
