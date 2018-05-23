@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint, g, send_file
-from tp import app, db
+from tp import app, db, limiter
 from tp.auth.models import User
 from tp.game.models import *
 from tp.utils import doTransaction
@@ -177,6 +177,7 @@ def recent_games():
 
 @quiz.route("/image/<int:id>", methods = ["GET"])
 @create_session
+@limiter.limit(app.config["DDOS_LIMITS_IMAGES"])
 def getQuizImage(id):
     image = Image.query.filter(Image.id == id).first()
     if image:
@@ -185,6 +186,7 @@ def getQuizImage(id):
 
 @category.route("/image/<int:id>", methods = ["GET"])
 @create_session
+@limiter.limit(app.config["DDOS_LIMITS_IMAGES"])
 def getCategoryImage(id):
     category = Category.query.filter(Category.id == id).first()
     if category:
@@ -264,4 +266,4 @@ def answer_training():
         training.numberOfErrors = getErrorsForTraining(training).scalar()
         return jsonify(success = True, training = training)
     else:
-        raise ChangeFailed
+        raise ChangeFailed()

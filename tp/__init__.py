@@ -5,6 +5,8 @@ app = None
 socketio = None
 db = None
 mail = None
+redis = None
+limiter = None
 from flask.json import JSONEncoder
 #classe che viene utilizzata internamente da flask per fare il JSON encoding di una classe
 class TPJSONEncoder(JSONEncoder):
@@ -23,6 +25,8 @@ def init(testing = False, ci = False):
     global socketio
     global db
     global mail
+    global redis
+    global limiter
     # Import flask and template operators
     from flask import Flask, render_template, jsonify, json
 
@@ -30,8 +34,6 @@ def init(testing = False, ci = False):
     from flask.ext.sqlalchemy import SQLAlchemy
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
-    from flask.ext.session import Session
-
     from flask.ext.mail import Mail
 
 
@@ -47,16 +49,22 @@ def init(testing = False, ci = False):
     # Configurations
     # This line imports contents of config.py in app.config
     app.config.from_object('config')
+    key_func = None
+    import uuid
+    if testing or ci:
+        del app.config["RATELIMIT_STORAGE_URL"]
+        key_func = uuid.uuid4
+    else:
+        key_func = get_remote_address
+    limiter = Limiter(
+        app,
+        key_func=key_func,
+        default_limits=app.config["DDOS_LIMITS"]
+    )
 
     if not testing and not ci:
-        #configure session (with redis)
-        Session(app)
+        redis = redis.StrictRedis(host="localhost", port=6379, db=0)
         #configure ddos limiter
-        Limiter(
-            app,
-            key_func=get_remote_address,
-            default_limits=app.config["DDOS_LIMITS"]
-        )
 
     if testing:
         print "enabling testing mode.."

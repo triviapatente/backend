@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint, g, send_file, render_template
 from flask_mail import Message
-from tp import app, db, mail
+from tp import app, db, limiter, mail
 from tp.auth.queries import *
 from tp.auth.models import *
 from sqlalchemy import or_
@@ -257,6 +257,7 @@ def changeImage():
 
 @create_session
 @account.route("/image/<int:id>", methods = ["GET"])
+@limiter.limit(app.config["DDOS_LIMITS_IMAGES"])
 def getUserImage(id):
     user = User.query.filter(User.id == id).first()
     if not user:

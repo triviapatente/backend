@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from flask import request, session, g
-from tp import db
+from flask import request, g
+from tp import db, redis
 from tp.auth.social.facebook.utils import FBManager
 from tp.auth.models import *
 from tp.events.models import Socket
@@ -13,25 +13,40 @@ from tp.auth.social.facebook.utils import getFBTokenInfosFromUser
 #chiave associata al token negli header http di ogni richiesta (il valore è deciso qui)
 TOKEN_KEY = 'tp-session-token'
 DEVICE_ID_KEY = 'tp-device-id'
+def session_set(key, value):
+    if redis:
+        id = request.sid
+        sessionData = r.get(id)
+        if sessionData is None:
+            sessionData = {}
+        sessionData[key] = value
+        r.set(id, sessionData)
+def session_get(key):
+    if redis:
+        id = request.sid
+        sessionData = r.get(id)
+        if sessionData is not None and key in sessionData:
+            return sessionData[key]
+    return None
 #chiamata che a partire da una richiesta ritorna il token.
 #centralizzata, cosi la si può usare dappertutto
 def tokenFromRequest(socket):
     if socket == True:
         try:
             token = request.event["args"][0][TOKEN_KEY]
-            session[TOKEN_KEY] = token
+            session_set(TOKEN_KEY, token)
             return token
         except:
-            return session.get(TOKEN_KEY)
+            return session_get(TOKEN_KEY)
     else:
         return request.headers.get(TOKEN_KEY)
 def deviceIdFromRequest():
     try:
         deviceId = request.event["args"][0][DEVICE_ID_KEY]
-        session[DEVICE_ID_KEY] = deviceId
+        session_set(DEVICE_ID_KEY, deviceId)
         return token
     except:
-        return session.get(DEVICE_ID_KEY)
+        return session_get(DEVICE_ID_KEY)
 
 def createUser(username = None, email = None, name = None, surname = None, birth = None, password = None, image = None):
     user = User(username = username, email = email, name = name, surname = surname, birth = birth, image = image)
