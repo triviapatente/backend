@@ -13,6 +13,16 @@ from tp.auth.social.facebook.utils import getFBTokenInfosFromUser
 #chiave associata al token negli header http di ogni richiesta (il valore è deciso qui)
 TOKEN_KEY = 'tp-session-token'
 DEVICE_ID_KEY = 'tp-device-id'
+def unsetToken():
+    session_unset(TOKEN_KEY)
+
+def unsetDeviceId():
+    session_unset(DEVICE_ID_KEY)
+
+def session_unset(key):
+    if redisDB:
+        key = request.sid + "|||" + key
+        redisDB.delete(key)
 def session_set(key, value):
     if redisDB:
         key = request.sid + "|||" + key

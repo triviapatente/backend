@@ -4,7 +4,7 @@ from tp import socketio, db
 from tp.ws_decorators import ws_auth_required, filter_input_room
 from tp.base.utils import roomName, get_connection_values, getInfosFromRoom
 from tp.events.models import *
-from tp.auth.utils import getUserFromRequest, deviceIdFromRequest
+from tp.auth.utils import getUserFromRequest, deviceIdFromRequest, unsetToken, unsetDeviceId
 from tp.events.models import Socket
 from tp.decorators import create_session
 from tp.decorators import needs_values
@@ -78,3 +78,5 @@ def disconnect():
         print "User %s has disconnected" % g.user.username
     else:
         print "Anonymous user has disconnected"
+    unsetDeviceId()
+    unsetToken()
