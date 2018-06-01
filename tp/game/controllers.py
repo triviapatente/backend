@@ -177,7 +177,7 @@ def recent_games():
 
 @quiz.route("/image/<int:id>", methods = ["GET"])
 @create_session
-@limiter.limit(app.config["DDOS_LIMITS_IMAGES"])
+@limiter.exempt
 def getQuizImage(id):
     image = Image.query.filter(Image.id == id).first()
     if image:
@@ -186,7 +186,7 @@ def getQuizImage(id):
 
 @category.route("/image/<int:id>", methods = ["GET"])
 @create_session
-@limiter.limit(app.config["DDOS_LIMITS_IMAGES"])
+@limiter.exempt
 def getCategoryImage(id):
     category = Category.query.filter(Category.id == id).first()
     if category:

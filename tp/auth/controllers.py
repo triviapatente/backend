@@ -257,7 +257,7 @@ def changeImage():
 
 @create_session
 @account.route("/image/<int:id>", methods = ["GET"])
-@limiter.limit(app.config["DDOS_LIMITS_IMAGES"])
+@limiter.exempt
 def getUserImage(id):
     user = User.query.filter(User.id == id).first()
     if not user:
