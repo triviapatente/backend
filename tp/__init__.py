@@ -140,7 +140,7 @@ def init(testing = False, ci = False):
 
 
     from tp.auth.controllers import auth, account, info, fb
-    from tp.base.controllers import base
+    from tp.base.controllers import base, gdpr
     from tp.game.controllers import game, quiz, category, training
     from tp.message.controllers import message
     from tp.preferences.controllers import preferences
@@ -156,6 +156,7 @@ def init(testing = False, ci = False):
     app.register_blueprint(quiz)
     app.register_blueprint(category)
     app.register_blueprint(training)
+    app.register_blueprint(gdpr)
     #app.register_blueprint(preferences)
     app.register_blueprint(account)
     #app.register_blueprint(info)

@@ -124,6 +124,13 @@ TERMS_PATH = "static/pdf/TriviaPatente Terms And Conditions.pdf"
 TERMS_AND_CONDITIONS_LAST_UPDATE = datetime(2017, 12, 15, 00, 22) #00:22 of 16/12/2017
 #privacy policy url
 PRIVACY_POLICY_URL = "https://www.iubenda.com/privacy-policy/8283872"
+#gdpr
+#revoke
+REVOKE_PERMISSIONS_URL = "https://triviapatente.it#gdprrevoke"
+#drop
+DROP_ACCOUNT_URL = "https://triviapatente.it#gdprdrop"
+#get
+GET_DATA_URL = "https://triviapatente.it#gdprget"
 #privacy policy last update
 PRIVACY_POLICY_LAST_UPDATE = datetime(2017, 12, 15, 00, 22) #00:22 of 16/12/2017
 #url to android store

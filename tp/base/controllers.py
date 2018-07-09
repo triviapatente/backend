@@ -18,7 +18,7 @@ import StringIO
 import requests
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
-
+gdpr = Blueprint("gdpr", __name__, url_prefix = "/gdpr")
 @base.route("/")
 @create_session
 def welcome():
@@ -141,48 +141,41 @@ def contactUs():
 def simpleDateFilter(value):
     return value.strftime("%b %d %Y %H:%M:%S")
 
-@base.route("/gdpr/drop-user", methods = ["POST"])
-@create_session
-@needs_values("POST", "email", "password")
-def deleteUser():
-    email = g.post.get("email");
-    password = g.post.get("password");
-    user = User.query.filter(User.email == email).first()
-    if user is None:
-        raise NotAllowed()
-    keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
-    if keychain is None:
-        raise NotAllowed()
-    if(keychain.check_password(password)):
-        output = doTransaction(dropUser, id=user.id)
-        if output == True:
-            return jsonify(success = True)
-        else:
-            raise ChangeFailed()
-    else:
-        raise NotAllowed()
+@base.route("/redirect/drop-user")
+def redirectToDropUser():
+    url = app.config["DROP_ACCOUNT_URL"]
+    return redirect(url)
 
-@base.route("/gdpr/get-data", methods = ["POST"])
+@base.route("/redirect/get-data")
+def redirectToGetData():
+    url = app.config["GET_DATA_URL"]
+    return redirect(url)
+
+@base.route("/redirect/revoke-permissions")
+def redirectToRevoke():
+    url = app.config["REVOKE_PERMISSIONS_URL"]
+    return redirect(url)
+
+@gdpr.route("/drop-user", methods = ["POST"])
 @create_session
-@needs_values("POST", "email", "password")
-def getData():
-    email = g.post.get("email");
-    password = g.post.get("password");
-    user = User.query.filter(User.email == email).first()
-    if user is None:
-        raise NotAllowed()
-    keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
-    if keychain is None:
-        raise NotAllowed()
-    if(keychain.check_password(password)):
-        template = app.config["GDPR_DATA_TEMPLATE"]
-        installations = Installation.query.filter(Installation.user_id == user.id).all()
-        output = render_template_string(template, user=user, installations=installations, installations_count=len(installations))
-        strIO = StringIO.StringIO()
-        strIO.write(output)
-        strIO.seek(0)
-        return send_file(strIO,
-                        attachment_filename="your_data.txt",
-                        as_attachment=True)
+@auth_required
+def deleteUser():
+    output = doTransaction(dropUser, id=g.user.id)
+    if output == True:
+        return jsonify(success = True)
     else:
-        raise NotAllowed()
+        raise ChangeFailed()
+
+@gdpr.route("/get-data", methods = ["POST"])
+@create_session
+@auth_required
+def getData():
+    template = app.config["GDPR_DATA_TEMPLATE"]
+    installations = Installation.query.filter(Installation.user_id == user.id).all()
+    output = render_template_string(template, user=user, installations=installations, installations_count=len(installations))
+    strIO = StringIO.StringIO()
+    strIO.write(output)
+    strIO.seek(0)
+    return send_file(strIO,
+                    attachment_filename="your_data.txt",
+                    as_attachment=True)
