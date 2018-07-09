@@ -134,7 +134,7 @@ GET_DATA_URL = "https://triviapatente.it#gdprget"
 #privacy policy last update
 PRIVACY_POLICY_LAST_UPDATE = datetime(2017, 12, 15, 00, 22) #00:22 of 16/12/2017
 #url to android store
-ANDROID_STORE_URL = "http://www.android.com"
+ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=it.triviapatente.android"
 #url to iOS store
 IOS_STORE_URL = "https://itunes.apple.com/it/app/triviapatente/id1326510033"
 #numero di messaggi nuovi mostrati ad ogni scroll
