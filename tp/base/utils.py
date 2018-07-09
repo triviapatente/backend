@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import g
-from tp import app
-from tp.auth.models import User
+from tp import app, db
+from tp.auth.models import *
 from tp.game.utils import getTrainingStats
 from tp.game.models import Partecipation
 from tp.events.models import *
@@ -48,6 +48,29 @@ def getUsersFromRoom(type, game_id, check_for_user = False):
             query.filter(User.id == g.user.id)
         return query.all()
     return None
+
+def dropUser(id):
+    user = User.query.filter(User.id == id).one()
+    user.generateMockUsername()
+    user.generateMockEmail()
+    user.name = None
+    user.surname = None
+    user.score = 0
+    if user.image:
+        try:
+            os.remove(user.image)
+        except:
+            pass
+    user.image = None
+    Keychain.query.filter(Keychain.user_id == id).delete()
+    Socket.query.filter(Socket.user_id == id).delete()
+    Installation.query.filter(Installation.user_id == id).delete()
+    RoomParticipation.query.filter(RoomParticipation.user_id == id).delete()
+    games = Game.query.join(Partecipation).filter(Partecipation.user_id == id).all()
+    for game in games:
+        game.expired = True
+        game.ended = True
+        db.session.add(game)
 
 def getRoomsFor(type, user):
     rooms = []

@@ -1,0 +1,17 @@
+{% block body %}
+TriviaPatente
+
+Dati personali raccolti
+
+Username: {{user.username}}
+Email: {{user.email}}
+Nome:{% if user.name %} {{user.name}} {% else %} / {% endif %}
+Cognome:{% if user.surname %} {{user.surname}} {% else %} / {% endif %}
+
+Data di creazione account: {{user.createdAt | simpleDate}} UTC
+Data di ultima modifica account: {{user.updatedAt | simpleDate}} UTC
+
+Numero di device associati all'account: {{installations_count}}
+{% for item in installations %}
+Device #{{loop.index}}: Sistema operativo {{item.os}}{% endfor %}
+{% endblock %}

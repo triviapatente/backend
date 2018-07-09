@@ -74,6 +74,9 @@ def init(testing = False, ci = False):
             app.config["SQLALCHEMY_TEST_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"].replace("localhost", "postgres")
         app.config["SQLALCHEMY_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"]
 
+    file = open('tp/templates/gdpr/data.txt')
+    app.config["GDPR_DATA_TEMPLATE"] = file.read()
+    file.close()
 
     # Define the database object which is imported
     # by modules and controllers

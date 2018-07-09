@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint, render_template
 from tp import app, db
-from flask import g, redirect, request
+from flask import g, redirect, request, render_template_string, send_file
 from porting import getJSONModels
-from tp.exceptions import NotAllowed, BadParameters, InstagramProblem, InstagramUnnecessary
+from tp.exceptions import NotAllowed, BadParameters, InstagramProblem, InstagramUnnecessary, ChangeFailed
 from tp.decorators import auth_required, needs_values, create_session
 from tp.base.models import Feedback
+from tp.auth.models import User, Keychain
+from tp.base.utils import *
+import datetime
+from tp.utils import doTransaction
 from sqlalchemy import exc
 from tp.events.models import Installation
 from premailer import transform
 import jinja2
+import StringIO
 import requests
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
@@ -131,3 +136,53 @@ def contactUs():
         raise BadParameters(["scope"])
 
     return jsonify(success = True)
+
+@app.template_filter('simpleDate')
+def simpleDateFilter(value):
+    return value.strftime("%b %d %Y %H:%M:%S")
+
+@base.route("/gdpr/drop-user", methods = ["POST"])
+@create_session
+@needs_values("POST", "email", "password")
+def deleteUser():
+    email = g.post.get("email");
+    password = g.post.get("password");
+    user = User.query.filter(User.email == email).first()
+    if user is None:
+        raise NotAllowed()
+    keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
+    if keychain is None:
+        raise NotAllowed()
+    if(keychain.check_password(password)):
+        output = doTransaction(dropUser, id=user.id)
+        if output == True:
+            return jsonify(success = True)
+        else:
+            raise ChangeFailed()
+    else:
+        raise NotAllowed()
+
+@base.route("/gdpr/get-data", methods = ["POST"])
+@create_session
+@needs_values("POST", "email", "password")
+def getData():
+    email = g.post.get("email");
+    password = g.post.get("password");
+    user = User.query.filter(User.email == email).first()
+    if user is None:
+        raise NotAllowed()
+    keychain = Keychain.query.filter(Keychain.user_id == user.id).first()
+    if keychain is None:
+        raise NotAllowed()
+    if(keychain.check_password(password)):
+        template = app.config["GDPR_DATA_TEMPLATE"]
+        installations = Installation.query.filter(Installation.user_id == user.id).all()
+        output = render_template_string(template, user=user, installations=installations, installations_count=len(installations))
+        strIO = StringIO.StringIO()
+        strIO.write(output)
+        strIO.seek(0)
+        return send_file(strIO,
+                        attachment_filename="your_data.txt",
+                        as_attachment=True)
+    else:
+        raise NotAllowed()

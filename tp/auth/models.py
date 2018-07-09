@@ -5,7 +5,7 @@ import sys
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum, Date, BigInteger, DateTime
 from sqlalchemy.orm import relationship
 from passlib.apps import custom_app_context as pwd_context
-
+import random
 from itsdangerous import (JSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
@@ -69,6 +69,27 @@ class User(Base, CommonPK):
       if suffix.isdigit():
           return int(suffix)
       return None
+
+  def getMockUsername(self, unique = True):
+      candidate = "user_%d" % random.randint(1, sys.maxint)
+      if unique and User.query.filter(User.username == candidate).first():
+        return self.getUniqueMockValue(True)
+      return candidate
+
+  def getUniqueMockEmail(self, fromUsername = True):
+      if fromUsername:
+          prefix = self.username
+      else:
+          prefix = getMockUsername(False)
+      candidate = "%s@triviapatente.it" % prefix
+      if User.query.filter(User.email == candidate).first():
+        return self.getUniqueMockEmail(False)
+      return candidate
+
+  def generateMockUsername(self):
+      self.username = self.getMockUsername(True)
+  def generateMockEmail(self):
+      self.email = self.getUniqueMockEmail()
 
   def generateUsername(self):
       if self.name and self.surname:
