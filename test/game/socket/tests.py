@@ -416,7 +416,7 @@ class GameSocketTestCase(TPAuthTestCase):
         answer(self.socket, True, self.game_id, round_id, questions[2].get("id"), self.token)
         answer(self.socket, True, self.game_id, round_id, questions[3].get("id"), self.token)
         #consumo l'evento round_ended
-        round_ended_response = self.opponent_socket.get_received(4)
+        round_ended_response = self.opponent_socket.get_received(3)
         assert round_ended_response.json.get("action") == "destroy"
         assert round_ended_response.json.get("round").get("id") == round_id
         assert round_ended_response.json.get("user").get("id") == self.user.get("id")
@@ -538,7 +538,7 @@ class GameSocketTestCase(TPAuthTestCase):
 
         print "#4: Event test: round_ended"
         answer(self.opponent_socket, True, self.game_id, round_id, question_id, self.opponent_token)
-        response = self.socket.get_received(1)
+        response = self.socket.get_received(0)
         assert response.json.get("round")
 
         print "#5: Event test: user_answered"

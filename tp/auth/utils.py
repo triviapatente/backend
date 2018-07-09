@@ -48,7 +48,7 @@ def deviceIdFromRequest():
     try:
         deviceId = request.event["args"][0][DEVICE_ID_KEY]
         session_set(DEVICE_ID_KEY, deviceId)
-        return token
+        return deviceId
     except:
         return session_get(DEVICE_ID_KEY)
 
