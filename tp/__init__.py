@@ -35,7 +35,7 @@ def init(testing = False, ci = False):
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
     from flask.ext.mail import Mail
-
+    from flask_cors import CORS
 
     # Import SocketIO
     from flask_socketio import SocketIO, emit
@@ -43,6 +43,8 @@ def init(testing = False, ci = False):
     # Define the WSGI application object
     app = Flask(__name__)
 
+
+    cors = CORS(app, resources={r"/*": {"origins": "*"}})
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder
 
