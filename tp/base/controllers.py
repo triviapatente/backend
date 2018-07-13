@@ -171,8 +171,8 @@ def deleteUser():
 @auth_required
 def getData():
     template = app.config["GDPR_DATA_TEMPLATE"]
-    installations = Installation.query.filter(Installation.user_id == user.id).all()
-    output = render_template_string(template, user=user, installations=installations, installations_count=len(installations))
+    installations = Installation.query.filter(Installation.user_id == g.user.id).all()
+    output = render_template_string(template, user=g.user, installations=installations, installations_count=len(installations))
     strIO = StringIO.StringIO()
     strIO.write(output)
     strIO.seek(0)
