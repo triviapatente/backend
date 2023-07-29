@@ -2,11 +2,10 @@
 ##### Table of Contents
 1. [Introduction](#intro)
 2. [Getting started](#getstarted)
-3. [Installation](#installation)
-4. [Features](#features)
-5. [Contributing](#contribute)
-6. [Authors](#authors)
-7. [License](#license)
+3. [Features](#features)
+4. [Contributing](#contribute)
+5. [Authors](#authors)
+6. [License](#license)
 
 <a name="intro"></a>
 ## Introduction
