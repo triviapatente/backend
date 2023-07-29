@@ -10,6 +10,7 @@ baseUrl = 'http://m.patentati.it/'
 # path where images are saved
 import tp
 tp.init()
+print('App initialized')
 from tp import app
 imgPath = app.config["QUIZ_IMAGE_FOLDER"]
 
@@ -23,12 +24,14 @@ from tp.game.models import Quiz, Category
 
 # Create directory if it doesn't exist
 import os
+print('Creating images dir')
 
 if not os.path.exists(imgPath):
     os.makedirs(imgPath)
+print('Image dir created')
 
 ### Extraction ###
-print('Start crawling {seed}..')
+print(f"Start crawling {seed}..")
 
 db.create_all()
 crawler.getCategories(db.session, seed, baseUrl, imgPath)

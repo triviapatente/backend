@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from crawler.patentati import routines
-import crawler.utils.utils
+from crawler.utils import utils
 
 from tp.game.models import Quiz, Image, Category
 from crawler.shared import shared_map
@@ -16,22 +16,27 @@ def getCategories(session, seed, bUrl, imgPath = '/images'):
     global baseUrl
     baseUrl = bUrl
     # Categories and relative links extraction
-    categories =  routines.crawlPage(seed, 'div', 'content')
+    categories =  routines.crawlPage(seed, 'div', 'width-leave-300@m uk-width-expand@m pat-content-right')
+    print(f"Categories: {categories}")
     malformedQuestions = 0
     # For each pair category - link
     for name, link in categories.items():
         # Create record
-        name = name.encode("utf-8")
-        category = Category(name = name)
-        infos = shared_map[name]
-        category.id = infos["id"]
-        category.hint = infos["hint"]
-        category.color = infos["color"]
-        print(f"Saving category: {category.hint}")
-        session.add(category)
-        session.commit()
-        #print("Crawling the above category..")
-        malformedQuestions += getGroups(session, link, int(category.id), imgPath)
+        encodedName = name.encode("utf-8")
+        category = Category(name = encodedName)
+        if name in shared_map:
+            print("Match")
+            infos = shared_map[name]
+            category.id = infos["id"]
+            category.hint = infos["hint"]
+            category.color = infos["color"]
+            print(f"Saving category: {category.hint}")
+            session.add(category)
+            session.commit()
+            #print("Crawling the above category..")
+            malformedQuestions += getGroups(session, link, int(category.id), imgPath)
+        else:
+            print("Not match")
         #print("Saved all the quizzes of the category")
     print(f"Overall malformed questions: {malformedQuestions}")
 
@@ -40,10 +45,11 @@ def getCategories(session, seed, bUrl, imgPath = '/images'):
 # ##session is the ORM connected to the db, ##category_id is the id of the category, ##imgPath where to save images
 def getGroups(session, link, category_id, imgPath):
     malformedQuestions = 0
-    groupsLinks = utils.getLinks(utils.getAllAnchors(utils.getContainer(baseUrl + link, 'div', 'content')))
+    groupsLinks = utils.getLinks(utils.getAllAnchors(utils.getContainer(baseUrl + link, 'div', 'width-leave-300@m uk-width-expand@m pat-content-right')))
     for link in groupsLinks:
         # Get question rows
-        questionsRows = routines.getQuestions(baseUrl + link, 'quests')
+        print(f"Group at {baseUrl + link}")
+        questionsRows = routines.getQuestions(baseUrl + link, 'domande')
         malformedQuestions += getQuestions(session, questionsRows, category_id, imgPath)
     print(f"Malformed questions: {malformedQuestions}")
     if malformedQuestions > 0:

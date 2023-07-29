@@ -40,8 +40,7 @@ Start postgres`
 
 ```brew services run postgresql@15```
 
-### Run Vagrant
-```vagrant up```
+
 
 
 The code run and has been tested with {TODO VERSION OF IOS}. 

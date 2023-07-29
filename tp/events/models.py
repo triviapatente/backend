@@ -34,4 +34,4 @@ class RoomParticipation(Base):
     user_id = Column(Integer, ForeignKey("user.id"), primary_key = True, nullable = False)
     #socket id della connessione
     device_id = Column(String, ForeignKey("socket.device_id"), primary_key = True, nullable = False)
-    socket = relationship(Socket)
+    socket = relationship(Socket, overlaps="participations")

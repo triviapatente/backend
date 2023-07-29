@@ -1,4 +1,4 @@
-psycopg2
+psycopg2-binary
 eventlet
 scrypt
 redis
@@ -13,6 +13,7 @@ premailer
 # lxml==3.4.4 # True
 itsdangerous==2.0.1
 sqlalchemy==1.4.49
+urllib3==1.26
 flask==2.0.3
 werkzeug==2.0.3
 flask-sqlalchemy==2.3.2 # True

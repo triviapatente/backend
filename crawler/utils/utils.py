@@ -16,7 +16,7 @@ def getContainer(url, containerTag, containerClass):
 
 # Clean sentence (##str)
 def clean(str):
-    return re.sub('[\n\t\r]', '', str)
+    return re.sub('[\n\t\r]', '', str).strip()
 
 # Get all anchors in a given ##container
 def getAllAnchors(container):
@@ -46,7 +46,7 @@ def getTexts(spans):
 
 # get an html parser for the given ##url
 def getParser(url):
-    return BeautifulSoup(getHtml(url), "html5lib")
+    return BeautifulSoup(getHtml(url), "html.parser")
 
 
 # Given an image ##url a path save the img in the choosen ##imgPath
