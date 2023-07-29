@@ -53,7 +53,7 @@ The code run and has been tested with {TODO VERSION OF IOS}.
 ### Installing
 Before running the backend, you need to populate the database with questions and answers. This repository contains a crawler that gets from the internet ~7000 driver's license questions. The data is crawled from the website [https://www.patentati.it/](https://www.patentati.it/).
 
-In order to run the crawler, execute the following file
+In order to run the crawler, type:
 
 ```python run_crawler.py```
 
