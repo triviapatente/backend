@@ -19,7 +19,7 @@ This repository contains the webservice of the application.
 Set up the virtual environment (recommended)
 ON MAC OS
 - ```brew install postgresql@15```
-- ```brew install libpq --build-from-source```
+- ```brew install libpq libpq-dev --build-from-source```
 - ```brew install openssl@1.1```
 - ```export LDFLAGS="-L/opt/homebrew/opt/postgresql@15/lib -L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/libpq/lib"```
 - ```export CPPFLAGS="-I/opt/homebrew/opt/postgresql@15/include -I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/libpq/include"```
