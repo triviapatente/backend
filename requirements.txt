@@ -20,7 +20,7 @@ flask-sqlalchemy==2.3.2 # True
 flask-httpauth
 flask-session
 flask-limiter==2.0.3
-flask-socketio==3.0.0 # True
+flask-socketio==5.0.0
 flask-apscheduler
 flask-cors
 flask-mail

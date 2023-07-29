@@ -5,7 +5,7 @@ from flask_socketio import emit
 from tp import socketio, db
 from tp.ws_decorators import ws_auth_required, filter_input_room
 from tp.base.utils import roomName, get_connection_values, getInfosFromRoom
-import tp.base.events
+from tp.base import events
 from tp.events.models import *
 from tp.auth.utils import getUserFromRequest, deviceIdFromRequest, unsetToken, unsetDeviceId
 from tp.events.models import Socket

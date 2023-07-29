@@ -53,6 +53,7 @@ def fake_request(test_client, fn):
     #vado a pescare il vecchio metodo, prima che lo cambiassi
     oldmethod = getattr(test_client, fn)
     def request(url, **args):
+        print(f"Fake socket request {url}")
         #ottengo gli header, se ci sono
         headers = args.get("headers", {})
         #ottengo il token, se esiste
@@ -69,11 +70,6 @@ def fake_request(test_client, fn):
         #faccio l'encode della risposta
         # response.data = response.data.encode("utf-8")
         print(f"Risposta HTTP (url = {url}):", response.data)
-        try:
-            #aggiungo il json alla risposta
-            response.json = json.loads(response.data)
-        except:
-            pass
         return response
     return request
 def fake_socket_emit(socket):
