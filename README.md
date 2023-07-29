@@ -34,11 +34,11 @@ Then,
 - ```pip install -r requirements.txt```
 
 Start postgres
+- ```brew services run postgresql@15```
 - ```createuser -P -s -e triviapatente``` with password "triviapatente"
 - ```createdb triviapatente -O triviapatente```
 - ```createdb triviapatente_test -O triviapatente```
 
-- ```brew services run postgresql@15```
 
 ### Run Vagrant
 ```vagrant up```
