@@ -44,7 +44,7 @@ def init(testing = False, ci = False):
     app = Flask(__name__)
 
 
-    cors = CORS(app, resources={r"/*": {"origins": "*"}})
+    #cors = CORS(app, resources={r"/*": {"origins": "*"}})
     #aggiungo il json encoder custom
     app.json_encoder = TPJSONEncoder
 
@@ -54,7 +54,7 @@ def init(testing = False, ci = False):
     key_func = None
     import uuid
     if testing or ci:
-        del app.config["RATELIMIT_STORAGE_URL"]
+        #del app.config["RATELIMIT_STORAGE_URL"]
         key_func = uuid.uuid4
     else:
         key_func = get_remote_address
@@ -83,7 +83,7 @@ def init(testing = False, ci = False):
     # Define the database object which is imported
     # by modules and controllers
     db = SQLAlchemy(app)
-    socketio = SocketIO(json = json, async_mode='eventlet')
+    socketio = SocketIO(json = json, async_mode='eventlet', cors_allowed_origins="*")
     if app.config["DEBUG"] == True or testing or ci:
         print("Starting SocketIO without Redis..")
         socketio.init_app(app)
