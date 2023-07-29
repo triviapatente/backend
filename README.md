@@ -18,27 +18,27 @@ This repository contains the webservice of the application.
 
 Set up the virtual environment (recommended)
 ON MAC OS
-```brew install postgresql@15```
-```brew install libpq --build-from-source```
-```brew install openssl@1.1```
-```export LDFLAGS="-L/opt/homebrew/opt/postgresql@15/lib -L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/libpq/lib"```
-```export CPPFLAGS="-I/opt/homebrew/opt/postgresql@15/include -I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/libpq/include"```
+- ```brew install postgresql@15```
+- ```brew install libpq --build-from-source```
+- ```brew install openssl@1.1```
+- ```export LDFLAGS="-L/opt/homebrew/opt/postgresql@15/lib -L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/libpq/lib"```
+- ```export CPPFLAGS="-I/opt/homebrew/opt/postgresql@15/include -I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/libpq/include"```
 
 Then,
-```python -m venv .```
-```pip install --upgrade pip```
-```pip install --upgrade setuptools```
-```pip install –-upgrade wheel```
+- ```python -m venv .```
+- ```pip install --upgrade pip```
+- ```pip install --upgrade setuptools```
+- ```pip install –-upgrade wheel```
 
-```pip install -r requirements.txt```
+- ```pip install -r requirements.txt```
 
-Start postgres`
-```export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"``
-```createuser -P -s -e triviapatente``` with password triviapatente
-```createdb triviapatente -O triviapatente```
-```createdb triviapatente_test -O triviapatente```
+Start postgres
+- ```export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"```
+- ```createuser -P -s -e triviapatente with password triviapatente```
+- ```createdb triviapatente -O triviapatente```
+- ```createdb triviapatente_test -O triviapatente```
 
-```brew services run postgresql@15```
+- ```brew services run postgresql@15```
 
 ### Run Vagrant
 ```vagrant up```
