@@ -34,7 +34,7 @@ Then,
 - ```pip install -r requirements.txt```
 
 Start postgres
-- ```createuser -P -s -e triviapatente with password triviapatente```
+- ```createuser -P -s -e triviapatente``` with password "triviapatente"
 - ```createdb triviapatente -O triviapatente```
 - ```createdb triviapatente_test -O triviapatente```
 
