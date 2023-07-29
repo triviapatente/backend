@@ -114,4 +114,4 @@ This project was developed with ❤️ and a giant dose of curiosity and passion
 
 <a name="license"><a/>
 ## License
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/triviapatente/ios/blob/master/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/triviapatente/backend/blob/master/LICENSE) file for details.
