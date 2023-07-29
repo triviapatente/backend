@@ -24,7 +24,6 @@ DDOS_LIMITS = ["3 per second", "30 per minute"]
 DDOS_LIMITS_IMAGES = ["12 per second", "120 per minute"]
 
 INSTAGRAM_API_ENDPOINT = "https://api.instagram.com/v1/users/self/media/recent/"
-INSTAGRAM_ACCESS_TOKEN = "7547904163.2fef49b.06b60bdfda3348f49ff13020d87c5d34"
 NEEDS_INSTAGRAM_SHOWGALLERY = True
 
 DAY = 24 * 60 * 60
@@ -59,7 +58,6 @@ PUBLIC_INFOS = {
     "webservice type": "REST",
     "last_run": datetime.now(pytz.utc)
 }
-FIREBASE_API_KEY = "AAAAohpGZ3o:APA91bF-D2q76LSTEZgQrfLofk3MLJOvXXdp96wI9WpiZ8TGjZLzCnQ8m0TC-jXMyaddYXIQydGIqJ9bk7cE9wMDvKg4XD2g7nJXHqrCoruH5OwBPwRPq8tIYD6oqzHIW8SjVTN9FVLL"
 #mail config
 #NOTE: temporaneo, quando compriamo il dominio è da cambiare
 EMAIL_SENDER = "support@triviapatente.it"
