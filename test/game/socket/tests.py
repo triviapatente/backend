@@ -203,7 +203,7 @@ class GameSocketTestCase(TPAuthTestCase):
         assert categories
 
         print("#2: Le richiedo e sono le stesse")
-        n_categories = len(categories)
+        n_categories = app.config["NUMBER_OF_CATEGORIES_PROPOSED"]
         response = get_categories(self.socket, self.game_id, round_id, self.token)
         assert response.json.get("success") == True
         assert n_categories == len(response.json.get("categories"))

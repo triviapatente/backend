@@ -136,19 +136,21 @@ def get_random_categories(data):
         raise NotAllowed()
     #ottengo le categorie proposte precedentemente per lo stesso turno, se ci sono
     proposed = Category.query.with_entities(Category).join(ProposedCategory).filter(ProposedCategory.round_id == round.id).all()
-    print(0)
     #se non ci sono
     if len(proposed) == 0:
         ids = Round.query.filter(Round.game_id == game.id).join(Category).with_entities(Category.id).all()
+        ids_to_filter = [d[0] for d in ids]
         opponent = getOpponentFrom(game.id)
         #le genero random
         proposed = Category.query.with_entities(Category, getNumberOfTotalAnswersForCategory(Category, game, opponent).label("total_answers"))
         if len(ids) != 0:
-            proposed = proposed.filter(~Category.id.in_(ids))
-        output = proposed.order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"])
+            proposed = proposed.filter(~Category.id.in_(ids_to_filter))
+        proposed = proposed.order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"])
+        print(1)
+        proposed = proposed.all()
 
         #e le aggiungo come proposed in db
-        for (candidate, totalAnswers) in output:
+        for (candidate, totalAnswers) in proposed:
             c = ProposedCategory(round_id = round.id, category_id = candidate.id)
             db.session.add(c)
 
@@ -176,12 +178,15 @@ def choose_category(data):
 
     proposed = ProposedCategory.query.filter(ProposedCategory.round_id == round.id).filter(ProposedCategory.category_id == category.id).first()
     if not proposed:
+        print(f"Non è proposta {category}")
         raise NotAllowed()
     #se non sono il dealer, vengo buttato fuori
     if round.dealer_id != g.user.id:
+        print("Non sei dealer")
         raise NotAllowed()
     #se ho già scelto la categoria, non posso più farlo
     if round.cat_id != None:
+        print("Il round ha già categoria")
         raise NotAllowed()
     previous_opponent_turn = isOpponentTurn(game)
     #aggiorno la categoria e salvo in db
