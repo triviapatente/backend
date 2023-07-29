@@ -125,7 +125,7 @@ class GameSocketTestCase(TPAuthTestCase):
         numberOfRounds = app.config["NUMBER_OF_ROUNDS"]
         print(f"#9: Dopo {numberOfRounds} turni la partita finisce")
         #svolgo i turni
-        limit = (numberOfRounds / 2) + 1
+        limit = int((numberOfRounds / 2) + 1)
         for i in range(1, limit):
             #svolgo il turno con dealer opponent
             generateRound(self.game_id, (self.opponent_socket, True, self.opponent_token), (self.socket, True, self.token))

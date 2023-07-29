@@ -16,6 +16,7 @@ from sqlalchemy import func, and_, asc
 
 import tp.cron.events as cronEvents
 from tp.game.events import RecentGameEvents
+from tp.game import events
 import pytz
 
 @socketio.on("init_round")
