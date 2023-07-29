@@ -255,7 +255,7 @@ def answer_training():
         index = item.get("index")
         if not isinstance(key, str) or not isinstance(index, int):
             raise BadParameters("Input formattato male")
-    quiz_ids = [long(k) for k in answers.keys()]
+    quiz_ids = [int(k) for k in answers.keys()]
     quizzesCount = Quiz.query.filter(Quiz.id.in_(quiz_ids)).count()
     if quizzesCount != requiredNumber:
         raise BadParameters("Alcuni quiz non esistono in db!")

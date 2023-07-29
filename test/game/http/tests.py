@@ -403,8 +403,8 @@ class GameHTTPTestCase(TPAuthTestCase):
         assert len(response.json.get("trainings")) == 1
 
         print("#1.4: Le risposte a None sono accettate dal server")
-        key = input.keys()[0]
-        input[key]["answer"] = None;
+        key = list(input.keys())[0]
+        input[key]["answer"] = None
         response = answer_training(self, input)
         assert response.status_code == 200
         print(response.json.get("training"))
@@ -417,8 +417,8 @@ class GameHTTPTestCase(TPAuthTestCase):
 
         print("#2.2 Alcuni quiz non esistono")
         newInput = input
-        oldKey = "%s" % questions[0].get("id")
-        newKey = "%s" % -1
+        oldKey = questions[0].get("id")
+        newKey = 9000
         newInput[newKey] = newInput[oldKey]
         del newInput[oldKey]
         response = answer_training(self, newInput)
@@ -446,7 +446,7 @@ class GameHTTPTestCase(TPAuthTestCase):
             assert "category_hint" in item #hint is null on testing
             assert item.get("order_index") is not None
 
-        prin( "#1.4: Le domande sono in ordine")
+        print("#1.4: Le domande sono in ordine")
         i = 0
         for item in questions:
             assert item.get("order_index") == i

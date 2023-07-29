@@ -49,7 +49,7 @@ def createTraining(answers):
         index = item.get("index")
         if not isinstance(answer, bool):
             answer = None
-        q = TrainingAnswer(quiz_id = long(quiz), answer = answer, order_index = index)
+        q = TrainingAnswer(quiz_id = int(quiz), answer = answer, order_index = index)
         new_training.answers.append(q)
         lastQ = LastTrainingAnswer.query.filter(LastTrainingAnswer.quiz_id == quiz, LastTrainingAnswer.user_id == g.user.id).first()
         if not lastQ:
