@@ -23,6 +23,7 @@ ON MAC OS
 - ```brew install openssl@1.1```
 - ```export LDFLAGS="-L/opt/homebrew/opt/postgresql@15/lib -L/opt/homebrew/opt/openssl@1.1/lib -L/opt/homebrew/opt/libpq/lib"```
 - ```export CPPFLAGS="-I/opt/homebrew/opt/postgresql@15/include -I/opt/homebrew/opt/openssl@1.1/include -I/opt/homebrew/opt/libpq/include"```
+- ```export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"```
 
 Then,
 - ```python -m venv .```
@@ -33,7 +34,6 @@ Then,
 - ```pip install -r requirements.txt```
 
 Start postgres
-- ```export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"```
 - ```createuser -P -s -e triviapatente with password triviapatente```
 - ```createdb triviapatente -O triviapatente```
 - ```createdb triviapatente_test -O triviapatente```
