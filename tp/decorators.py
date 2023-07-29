@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from flask import g, request, session, render_template
+from flask import g, render_template
 from functools import wraps
 from tp import db, app
 from time import time
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import sessionmaker, scoped_session
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate
-from tp.auth.models import Keychain, User
-from tp.game.models import Game
-from tp.base.utils import roomName
 from tp.utils import merge_dicts
-from tp.exceptions import TPException, MissingParameter, ChangeFailed, NotAllowed, MaxCharacters
+from tp.exceptions import TPException, MissingParameter, NotAllowed, MaxCharacters
 #decorator che serve per markare una api call in modo che avvenga un controllo sul token mandato dall'utente prima della sua esecuzione.
 #per metterlo in funzione basterà anteporre @auth_required alla stessa
 def auth_required(f):
@@ -42,10 +37,10 @@ def webpage(template, **defaultParams):
                 output = f(*args, **kwargs)
                 output = merge_dicts(output, defaultParams)
                 return render_template(template, **output), 200
-            except(TPException, e):
+            except TPException as e:
                 defaultParams["error"] = e.message
                 return render_template(template, **defaultParams), e.status_code
-            except(Exception, e):
+            except Exception as e:
                 defaultParams["error"] = str(e)
                 return render_template(template, **defaultParams), 400
 
@@ -112,12 +107,12 @@ def needs_values(method, *keys):
                 #lo store è una map? controllo se è presente (è il caso di request.form)
                 missing_on_dict = isinstance(store, dict) and store.get(key) == None
                 #il parametro nello store è una stringa vuota?
-                empty_string = isinstance(store, dict) and isinstance(store.get(key), basestring) and not store.get(key)
+                empty_string = isinstance(store, dict) and isinstance(store.get(key), str) and not store.get(key)
                 if missing_on_dict or missing_on_array or empty_string:
                     missing.append(key)
                 else:
                     value = store.get(key)
-                    if isinstance(value, basestring) and len(value) > app.config["MAX_CHARS_FOR_FIELD"]:
+                    if isinstance(value, str) and len(value) > app.config["MAX_CHARS_FOR_FIELD"]:
                         too_long.append(key)
                     else:
                         output[key] = store[key]

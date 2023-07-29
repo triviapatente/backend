@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
+from sqlalchemy.exc import IntegrityError
 
 from test.auth.http.api import register
 from test.game.http.api import new_game, leave_game
 from test.shared import get_socket_client, TPAuthTestCase
 from test.base.socket.api import join_room, leave_rooms
-from api import *
-from tp.game.models import Round, Question, ProposedCategory, ProposedQuestion, Game
-from tp.auth.models import User
+from test.game.socket.api import *
+from test.game.socket.utils import dumb_crawler, generate_random_category, generate_random_question, generateRound
+
+from tp.game.models import Round
 from tp.events.models import Socket
 from tp.base.utils import RoomType
 from tp import db, app
-from sqlalchemy.exc import IntegrityError
-from utils import dumb_crawler, generate_random_category, generate_random_question, generateRound
+
 class GameSocketTestCase(TPAuthTestCase):
 
     opponent_id = None

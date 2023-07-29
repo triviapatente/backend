@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 from tp import app
 import sys
-
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Enum, Date, BigInteger, DateTime
+import os
+import secrets
+from sqlalchemy import Column, String, Integer, ForeignKey, Date, BigInteger, DateTime
 from sqlalchemy.orm import relationship
 from passlib.apps import custom_app_context as pwd_context
 import random
-from itsdangerous import (JSONWebSignatureSerializer
-                          as Serializer, BadSignature, SignatureExpired)
-
-from tp.base.models import Base, CommonPK
+from itsdangerous import (JSONWebSignatureSerializer as Serializer)
 from werkzeug.utils import secure_filename
 from validate_email import validate_email
 from sqlalchemy.orm import validates
-from tp.exceptions import *
 from datetime import datetime
 
-import os
+from tp.base.models import Base, CommonPK
+from tp.exceptions import *
 
 MAX_CHARS = app.config["MAX_CHARS_FOR_FIELD"]
 
@@ -176,13 +174,13 @@ class Keychain(Base, CommonPK):
       #ottengo il serializer
       s = self.getSerializer()
       #critto l'id dell'utente proprietario del keychain e il nonce e ne ottengo un token
-      return s.dumps({ 'id': self.user_id, 'nonce': self.nonce})
+      return s.dumps({ 'id': self.user_id, 'nonce': self.nonce}).decode("utf-8")
   @property
   def change_password_token(self):
       #ottengo il serializer
       s = self.getSerializer()
       #critto l'id dell'utente proprietario del keychain
-      return s.dumps({ 'id': self.user_id, 'nonce': self.change_password_nonce})
+      return s.dumps({ 'id': self.user_id, 'nonce': self.change_password_nonce}).decode('utf-8')
 
   #metodo centrale che contiene l'istanza del serializer per generazione e verifica di token
   #muovendolo in un metodo centrale siamo sicuri che la chiave usata per generare/verificare è sempre la stessa
@@ -218,10 +216,10 @@ class Keychain(Base, CommonPK):
 
   #metodo che salva genera, hasha e salva un nuovo nonce di lunghezza ##length numeri consecutivi (in media di 2/3 cifre)
   def renew_nonce(self, length = 16):
-      self.nonce = ''.join(str(x) for x in map(ord, os.urandom(length)))
+      self.nonce = secrets.token_urlsafe(length)
   #metodo che salva genera, hasha e salva un nuovo change_password_nonce di lunghezza ##length numeri consecutivi (in media di 2/3 cifre)
   def renew_change_password_nonce(self, length = 16):
-      self.change_password_nonce = ''.join(str(x) for x in map(ord, os.urandom(length)))
+      self.change_password_nonce = secrets.token_urlsafe(length)
 
   #metodo che controlla se la password candidata è equivalente all'hash salvato
   def check_password(self, candidate):

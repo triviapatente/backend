@@ -23,7 +23,7 @@ def event(name, action, preferences_key = None):
                 data["action"] = action.value
                 data["name"] = name
             #users è una stanza
-            if isinstance(users, basestring):
+            if isinstance(users, str):
                 users = getUsersFromRoomID(users)
             if not users:
                 return (users, data, preferences_key)

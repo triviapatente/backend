@@ -8,7 +8,7 @@ from sqlalchemy.sql.expression import case
 
 from tp import db
 from tp.game.models import *
-from tp.events.utils import *
+from tp.stats.utils import *
 
 def getWrongLastQuestions(category_id):
     if not category_id:

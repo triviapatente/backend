@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from test.shared import TPAuthTestCase
 from tp.preferences.models import Preferences
-from api import *
+from test.shared import TPAuthTestCase
+from test.preferences.http.api import *
 
 class PreferencesHTTPTestCase(TPAuthTestCase):
     def test_changeNotificationPreferences(self):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from api import *
+from test.message.http.api import *
 from test.auth.http.api import register
 from test.game.http.api import new_game
 from test.base.socket.api import join_room

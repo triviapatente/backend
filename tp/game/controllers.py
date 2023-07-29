@@ -253,7 +253,7 @@ def answer_training():
         raise BadParameters("Non ci sono 40 domande!")
     for (key, item) in answers.items():
         index = item.get("index")
-        if not isinstance(key, basestring) or not isinstance(index, int):
+        if not isinstance(key, str) or not isinstance(index, int):
             raise BadParameters("Input formattato male")
     quiz_ids = [long(k) for k in answers.keys()]
     quizzesCount = Quiz.query.filter(Quiz.id.in_(quiz_ids)).count()

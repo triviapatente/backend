@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from api import *
+from test.purchases.http.api import *
 from test.shared import TPAuthTestCase
 from tp.purchases.models import ShopItem
 # poi servirà l'autenticazione

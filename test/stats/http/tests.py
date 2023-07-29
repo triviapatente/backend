@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from tp.game.models import Question, Game, Round, Quiz, Category
+from tp import db
+from tp.game.models import Question, Round, Quiz, Category
 from test.game.socket.utils import dumb_crawler
 from test.game.http.api import new_game
 from test.auth.http.api import register
 from test.shared import TPAuthTestCase
-from sqlalchemy.orm import sessionmaker
-from flask_sqlalchemy import SQLAlchemy
-from tp import app, db
-from api import *
+from test.stats.http.api import *
 class StatsHTTPTestCase(TPAuthTestCase):
     quiz_1 = None
     quiz_2 = None

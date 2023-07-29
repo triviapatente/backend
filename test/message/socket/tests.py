@@ -4,7 +4,7 @@ from test.shared import TPAuthTestCase, get_socket_client
 from test.base.socket.api import join_room
 from test.auth.http.api import register
 from test.game.http.api import new_game
-from api import *
+from test.message.socket.api import *
 
 class MessageSocketTestCase(TPAuthTestCase):
     opponent_socket = None

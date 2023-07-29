@@ -25,8 +25,8 @@ def extractArrayFrom(left, right, limit):
     #entrambi gli array hanno un numero di elementi >= a (##limit / 2)
     else:
         #prendo gli ultimi (##limit / 2) elementi da quello di sinistra, e i primi (##limit / 2) da destra
-        lower_bound = len(left) - (limit / 2)
-        upper_bound = limit / 2
+        lower_bound = int(len(left) - (limit / 2))
+        upper_bound = int(limit / 2)
         output = left[lower_bound:] + right[:upper_bound]
     return output
 

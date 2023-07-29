@@ -14,12 +14,12 @@ class Base(db.Model):
     __abstract__ = True
 
     def __getitem__(self, key):
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             return getattr(self, key)
         return None
 
     def __setitem__(self, key, value):
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             setattr(self, key, value)
 
     export_properties = []

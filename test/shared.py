@@ -67,7 +67,7 @@ def fake_request(test_client, fn):
         response = oldmethod(url, **args)
         assert response.status_code != 500, "Internal server error"
         #faccio l'encode della risposta
-        response.data = response.data.encode("utf-8")
+        # response.data = response.data.encode("utf-8")
         print(f"Risposta HTTP (url = {url}):", response.data)
         try:
             #aggiungo il json alla risposta
