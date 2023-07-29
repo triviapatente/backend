@@ -16,15 +16,15 @@ def filter_input_room(f):
         #parametri della richiesta socket
         room_id = g.params.get("id")
         room_type = g.params.get("type")
-        print "Filtering input room %s_%s" % (room_type, room_id)
+        print(f"Filtering input room {room_type}_{room_id}")
         if room_type != "game":
             raise NotAllowed()
         elif room_id is None:
             return f(*args, **kwargs)
         else:
             partecipation = Partecipation.query.filter(Partecipation.user_id == g.user.id, Partecipation.game_id == room_id).first()
-            print "game_id", room_id
-            print "partecipation", partecipation
+            print("game_id", room_id)
+            print("partecipation", partecipation)
             #se l'id non è settato, mi viene ritornato un valore diverso da none se la room ha un nome sensato, se l'id è settato invece, mi deve ritornare un array con length > 0
             if partecipation is not None:
                 g.roomName = roomName(room_id, "game")
@@ -40,7 +40,7 @@ def check_in_room(room_type, key):
         def decorated_function(*args, **kwargs):
             room_id = g.params[key]
             room = roomName(room_id, room_type)
-            print room, room_id
+            print(room, room_id)
             if room_type != RoomType.game:
                 raise NotAllowed()
             partecipation = RoomParticipation.query.filter(RoomParticipation.device_id == g.deviceId, RoomParticipation.game_id == room_id).first()

@@ -20,7 +20,7 @@ class TPJSONEncoder(JSONEncoder):
         return super(TPJSONEncoder, self).default(obj)
 
 def init(testing = False, ci = False):
-    print "app initialization"
+    print("app initialization")
     global app
     global socketio
     global db
@@ -31,10 +31,10 @@ def init(testing = False, ci = False):
     from flask import Flask, render_template, jsonify, json
 
     # Import SQLAlchemy
-    from flask.ext.sqlalchemy import SQLAlchemy
+    from flask_sqlalchemy import SQLAlchemy
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
-    from flask.ext.mail import Mail
+    from flask_mail import Mail
     from flask_cors import CORS
 
     # Import SocketIO
@@ -70,9 +70,9 @@ def init(testing = False, ci = False):
         #configure ddos limiter
 
     if testing:
-        print "enabling testing mode.."
+        print("enabling testing mode..")
         if ci:
-            print "enabling ci mode.."
+            print("enabling ci mode..")
             app.config["SQLALCHEMY_TEST_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"].replace("localhost", "postgres")
         app.config["SQLALCHEMY_DATABASE_URI"] = app.config["SQLALCHEMY_TEST_DATABASE_URI"]
 
@@ -85,10 +85,10 @@ def init(testing = False, ci = False):
     db = SQLAlchemy(app)
     socketio = SocketIO(json = json, async_mode='eventlet')
     if app.config["DEBUG"] == True or testing or ci:
-        print "Starting SocketIO without Redis.."
+        print("Starting SocketIO without Redis..")
         socketio.init_app(app)
     else:
-        print "Starting SocketIO with Redis.."
+        print("Starting SocketIO with Redis..")
         socketio.init_app(app, message_queue='redis://')
     mail = Mail()
     mail.init_app(app)
@@ -123,7 +123,7 @@ def init(testing = False, ci = False):
     def handleTPException(error):
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
-        print "API Error %d: %s" % (error.status_code, error.message)
+        print(f"API Error {error.status_code}: {error.message}")
         return response
     @socketio.on_error_default
     def handle_socket_error(error):
@@ -131,13 +131,13 @@ def init(testing = False, ci = False):
         event = request.event["message"]
         if issubclass(error.__class__, TPException):
             response = error.to_dict()
-            print "Socket Error %d (%s): %s" % (error.status_code, event, error.message)
+            print("Socket Error {error.status_code} ({event}): {error.message}")
         else:
             error = str(error)
             #internal server error
             response = {"error": error, "success": False, "status_code": 500}
-            print "Socket Error %s (%s)" % (error, event)
-        print "Traceback: %s" % traceback.format_exc(sys.exc_info())
+            print("Socket Error {error} ({event})")
+        print("Traceback: {traceback.format_exc(sys.exc_info())}")
         emit(event, response)
 
 

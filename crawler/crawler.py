@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from patentati import routines
-from utils import utils
+from crawler.patentati import routines
+import crawler.utils.utils
 
 from tp.game.models import Quiz, Image, Category
-from shared import shared_map
+from crawler.shared import shared_map
 baseUrl = ''
 
 # get Categories and puts them into ##session, no commit, ##imgPath where to save images
@@ -27,13 +27,13 @@ def getCategories(session, seed, bUrl, imgPath = '/images'):
         category.id = infos["id"]
         category.hint = infos["hint"]
         category.color = infos["color"]
-        print 'Saving category: ' + category.hint + '..'
+        print(f"Saving category: {category.hint}")
         session.add(category)
         session.commit()
-        #print 'Crawling the above category..'
+        #print("Crawling the above category..")
         malformedQuestions += getGroups(session, link, int(category.id), imgPath)
-        #print 'Saved all the quizzes of the category'
-    print "Overall malformed questions: %d" % (malformedQuestions)
+        #print("Saved all the quizzes of the category")
+    print(f"Overall malformed questions: {malformedQuestions}")
 
 
 # get Groups from ##link of the category to continue the crawler and go to extract the quizzes
@@ -45,9 +45,9 @@ def getGroups(session, link, category_id, imgPath):
         # Get question rows
         questionsRows = routines.getQuestions(baseUrl + link, 'quests')
         malformedQuestions += getQuestions(session, questionsRows, category_id, imgPath)
-    print "Malformed questions: %d" % (malformedQuestions)
+    print(f"Malformed questions: {malformedQuestions}")
     if malformedQuestions > 0:
-        print "Warning: you have to correct them manually!"
+        print("Warning: you have to correct them manually!")
     return malformedQuestions
 # get Questions from ##questionsRows, which is the set of all the rows of the group table and put them into ##session
 # ##session is the ORM connected to the db, ##category_id is the id of the category, ##imgPath where to save images
@@ -58,13 +58,13 @@ def getQuestions(session, questionsRows, category_id, imgPath):
         image_url, question, answer = routines.parseQuestionRow(row)
         if question[:1].islower():
             malformedQuestions += 1
-            print "Malformed question found: %s" % question
+            print(f"Malformed question found: {question}")
         # Downloading image if not already done
-        #print 'Downloading next image if necessary..'
+        #print("Downloading next image if necessary..")
         image_id = getImage(session, image_url, imgPath)
         # Create quiz record
         question = Quiz(question = question, answer = answer, image_id = image_id, category_id = category_id)
-        #print 'Saving next quiz..'
+        #print("Saving next quiz..")
         session.add(question)
     return malformedQuestions
 
@@ -79,14 +79,14 @@ def getImage(session, image_url, imgPath):
     if not image:
         if utils.getImage(url, path):
             # Create image record
-            #print 'Successful download, saving image..'
+            #print("Successful download, saving image..")
             image = Image(image = path)
             session.add(image)
             session.commit()
         else:
-            #print 'Some error occured in image download..'
+            #print("Some error occured in image download..")
             return None
     else:
         None
-        #print 'Image already present in the database..'
+        #print("Image already present in the database..")
     return image.id

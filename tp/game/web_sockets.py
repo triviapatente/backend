@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import g, request, json
 from tp import socketio, app, db
-from tp.ws_decorators import ws_auth_required, filter_input_room, check_in_room
+from tp.ws_decorators import ws_auth_required, check_in_room
 from tp.decorators import check_game_not_ended
 from tp.base.utils import roomName
 from tp.game.utils import *
@@ -11,11 +11,11 @@ from tp.decorators import needs_values, fetch_models, create_session
 from flask_socketio import emit, join_room, leave_room, rooms
 from flask import g
 from tp.base.utils import RoomType
-from tp.exceptions import NotAllowed, ChangeFailed
+from tp.exceptions import NotAllowed
 from sqlalchemy import func, and_, asc
-import events
-from tp.cron import events as cronEvents
-from events import RecentGameEvents
+
+import tp.cron.events as cronEvents
+from tp.game.events import RecentGameEvents
 import pytz
 
 @socketio.on("init_round")
@@ -48,9 +48,9 @@ def init_round(data):
                 game.winner_id = winner.id
             db.session.add(game)
             db.session.commit()
-            print "Game %d ended. Updating scores.." % game.id
+            print(f"Game {game.id} ended. Updating scores..")
             updatedUsers = updateScore(game)
-            print "User's score updated."
+            print("User's score updated.")
             sendStimulationOnGameEnded(game, updatedUsers, cronEvents)
         #preparo l'output
         partecipations = [p.json for p in getPartecipationFromGame(game)]
@@ -112,7 +112,7 @@ def init_round(data):
         #invio la risposta standard più l'info che devo ancora finire il round
         output["waiting"] = "game"
         output["waiting_for"] = g.user
-    print "User %s in init round got output:" % g.user.username, output
+    print(f"User {g.user.username} in init round got output:", output)
     #TODO informazione ridondante, rimuoverla quando avremo il db lato client (in tal caso basterà l'id della categoria, che è messo nel round)
     output["category"] = Category.query.filter(Category.id == round.cat_id).first()
     emit("init_round", output)
@@ -153,7 +153,7 @@ def get_random_categories(data):
         proposed = [cat for (cat, number) in proposed]
     #dopodichè, rispondo
     proposed = sorted([p.json for p in proposed], key = lambda cat: cat.get("id"))
-    print "User %s got proposed categories." % g.user.username, proposed
+    print(f"User {g.user.username} got proposed categories.", proposed)
     emit("get_categories", {"categories": proposed, "success": True})
 
 @socketio.on("choose_category")
@@ -189,7 +189,7 @@ def choose_category(data):
     db.session.commit()
     # genero le domande random, pescando da quelle della categoria richiesta
     proposed = Quiz.query.with_entities(Quiz, getNumberOfTotalAnswersForQuiz(Quiz, game, opponent).label("total_answers")).filter(Quiz.category_id == category.id).order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_QUESTIONS_PER_ROUND"]).all()
-    print proposed
+    print(proposed)
     #e le aggiungo come questions in db
     for (candidate, totalAnswers) in proposed:
         q = ProposedQuestion(round_id = round.id, quiz_id = candidate.id)
@@ -197,7 +197,7 @@ def choose_category(data):
     db.session.commit()
 
     #rispondo anche con info sulla category scelta
-    print "User %s has choosen category." % g.user.username, category
+    print(f"User {g.user.username} has choosen category.", category)
     emit("choose_category", {"success": True, "category": category})
     opponent = User.query.get(opponent_id)
     events.category_chosen([opponent], category)
@@ -233,7 +233,7 @@ def get_questions(data):
 
     proposed = sorted([p.json for p in output], key = lambda q: q.get("id"))
     #dopodichè, rispondo
-    print "User %s got questions." % g.user.username, proposed
+    print(f"User {g.user.username} got questions.", proposed)
     emit("get_questions", {"questions": proposed, "success": True})
 
 @socketio.on("answer")
@@ -266,7 +266,7 @@ def answer(data):
     number_of_answers = Question.query.filter(Question.round_id == round.id).filter(Question.user_id == g.user.id).count()
 
     #rispondo anche dicendo se ho dato la risposta giusta o sbagliata
-    print "User %s answered to proposed question." % g.user.username, question, answer
+    print(f"User {g.user.username} answered to proposed question.", question, answer)
     correct = (quiz.answer == question.answer)
     opponent_turn = isOpponentTurn(game)
     if number_of_answers == NUMBER_OF_QUESTIONS_PER_ROUND:

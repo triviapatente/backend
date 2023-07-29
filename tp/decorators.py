@@ -4,7 +4,7 @@ from flask import g, request, session, render_template
 from functools import wraps
 from tp import db, app
 from time import time
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import sessionmaker, scoped_session
 from tp.utils import storeForMethod, outputKeyForMethod, getAllRequestParams
 from tp.auth.utils import authenticate
@@ -42,10 +42,10 @@ def webpage(template, **defaultParams):
                 output = f(*args, **kwargs)
                 output = merge_dicts(output, defaultParams)
                 return render_template(template, **output), 200
-            except TPException, e:
+            except(TPException, e):
                 defaultParams["error"] = e.message
                 return render_template(template, **defaultParams), e.status_code
-            except Exception, e:
+            except(Exception, e):
                 defaultParams["error"] = str(e)
                 return render_template(template, **defaultParams), 400
 
@@ -58,7 +58,7 @@ def track_time(f):
         start_time = time()
         output = f(*args, **kwargs)
         elapsed_time = time() - start_time
-        print "[%s] Elapsed time: %f" % (f.__name__, elapsed_time)
+        print(f"[{f.__name__}] Elapsed time: {elapsed_time}")
         return output
     return decorated_function
 #decorator che trimma ogni valore e se dopo il trim corrisponde alla stringa vuota, li setta a null se allowEmptyString = False

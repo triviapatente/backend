@@ -31,7 +31,7 @@ def getItalianRank():
     #se ci sono corrette info di paginazione, avvio una query paginata
     else:
         rank = getPaginatedRank(thresold, direction)
-    print "User %s got global rank." % g.user.username
+    print(f"User {g.user.username} got global rank.")
     return jsonify(rank = rank)
 
 @rank.route("/friends", methods = ["GET"])

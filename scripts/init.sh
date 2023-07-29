@@ -6,16 +6,16 @@ apt-get -qqy install python-pip
 apt-get install -y libxml2-dev libxslt1-dev zlib1g-dev
 apt-get install libevent-dev
 apt-get install python-all-dev
-#aggiungo l'utente ted con la password già inserita (e crittata)
-sudo useradd -p $(echo ted | openssl passwd -1 -stdin) ted
+#aggiungo l'utente triviapatente con la password già inserita (e crittata)
+sudo useradd -p $(echo triviapatente | openssl passwd -1 -stdin) triviapatente
 #lo creo a livello di postgres
-sudo -u postgres bash -c "createuser -P -s -e ted"
+sudo -u postgres bash -c "createuser -P -s -e triviapatente"
 #creo il db
 sudo -u postgres bash -c "psql -c \"CREATE DATABASE triviapatente \""
 sudo -u postgres bash -c "psql -c \"CREATE DATABASE triviapatente_test \""
-#do il privilegio all'utente ted
-sudo -u postgres bash -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE triviapatente TO ted\""
-sudo -u postgres bash -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE triviapatente_test TO ted\""
+#do il privilegio all'utente triviapatente
+sudo -u postgres bash -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE triviapatente TO triviapatente\""
+sudo -u postgres bash -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE triviapatente_test TO triviapatente\""
 
 #questi 6 linee di codice ricercano questi pattern nei file e se non lo trovano lo inseriscono
 #i commenti sono fondamentali per evidenziare che questi sono i comandi che abbiamo inserito noi

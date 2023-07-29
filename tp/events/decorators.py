@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from flask_socketio import emit
-from models import *
 from flask import g
-from tp.base.utils import getUsersFromRoomID
 from functools import wraps
+from pyfcm import FCMNotification
+
+from tp.events.models import *
+from tp.base.utils import getUsersFromRoomID
 from tp import socketio, app
 from tp.preferences.models import Preferences
-from pyfcm import FCMNotification
 
 pushService = FCMNotification(api_key = app.config["FIREBASE_API_KEY"])
 
@@ -40,19 +41,19 @@ def event(name, action, preferences_key = None):
 def send_socket_message(name, user, data):
     sockets = Socket.query.filter(Socket.user_id == user.id).all()
     for socket in sockets:
-        print "[SOCKET EVENT, name = %s, user = %s, sid = %s]" % (name, user.username, socket.socket_id)
+        print(f"[SOCKET EVENT, name = {name}, user = {user.username}, sid = {socket.socket_id}]")
         try:
             socketio.emit(name, data, room = socket.socket_id)
         except Exception as e:
-            print "Exception on emit", str(e)
+            print("Exception on emit", str(e))
 
 def send_push_message(users, params):
     user_ids = [u.id for u in users]
     installations = Installation.query.filter(Installation.user_id.in_(user_ids)).all()
     device_tokens = [i.token for i in installations]
     if len(device_tokens) != 0:
-        print "Sending push to...", device_tokens
+        print("Sending push to...", device_tokens)
         title = "TriviaPatente"
         body = params["message"]
         result = pushService.notify_multiple_devices(registration_ids = device_tokens, message_title = title, message_body = body, data_message = params)
-        print "[PUSH EVENT, result:]", result
+        print("[PUSH EVENT, result:]", result)

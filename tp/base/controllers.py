@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, Blueprint, render_template
-from tp import app, db
 from flask import g, redirect, request, render_template_string, send_file
-from porting import getJSONModels
+from sqlalchemy import exc
+from premailer import transform
+from io import StringIO ## for Python 3
+import requests
+
+from tp import app, db
+from tp.base.porting import getJSONModels
+from tp.base.models import Feedback
+from tp.base.utils import *
+from tp.auth.models import User, Keychain
 from tp.exceptions import NotAllowed, BadParameters, InstagramProblem, InstagramUnnecessary, ChangeFailed
 from tp.decorators import auth_required, needs_values, create_session
-from tp.base.models import Feedback
-from tp.auth.models import User, Keychain
-from tp.base.utils import *
-import datetime
 from tp.utils import doTransaction
-from sqlalchemy import exc
 from tp.events.models import Installation
-from premailer import transform
-import jinja2
-import StringIO
-import requests
 
 base = Blueprint("base", __name__, url_prefix = "/ws")
 gdpr = Blueprint("gdpr", __name__, url_prefix = "/gdpr")

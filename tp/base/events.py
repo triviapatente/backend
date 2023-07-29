@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from tp.events.decorators import event
 from tp.events.utils import EventActions
-from tp.base.utils import getRoomsFor, RoomType
 from flask import g
 
 @event("user_joined", action = EventActions.joined)

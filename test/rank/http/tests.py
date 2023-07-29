@@ -35,14 +35,14 @@ class RankHTTPTestCase(TPTestCase):
 
     def test_array_merge(self):
         limit = 10
-        print "#1: Left e right < limit / 2"
+        print("#1: Left e right < limit / 2")
         output = extractArrayFrom([], [], limit)
         assert len(output) == 0
         output = extractArrayFrom([1, 2], [3], limit)
         assert len(output) == 3
         output = extractArrayFrom([1], [2, 3], limit)
         assert len(output) == 3
-        print "#2: Left < limit / 2, e right no"
+        print("#2: Left < limit / 2, e right no")
         output = extractArrayFrom([], [1, 2, 3, 4, 5], limit)
         assert len(output) == 5
         output = extractArrayFrom([], [1, 2, 3, 4, 5, 6], limit)
@@ -51,7 +51,7 @@ class RankHTTPTestCase(TPTestCase):
         assert len(output) == 6
         output = extractArrayFrom([1], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11], limit)
         assert len(output) == limit
-        print "#3: Right < limit / 2, e left no"
+        print("#3: Right < limit / 2, e left no")
         output = extractArrayFrom([1, 2, 3, 4, 5], [], limit)
         assert len(output) == 5
         output = extractArrayFrom([1, 2, 3, 4, 5, 6], [], limit)
@@ -60,7 +60,7 @@ class RankHTTPTestCase(TPTestCase):
         assert len(output) == 6
         output = extractArrayFrom([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11], limit)
         assert len(output) == limit
-        print "#4: Right e left >= limit / 2"
+        print("#4: Right e left >= limit / 2")
         output = extractArrayFrom([1, 2, 3, 4, 5, 6, 7, 8, 9], [10, 11, 12, 13, 14, 15, 16, 17], limit)
         assert len(output) == limit
         assert output[0] == 5
@@ -69,28 +69,28 @@ class RankHTTPTestCase(TPTestCase):
         assert len(output) == limit
 
     def test_global_rank(self):
-        print "#1: Classifica ricevuta correttamente"
+        print("#1: Classifica ricevuta correttamente")
         response = global_rank(self)
         rank = response.json.get("rank")
         assert response.status_code == 200
         assert rank
 
-        print "#2: Classifica di %s elementi come predefinito" % self.number_of_results
+        print(f"#2: Classifica di {self.number_of_results} elementi come predefinito")
         assert len(rank) == self.number_of_results
 
-        print "#3: Position e internalPosition di ogni elemento ricevuta"
+        print("#3: Position e internalPosition di ogni elemento ricevuta")
         for user in rank:
             assert user.get("position")
             assert user.get("internalPosition")
 
-        print "#4: Sono nei primi n, mi ritorna i primi n"
+        print("#4: Sono nei primi n, mi ritorna i primi n")
         #sono già primo, sono stato generato con lo score più alto
         index = 0
         assert rank[index].get("position") == index + 1
         index = len(rank) - 1
         assert rank[index].get("position") == index + 1
 
-        print "#5: Sono dopo i primi n, ritorna esattamente n risultati con me"
+        print("#5: Sono dopo i primi n, ritorna esattamente n risultati con me")
         #aggiorno il mio punteggio
         user = User.query.get(self.user_id)
         lastScore = user.score
@@ -104,42 +104,42 @@ class RankHTTPTestCase(TPTestCase):
         rank = response.json.get("rank")
         assert len(rank) == self.number_of_results
 
-        print "#6: Ci sono sempre io in classifica"
+        print("#6: Ci sono sempre io in classifica")
         obtainCurrentUserFrom(rank, self.user_id)
 
         #paginazione
         thresold = [u for u in rank if u.get("id") == self.user_id][0].get("internalPosition")
-        print "#7: Paginazione: up corretta"
+        print("#7: Paginazione: up corretta")
         response = global_rank(self, thresold, "up")
         rank = response.json.get("rank")
 
         for i in range(0, len(rank)):
             assert rank[i].get("internalPosition") == thresold + i + 1
 
-        print "#8: Paginazione: down corretta"
+        print("#8: Paginazione: down corretta")
         response = global_rank(self, thresold, "down")
         rank = response.json.get("rank")
 
         for i in range(0, len(rank)):
             assert rank[i].get("internalPosition") == thresold - len(rank) + i
 
-        print "#9: Paginazione: direction sbagliata"
+        print("#9: Paginazione: direction sbagliata")
         response = global_rank(self, 3400, "efeervev")
         assert response.status_code == 400
 
-        print "#10: Paginazione: top rank"
+        print("#10: Paginazione: top rank")
         response = global_rank(self, 0, "up")
         rank = response.json.get("rank")
         assert len(rank) == self.number_of_results
         for i in range(0, len(rank)):
             assert rank[i].get("internalPosition") == i + 1
 
-        print "#11: Parametri mancanti"
-        print "#11.1: thresold quando direction è settata"
+        print("#11: Parametri mancanti")
+        print("#11.1: thresold quando direction è settata")
         response = global_rank(self, None, "up")
         assert response.status_code == 400
 
-        print "#11.2: direction quando thresold è settato"
+        print("#11.2: direction quando thresold è settato")
         response = global_rank(self, 3400, None)
         assert response.status_code == 400
 
@@ -156,20 +156,20 @@ class RankHTTPTestCase(TPTestCase):
         user = [u for u in rank if u.get("id") == self.user_id][0]
         opponent = [u for u in rank if u.get("id") == opponent_id][0]
 
-        print "#1: Punteggi uguali, position uguale"
+        print("#1: Punteggi uguali, position uguale")
         assert user.get("position") == opponent.get("position")
 
-        print "#2: Punteggi uguali, internalPosition diversa"
+        print("#2: Punteggi uguali, internalPosition diversa")
         assert user.get("internalPosition") != opponent.get("internalPosition")
 
-        print "#3: internalPosition per ugual punteggio stabilita alfabeticamente"
+        print("#3: internalPosition per ugual punteggio stabilita alfabeticamente")
         if user.get("username") > opponent.get("username"):
             assert user.get("internalPosition") > opponent.get("internalPosition")
         else:
             assert user.get("internalPosition") < opponent.get("internalPosition")
 
     def test_search(self):
-        print "#1: Risposta successful"
+        print("#1: Risposta successful")
         response = search(self, "us")
         assert response.status_code == 200
         matches = response.json.get("users")
@@ -177,7 +177,7 @@ class RankHTTPTestCase(TPTestCase):
         for match in matches:
             assert match.get("position")
 
-        print "#2: Parametri mancanti"
-        print "#2.1: query"
+        print("#2: Parametri mancanti")
+        print("#2.1: query")
         response = search(self, None)
         assert response.status_code == 400

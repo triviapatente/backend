@@ -100,7 +100,7 @@ def createFBUser(username = None, email = None, name = None, surname = None, bir
 def getUserFromRequest(socket = False):
     #ottengo il token, con la chiamata trovata in app.auth.utils se non parliamo di socket, nella sessione se invece ne parliamo
     token = tokenFromRequest(socket)
-    print "Got token from request: %s." % token
+    print(f"Got token from request: {token}.")
     #provo a verificare il token e vedere se riesco a ottenere l'user
     return  Keychain.verify_auth_token(token)
 
@@ -108,7 +108,7 @@ def authenticate(socket = False):
     user = getUserFromRequest(socket)
     #se non lo ottengo vuol dire che il token non è verificato
     if user is None:
-        print "No user associated with token, forbidden!"
+        print("No user associated with token, forbidden!")
         #lancio un errore Forbidden
         raise Forbidden()
     elif socket == True:
@@ -124,6 +124,6 @@ def authenticate(socket = False):
         db.session.commit()
         g.deviceId = deviceId
 
-    print "User %s associated with token." % user.username
+    print(f"User {user.username} associated with token.")
     #in caso contrario, salvo l'utente nelle variabili della richiesta. ora le info dell'utente che la sta effettuando sono accessibili in tutto il context della richiesta corrente
     g.user = user

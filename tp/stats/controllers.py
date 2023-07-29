@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, jsonify
+
 from tp.decorators import auth_required, fetch_models, needs_values
-from tp.auth.models import User
 from tp.game.models import Category
 from tp.decorators import create_session
-from queries import *
-from datetime import datetime, timedelta
+from tp.stats.queries import *
 
 stats = Blueprint("stats", __name__, url_prefix = "/stats")
 

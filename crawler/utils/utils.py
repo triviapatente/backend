@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import urllib2, re, requests, shutil
+from urllib.request import urlopen
+import re, requests, shutil
 from bs4 import BeautifulSoup
 
 ### Contains all the general crawl utils ###
 
 # Given an ##url returns the html document
 def getHtml(url):
-    return urllib2.urlopen(url).read()
+    return urlopen(url).read()
 
 # Get container given the tag (##containerTag) and the class (##containerClass)
 def getContainer(url, containerTag, containerClass):

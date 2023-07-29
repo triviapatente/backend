@@ -39,7 +39,7 @@ def login():
     #controllo se la password dell'utente corrisponde a quella interna
     if keychain.check_password(password):
         #se si, sei loggato! Ti torno anche un token, così la tua sessione inizia
-        print "User: ", user
+        print("User: ", user)
         return jsonify(user = user, token = keychain.auth_token)
     else:
         #se no, login fallito
@@ -63,7 +63,7 @@ def register():
     #i controlli son passati, posso creare l'utente e salvarlo
     output = doTransaction(createUser, username = username, email = email, password = password)
     user, keychain = output
-    print "User %s has registered." % user.username, user
+    print(f"User {user.username} has registered.", user)
     return jsonify(user = user, token = keychain.auth_token)
 
 @create_session
@@ -91,7 +91,7 @@ def fb_auth():
         output = doTransaction(createFBUser, email = email, birth = birth, name = first_name, surname = last_name, token = token, tokenInfos = tokenInfos)
         if output:
             user, keychain = output
-            print "User %s has registered." % user.username, user
+            print(f"User {user.username} has registered.", user)
             return jsonify(user = user, token = keychain.auth_token)
         raise TPException() #TODO: trovare exception appropriata
 
@@ -106,7 +106,7 @@ def link_to_fb():
     tokenInfos = api.getTokenInfos()
     output = doTransaction(linkUserToFB, profileData = profileData, tokenInfos = tokenInfos, token = token)
     if output:
-        print "User %s has linked its account to Facebook" % g.user.username
+        print(f"User {g.user.username} has linked its account to Facebook")
         infos = getFBTokenInfosFromUser(g.user)
         return jsonify(infos = infos, user = g.user)
     raise TPException() #TODO: trovare exception appropriata
@@ -208,7 +208,7 @@ def changeName():
     g.user.name = name
     db.session.add(g.user)
     db.session.commit()
-    print "User %d changed name to: %s." % (g.user.id, g.user.name)
+    print(f"User {g.user.id} changed name to: {g.user.name}.")
     return jsonify(success = True, user = g.user)
 
 @create_session
@@ -223,7 +223,7 @@ def changeSurname():
     g.user.surname = surname
     db.session.add(g.user)
     db.session.commit()
-    print "User %d changed surname to: %s" % (g.user.id, g.user.surname)
+    print("User {g.user.id} changed surname to: {g.user.surname}")
     return jsonify(success = True, user = g.user)
 
 @create_session
@@ -247,12 +247,12 @@ def changeImage():
             db.session.commit()
         except:
             db.session.rollback()
-            print "Unable to change user image."
+            print("Unable to change user image.")
             raise ChangeFailed()
-        print "User %d change image to: %s." % (g.user.id, g.user.image)
+        print(f"User {g.user.id} change image to: {g.user.image}.")
         return jsonify(success = True, user = g.user)
     else:
-        print "User image not allowed."
+        print("User image not allowed.")
         raise FormatNotAllowed()
 
 @create_session

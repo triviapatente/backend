@@ -38,22 +38,22 @@ class MessageHTTPTestCase(TPAuthTestCase):
         # prendo la data dell'11esimo messaggio
         datetime = self.messages[10]["updatedAt"]
 
-        print "#1: Message list from %s received" % datetime
+        print(f"#1: Message list from {datetime} received")
         # prendo i primi 10 messaggi (i primi 50 più vecchi dopo l'11esimo sono i primi 10)
         messageList = getList(self, self.game_id, datetime).json.get("messages")
         # controllo di avere messaggi
         assert messageList
 
-        print "#2: Number of messages less then max per scroll when there are less then max to get"
+        print("#2: Number of messages less then max per scroll when there are less then max to get")
         # controllo che il numero di messaggi sia minore del massimo per scroll quando il numero di messaggi più vecchi della data son meno del massimo
         assert len(messageList) <= self.maxMessages
 
-        print "#3: Check messages content"
+        print("#3: Check messages content")
         # controllo che il contenuto dei messaggi tornati sia quello dei 10 più vecchi
         for i in range(0, 10):
             assert self.messages[i]["content"] == messageList[i]["content"]
 
-        print "#4: Number of messages less then max per scroll when there are more then max to get"
+        print("#4: Number of messages less then max per scroll when there are more then max to get")
         # come 2 ma ce ne sono più del massimo che sono più vecchi di quella data
         messageList = getList(self, self.game_id).json.get("messages")
         assert len(messageList) <= self.maxMessages

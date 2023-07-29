@@ -3,3 +3,9 @@
 images/*.jpg
 .vagrant
 images
+
+# python virtualenv
+bin/
+lib/
+include/
+/__pycache__

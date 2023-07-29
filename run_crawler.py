@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
+# import sys
+# import importlib
+# importlib.reload(sys)
+# sys.setdefaultencoding('utf8')
+
 # crawler built based on:
 seed = 'http://m.patentati.it/quiz-patente-b/lista-domande.php'
 baseUrl = 'http://m.patentati.it/'
@@ -26,12 +28,12 @@ if not os.path.exists(imgPath):
     os.makedirs(imgPath)
 
 ### Extraction ###
-print 'Start crawling ' + seed + '..'
+print('Start crawling {seed}..')
 
 db.create_all()
 crawler.getCategories(db.session, seed, baseUrl, imgPath)
 
 ### Saving Data ###
-print 'Saving data..'
+print('Saving data..')
 db.session.commit()
-print 'Done'
+print('Done')

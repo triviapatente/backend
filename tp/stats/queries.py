@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from tp import db
+import pytz
 from flask import g
-from tp.game.models import *
+from datetime import datetime, timedelta, date
 from sqlalchemy import func, distinct, and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import case
+
 from tp import db
-from datetime import datetime, timedelta, date
-from utils import *
-import pytz
+from tp.game.models import *
+from tp.events.utils import *
 
 def getWrongLastQuestions(category_id):
     if not category_id:

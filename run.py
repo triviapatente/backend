@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
-import sys
+
+# import sys
+# import importlib
+# importlib.reload(sys)
+# sys.setdefaultencoding('utf8')
 
 import eventlet
 eventlet.monkey_patch()
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 from subprocess import call
-
-#se lo script non è stato chiamato con la flag che forza l'avvio impedendo l'inizializzazione
-if len(sys.argv) >= 2 and sys.argv[1] == "-update":
-    #esegui lo script di inizializzazione dell'app (che installa anche le dipendenze)
-    call(["sudo", "sh", "scripts/dependencies.sh"])
 
 
 import tp
@@ -20,7 +17,7 @@ tp.init()
 
 from tp import app, socketio
 
-print 'Running the service..'
+print('Running the service..')
 debug = app.config["DEBUG"]
 port = app.config["PORT"]
 host = "0.0.0.0"
@@ -33,4 +30,4 @@ else:
 
 
 
-call(["fuser", "-k", "%d/tcp" % port])
+call(["fuser", "-k", f"{port}/tcp"])

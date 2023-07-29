@@ -288,7 +288,7 @@ def updateScore(game, left = False):
         for user_id, increment in increments.items():
             # assegno ad ogni utente il suo nuovo punteggio
             user = User.query.get(user_id)
-            print "Saving user %s score increment (%d).." % (user.username, increment)
+            print(f"Saving user {user.username} score increment ({increment})..")
             entry = Partecipation.query.filter(Partecipation.user_id == user.id, Partecipation.game_id == game_id).first()
             user.score = max(user.score + increment, 0)
             entry.score_increment = increment

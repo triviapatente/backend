@@ -17,7 +17,7 @@ def merge_dicts(x, y):
 def doTransaction(transaction, **params):
     # controllo che transaction sia una funzione
     if not callable(transaction):
-        print "The transaction you passed is not callable"
+        print("The transaction you passed is not callable")
         return False
     # inizio la transazione
     # permetto più subtransactions nella stessa transazione (quindi è possibile chiamare più volte doTransaction in transaction)
@@ -25,8 +25,8 @@ def doTransaction(transaction, **params):
     try:
         output = transaction(**params)
     except Exception as e:
-        print "Error while executing transaction: %s", str(e)
-        print traceback.format_exc()
+        print(f"Error while executing transaction: {str(e)}")
+        print(traceback.format_exc())
         # se avvengono errori torno indietro all'ultimo savepoint (o all'inizio se non ci sono)
         db.session.rollback()
         raise e #se la funzione non ritorna niente non è andata a buon fine

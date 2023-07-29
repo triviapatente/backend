@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from tp import db
-from tp.auth.models import *
-from tp.game.models import Partecipation, Game
 
 from sqlalchemy import func, distinct, desc, asc, or_, and_
 from sqlalchemy.orm import aliased
 from flask import g
+
 from tp import db
-from utils import *
+from tp.auth.models import *
+from tp.game.models import Partecipation, Game
+from tp.events.utils import *
 
 # query che ritorna i primi n utenti in classifica
 def getTopRank(exclude_me = False):

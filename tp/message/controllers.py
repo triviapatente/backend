@@ -22,5 +22,5 @@ def welcome():
 def list(game_id):
     timestamp = g.query.get("timestamp")
     date = datetime.fromtimestamp(float(timestamp))
-    print "User %s got messages from game %d from %s" % (g.user.username, game_id, date)
+    print(f"User {g.user.username} got messages from game {game_id} from {date}")
     return jsonify(messages = getMessages(game_id, date))

@@ -68,7 +68,7 @@ def fake_request(test_client, fn):
         assert response.status_code != 500, "Internal server error"
         #faccio l'encode della risposta
         response.data = response.data.encode("utf-8")
-        print "Risposta HTTP (url = %s): " % url, response.data
+        print(f"Risposta HTTP (url = {url}):", response.data)
         try:
             #aggiungo il json alla risposta
             response.json = json.loads(response.data)
@@ -94,7 +94,7 @@ def fake_socket_request(socket):
             json = args[0]
         else:
             json = args
-        print "Risposta SOCKET (event = %s): " % event, json
+        print(f"Risposta SOCKET (event = {event}): ", json)
         assert json, "No response from server"
         assert json.get("status_code") != 500, "Internal server error"
         output = lambda: None

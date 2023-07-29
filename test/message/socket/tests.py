@@ -30,7 +30,7 @@ class MessageSocketTestCase(TPAuthTestCase):
     def test_on_message(self):
         content = "Test"
 
-        print "#1: Send message on right room"
+        print("#1: Send message on right room")
         message_sent = send_message(self.socket, self.game_id, content).json
         # check success
         assert message_sent.get("success")
@@ -38,7 +38,7 @@ class MessageSocketTestCase(TPAuthTestCase):
         message = message_sent.get("message")
         assert message and message["content"] == content
 
-        print "#2: opponent receives message"
+        print("#2: opponent receives message")
         send_message(self.socket, self.game_id, content)
         opponent_response = self.opponent_socket.get_received()
 
@@ -48,7 +48,7 @@ class MessageSocketTestCase(TPAuthTestCase):
         assert opponent_response.json.get("name") == "message"
 
 
-        print "#3: Send message on wrong room"
+        print("#3: Send message on wrong room")
         message_sent = send_message(self.socket, self.game_id + 1, content).json
         # check success == False
         assert message_sent.get("success") == False

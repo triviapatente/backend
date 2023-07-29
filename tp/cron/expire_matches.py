@@ -6,7 +6,7 @@ from tp.auth.models import User
 from tp.game.models import Game, Round, Question, ProposedQuestion, Partecipation
 from tp.game.utils import getUsersFromGame, getWinner, updateScore
 from tp.utils import doTransaction
-from tp.cron import events
+from tp.cron.events import stimulate_daily, game_about_to_expire, game_expired
 from tp.decorators import create_session
 
 from datetime import datetime, timedelta
@@ -20,9 +20,9 @@ def expire_matches():
         max_age = app.config["MATCH_MAX_AGE"]
         alert_thresold = datetime.utcnow() - timedelta(seconds=alert_age)
         expire_thresold = datetime.utcnow() - timedelta(seconds=max_age)
-        print "[expire_matches Cron] Cron job with alert_thresold = %s and expire_thresold = %s" % (alert_thresold, expire_thresold)
+        print(f"[expire_matches Cron] Cron job with alert_thresold = {alert_thresold} and expire_thresold = {expire_thresold}")
         alert_games = Game.query.filter(Game.createdAt > expire_thresold).filter(Game.createdAt <= alert_thresold).filter(Game.ended == False, Game.pre_expiration_notified == False).all()
-        print alert_games
+        print(alert_games)
         for game in alert_games:
             doTransaction(alert, game = game)
         db.session.commit()
@@ -36,21 +36,21 @@ def stimulate_users():
     for user in users:
         stimulate(user)
 def stimulate(user):
-    print "About to stimulate user %s.." % user.username
+    print(f"About to stimulate user {user.username}..")
     user.last_daily_stimulation = datetime.utcnow()
-    events.stimulate_daily(user)
+    stimulate_daily(user)
     db.session.add(user)
     db.session.commit()
 def alert(game):
-    print "[expire_matches.alert cron] Game: %d" % game.id
+    print(f"[expire_matches.alert cron] Game: {game.id}")
     [userA, userB] = getUsersFromGame(game)
-    events.game_about_to_expire(game, userA, userB)
-    events.game_about_to_expire(game, userB, userA)
+    game_about_to_expire(game, userA, userB)
+    game_about_to_expire(game, userB, userA)
     game.pre_expiration_notified = True
     db.session.add(game)
 
 def expire(game):
-    print "[expire_matches.expire cron] Game: %d" % game.id
+    print(f"[expire_matches.expire cron] Game: {game.id}")
     [userA, userB] = getUsersFromGame(game)
     #non importante, può essere qualsiasi dei due
     g.user = userA
@@ -71,6 +71,6 @@ def expire(game):
     winner = getWinner(game)
     if winner is not None:
         game.winner_id = winner.id
-    events.game_expired(game, userA, userB)
-    events.game_expired(game, userB, userA)
+    game_expired(game, userA, userB)
+    game_expired(game, userB, userA)
     db.session.add(game)

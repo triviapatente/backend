@@ -10,5 +10,5 @@ services:
 
 variables:
   POSTGRES_DB: triviapatente_test
-  POSTGRES_USER: ted
-  POSTGRES_PASSWORD: ted
+  POSTGRES_USER: triviapatente
+  POSTGRES_PASSWORD: triviapatente

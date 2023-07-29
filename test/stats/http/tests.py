@@ -5,7 +5,7 @@ from test.game.http.api import new_game
 from test.auth.http.api import register
 from test.shared import TPAuthTestCase
 from sqlalchemy.orm import sessionmaker
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from tp import app, db
 from api import *
 class StatsHTTPTestCase(TPAuthTestCase):
@@ -59,23 +59,23 @@ class StatsHTTPTestCase(TPAuthTestCase):
         self.cats_count = Category.query.count()
 
     def test_obtain_categories(self):
-        print "#1 Risposta successful"
+        print("#1 Risposta successful")
         response = get_categories(self)
         assert response.json.get("success") == True
 
-        print "#2 Le categorie ci sono e sono tutte"
+        print("#2 Le categorie ci sono e sono tutte")
         categories = response.json.get("categories")
         assert categories != None
         assert len(categories) == self.cats_count
 
     def test_obtain_progresses(self):
-        print "#1 Risposta successful"
+        print("#1 Risposta successful")
         response_cat_1 = get_info(self, 1)
         assert response_cat_1.json.get("success") == True
 
-        print "#2 risposta coerente con le domande a cui ho risposto"
+        print("#2 risposta coerente con le domande a cui ho risposto")
         response_cat_2 = get_info(self, 2)
-        print "#2.1 Categoria 1"
+        print("#2.1 Categoria 1")
         progress_1 = response_cat_1.json.get("progress")
         length = len(progress_1)
         assert length
@@ -85,7 +85,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         assert last_progress.get("total_answers") == 2
         assert last_progress.get("correct_answers") == 1
 
-        print "#2.2 Categoria 2"
+        print("#2.2 Categoria 2")
         progress_2 = response_cat_2.json.get("progress")
         length = len(progress_2)
         assert length
@@ -95,7 +95,7 @@ class StatsHTTPTestCase(TPAuthTestCase):
         assert last_progress.get("total_answers") == 2
         assert last_progress.get("correct_answers") == 1
 
-        print "#2.2 Categoria complessiva"
+        print("#2.2 Categoria complessiva")
         response = get_info(self, None)
         progress = response.json.get("progress")
         assert progress
@@ -109,24 +109,24 @@ class StatsHTTPTestCase(TPAuthTestCase):
 
 
     def test_obtain_wrong_answers(self):
-        print "#1 Risposta successful"
+        print("#1 Risposta successful")
         response_cat_1 = get_info(self, 1)
         assert response_cat_1.json.get("success") == True
         assert response_cat_1.json.get("wrong_answers") != None
 
-        print "#2 risposta coerente con le domande a cui ho risposto"
+        print("#2 risposta coerente con le domande a cui ho risposto")
         response_cat_2 = get_info(self, 2)
-        print "#2.1 Categoria 1"
+        print("#2.1 Categoria 1")
         answers_1 = response_cat_1.json.get("wrong_answers")
         assert len(answers_1) == 1
         assert answers_1[0].get("id") == self.quiz_1.id
 
-        print "#2.2 Categoria 2"
+        print("#2.2 Categoria 2")
         answers_2 = response_cat_2.json.get("wrong_answers")
         assert len(answers_2) == 1
         assert answers_2[0].get("id") == self.quiz_4.id
 
-        print "#3. Parametri mancanti"
+        print("#3. Parametri mancanti")
         response = get_info(self, None)
         wrong_answers = response.json.get("wrong_answers")
         assert wrong_answers is None

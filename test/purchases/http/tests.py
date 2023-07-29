@@ -11,5 +11,5 @@ class PurchasesHTTPTestCase(TPAuthTestCase):
 
     def test_getItems(self):
         response = getItems(self)
-        print "#1 All items received correctly"
+        print("#1 All items received correctly")
         assert response.json.get("items")

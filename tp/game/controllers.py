@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
-from flask import request, jsonify, Blueprint, g, send_file
+from flask import jsonify, Blueprint, g, send_file
+from sqlalchemy import or_, func
+
 from tp import app, db, limiter
 from tp.auth.models import User
 from tp.game.models import *
 from tp.utils import doTransaction
-from sqlalchemy.orm import aliased
 from tp.decorators import auth_required, fetch_models, needs_values, check_game_not_ended
-from tp.ws_decorators import check_in_room
 from tp.exceptions import ChangeFailed, NotAllowed, BadParameters, AlreadyPendingGame
-from sqlalchemy import or_, func
 from tp.rank.queries import getLastGameResultJoin
 from tp.game.utils import *
-from tp.base.utils import RoomType
-import events
-from events import RecentGameEvents
+
+from tp.game.events import RecentGameEvents, tickle, new_game, game_left
 from datetime import datetime, timedelta
 from tp.decorators import create_session
 
@@ -49,7 +47,7 @@ def tickleGame():
     if question_number == app.config["NUMBER_OF_QUESTIONS_PER_ROUND"] * 2:
         raise NotAllowed("Il round è completo")
     opponent = [u for u in users if u.id != g.user.id][0]
-    events.tickle(game, opponent)
+    tickle(game, opponent)
     round.alreadyTickled = True
     db.session.add(round)
     db.session.commit()
@@ -68,8 +66,8 @@ def newGame():
         raise AlreadyPendingGame()
     game = doTransaction(createGame, **({"opponents": [opponent]}))
     if game:
-        print "Game %d created." % game.id
-        events.new_game(game)
+        print(f"Game {game.id} created.")
+        new_game(game)
         RecentGameEvents.change(opponent)
         return jsonify(success = True, game = game, user = opponent)
     else:
@@ -128,7 +126,7 @@ def leave_game():
             updateScore(game, left = True)
         #ritorno le varie risposte
         partecipations = [p.json for p in getPartecipationFromGame(game)]
-        events.game_left(users, game, partecipations)
+        game_left(users, game, partecipations)
         RecentGameEvents.change(opponent)
         return jsonify(success = True, ended = True, game = game, winner = opponent, partecipations = partecipations)
     #nessun avversario.. solo io nel gioco
@@ -146,20 +144,20 @@ def randomSearch():
     opponent = User.query.join(Socket, Socket.user_id == User.id).filter(User.id != g.user.id).filter(Socket.updatedAt >= limitDate).filter(pendingGames == 0).order_by(func.random())
     opponent = opponent.first()
     if not opponent:
-        print "About to search offline opponent..."
+        print("About to search offline opponent...")
         opponent = User.query.filter(User.id != g.user.id).filter(pendingGames == 0).order_by(func.random()).first()
     else:
-        print "Online opponent found!"
+        print("Online opponent found!")
     #controllo se non ho trovato nessun utente
     if opponent is None:
-        print "No opponent found."
+        print("No opponent found.")
         return jsonify(success = False)
     #eseguo la transazione con l'utente trovato
     game = doTransaction(createGame, opponents = [opponent])
     #gestisco l'output
     if game:
-        print "Game %d created." % game.id
-        events.new_game(game)
+        print(f"Game {game.id} created.")
+        new_game(game)
         RecentGameEvents.change(opponent)
         return jsonify(success = True, game = game, user = opponent)
     else:

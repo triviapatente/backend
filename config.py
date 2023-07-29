@@ -15,8 +15,8 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # Define the database - we are working with
 # SQLite for this example
-SQLALCHEMY_DATABASE_URI = 'postgresql://ted:ted@localhost:5432/triviapatente'
-SQLALCHEMY_TEST_DATABASE_URI = 'postgresql://ted:ted@localhost:5432/triviapatente_test'
+SQLALCHEMY_DATABASE_URI = 'postgresql://triviapatente:triviapatente@localhost:5432/triviapatente'
+SQLALCHEMY_TEST_DATABASE_URI = 'postgresql://triviapatente:triviapatente@localhost:5432/triviapatente_test'
 
 LIMIT_MINUTES_TO_BE_CONSIDERED_ONLINE = 5
 

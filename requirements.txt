@@ -1,0 +1,26 @@
+psycopg2
+eventlet
+scrypt
+redis
+enum34
+pytz
+itsdangerous
+passlib
+validate_email
+facebook-sdk
+pyfcm
+premailer
+# lxml==3.4.4 # True
+itsdangerous==2.0.1
+sqlalchemy==1.4.49
+flask==2.0.3
+werkzeug==2.0.3
+flask-sqlalchemy==2.3.2 # True
+flask-httpauth
+flask-session
+flask-limiter==2.0.3
+flask-socketio==3.0.0 # True
+flask-apscheduler
+flask-cors
+flask-mail
+requests[security]

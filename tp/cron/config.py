@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from expire_matches import expire_matches
+from tp.cron.expire_matches import expire_matches
 class Config(object):
     JOBS = [
         {

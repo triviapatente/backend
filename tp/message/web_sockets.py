@@ -9,7 +9,7 @@ from tp.decorators import needs_values
 from tp.ws_decorators import ws_auth_required, check_in_room
 from tp.base.utils import RoomType
 from tp.decorators import create_session
-import events
+from tp.message.events import send_message
 
 @socketio.on("send_message")
 @create_session
@@ -21,9 +21,9 @@ def on_message(data):
     message = saveMessage(user = g.user, game = game, message = data["content"])
     if message:
         # send message to all in the room
-        print "User %s sent message to room %s:" % (g.user.username, g.roomName), message.json
+        print(f"User {g.user.username} sent message to room {g.roomName}:", message.json)
         emit('send_message', {"success":True, "message": message.json})
-        events.send_message(g.roomName, message)
+        send_message(g.roomName, message)
     else:
-        print "User %s unable to sent message." % g.user.username
+        print(f"User {g.user.username} unable to sent message.")
         emit('send_message', {"success": False})
