@@ -136,6 +136,7 @@ def get_random_categories(data):
         raise NotAllowed()
     #ottengo le categorie proposte precedentemente per lo stesso turno, se ci sono
     proposed = Category.query.with_entities(Category).join(ProposedCategory).filter(ProposedCategory.round_id == round.id).all()
+    print(0)
     #se non ci sono
     if len(proposed) == 0:
         ids = Round.query.filter(Round.game_id == game.id).join(Category).with_entities(Category.id).all()
@@ -144,12 +145,13 @@ def get_random_categories(data):
         proposed = Category.query.with_entities(Category, getNumberOfTotalAnswersForCategory(Category, game, opponent).label("total_answers"))
         if len(ids) != 0:
             proposed = proposed.filter(~Category.id.in_(ids))
-        proposed = proposed.order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"]).all()
+        output = proposed.order_by(asc("total_answers"), func.random()).limit(app.config["NUMBER_OF_CATEGORIES_PROPOSED"])
 
         #e le aggiungo come proposed in db
-        for (candidate, totalAnswers) in proposed:
+        for (candidate, totalAnswers) in output:
             c = ProposedCategory(round_id = round.id, category_id = candidate.id)
             db.session.add(c)
+
         db.session.commit()
         proposed = [cat for (cat, number) in proposed]
     #dopodichè, rispondo
