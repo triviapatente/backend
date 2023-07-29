@@ -15,7 +15,7 @@
 <a name="intro"></a>
 ## Introduction
 
-TriviaPatente is a mobile application that makes it easier and funnier to learn the theory of the driving license, connecting you with your friends.
+[TriviaPatente](triviapatente.github.io) is a mobile application ([iOS](https://github.com/triviapatente/ios), [Android](https://github.com/triviapatente/android)) that makes it easier and funnier to learn the theory of the driving license, connecting you with your friends.
 This repository contains the native Android application.
 |Screenshots|||
 |:----- |:----- |:----- |
